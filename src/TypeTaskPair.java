@@ -4,7 +4,7 @@ public class TypeTaskPair {
     public static enum Type {
 	// list of possible operation types
 	ADD, DELETE, EDIT, CLEAR, SEARCH, DISPLAY, INVALID, ERROR,
-	UNDOADD, UNDODELETE, UNDOEDIT, UNDOCLEAR
+	UNDOADD, UNDODELETE, UNDOEDIT, UNDOCLEAR, HELP
     }
 
     Type type;
