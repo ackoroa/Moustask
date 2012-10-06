@@ -3,7 +3,8 @@ import java.util.List;
 public class TypeTaskPair {
     public static enum Type {
 	// list of possible operation types
-	ADD, DELETE, EDIT, CLEAR, SEARCH, DISPLAY, INVALID, ERROR
+	ADD, DELETE, EDIT, CLEAR, SEARCH, DISPLAY, INVALID, ERROR,
+	UNDOADD, UNDODELETE, UNDOEDIT, UNDOCLEAR
     }
 
     Type type;

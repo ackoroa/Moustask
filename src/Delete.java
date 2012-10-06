@@ -16,8 +16,9 @@ public class Delete implements UndoableCommand {
     }
 
     @Override
-    public void undo() {
+    public List<AbstractTask> undo() {
 	// TODO Auto-generated method stub
+	return null;
     }
 
 }

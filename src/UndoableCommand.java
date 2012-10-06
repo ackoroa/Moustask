@@ -1,3 +1,5 @@
+import java.util.List;
+
 public interface UndoableCommand extends Command {
-    public void undo();
+    public List<AbstractTask> undo();
 }
