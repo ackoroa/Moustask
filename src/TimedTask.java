@@ -1,15 +1,14 @@
 public class TimedTask extends AbstractTask {
     private String startDate, endDate;
 
-    public TimedTask(String description, String startDate, String endDate, int type) {
-	super(description, type);
+    public TimedTask(String description, String startDate, String endDate) {
+	super(description, AbstractTask.TIMED);
 	this.startDate = startDate;
 	this.endDate = endDate;
     }
 
-    public TimedTask(String description, String startDate, String endDate, String venue,
-	    int type) {
-	super(description, venue, type);
+    public TimedTask(String description, String startDate, String endDate, String venue) {
+	super(description, venue, AbstractTask.TIMED);
 	this.startDate = startDate;
 	this.endDate = endDate;
     }
