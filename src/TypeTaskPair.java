@@ -1,17 +1,15 @@
 import java.util.List;
 
-import com.sun.jmx.snmp.tasks.Task;
-
 public class TypeTaskPair {
     public static enum Type {
 	// list of possible operation types
-	ADD, DELETE, EDIT, SEARCH, DISPLAY, INVALID
+	ADD, DELETE, EDIT, CLEAR, SEARCH, DISPLAY, INVALID, ERROR
     }
 
     Type type;
-    List<Task> taskList;
+    List<AbstractTask> taskList;
 
-    public TypeTaskPair(Type type, List<Task> taskList) {
+    public TypeTaskPair(Type type, List<AbstractTask> taskList) {
 	this.type = type;
 	this.taskList = taskList;
     }
@@ -20,7 +18,7 @@ public class TypeTaskPair {
 	return type;
     }
 
-    public List<Task> getTasks() {
+    public List<AbstractTask> getTasks() {
 	return taskList;
     }
 
