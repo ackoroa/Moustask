@@ -1,12 +1,17 @@
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 public class Logic {
-	List<AbstractTask> taskList; // the virtual list of tasks
+	private List<AbstractTask> taskList;
 	private TypeTaskPair taskResult;
+	private Stack<Command> undoStack;
+	//private Storage storageObject;
 
 	public Logic() {
 		taskList = new LinkedList<AbstractTask>();
+		undoStack = new Stack<Command>();
+		//storageObject = new Storage();
 	}
 
 	public TypeTaskPair processCommand(String taskMessages) {
@@ -30,9 +35,9 @@ public class Logic {
 	private void checkCommandType(String commandTypeString,
 			String commandMessage) {
 		if (commandTypeString.equalsIgnoreCase(".add")) {
-			List<AbstractTask> addResult;
 			Add addObject = new Add(commandMessage);
-			addResult = addObject.execute(taskList);
+			List<AbstractTask> addResult = addObject.execute(taskList);
+			undoStack.push(addObject);
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.ADD, addResult);
 		} else if (commandTypeString.equalsIgnoreCase(".delete")) {
 
@@ -43,20 +48,29 @@ public class Logic {
 		} else if (commandTypeString.equalsIgnoreCase(".clear")) {
 
 		} else if (commandTypeString.equalsIgnoreCase(".display")) {
-
-		} else if (commandTypeString.equalsIgnoreCase(".help")) {
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.DISPLAY, taskList);
+		}else if (commandTypeString.equalsIgnoreCase(".undo")) {
+			if(undoStack.isEmpty()) {
+				taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDONULL, null);
+			} else {
+				//taskResult = new TypeTaskPair(TypeTaskPair.Type., taskList);
+			}
+		}
+		else if (commandTypeString.equalsIgnoreCase(".help")) {
 
 		} else if (commandTypeString.equalsIgnoreCase(".exit")) {
 			System.exit(0);
 		} else {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.INVALID, null);
 		}
-		
-		// DEBUG PRINT
-		System.out.println("//DEBUG\nThings in memory: ");
-		for(int i=0;i<taskList.size();i++) {
-			System.out.println(taskList.get(i).getDescription());
-			System.out.println("//END OF DEBUG.");
-		}
+
+		// DEBUG: TASK LIST MEMORY VIEW
+		/**
+		 System.out.println("TASK LIST MEMORY VIEW: ");
+		 for (int i = 0; i < taskList.size(); i++) {
+		 	System.out.println(taskList.get(i).getDescription());
+		 }
+		 System.out.println("// END OF TASK LIST MEMORY VIEW //");
+		 */
 	}
 }
