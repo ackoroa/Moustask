@@ -19,26 +19,26 @@ public class Delete implements UndoableCommand {
 	    throw new IndexOutOfBoundsException(
 		    "index pointer is outside the delete space");
 
-	deletedTask = deleteSpace.get(index);
+	deletedTask = deleteSpace.get(index-1);
 	this.wholeTaskList = wholeTaskList;
+	
 	wholeTaskList.remove(deletedTask);
 
-	List<AbstractTask> returnList = new Vector<AbstractTask>();
-	returnList.add(deletedTask);
-
-	return returnList;
+	return generateReturnList();
     }
 
     public List<AbstractTask> undo() {
-	assert wholeTaskList != null; // the task list from where the deleted
-				      // task came from must still exist
-
+	// the task list from where the deleted task came from must still exist
+	assert wholeTaskList != null; 
+	
 	wholeTaskList.add(deletedTask);
-
-	List<AbstractTask> returnList = new Vector<AbstractTask>();
-	returnList.add(deletedTask);
-
-	return returnList;
+	return generateReturnList();
     }
 
+
+    private List<AbstractTask> generateReturnList() {
+	List<AbstractTask> returnList = new Vector<AbstractTask>();
+	returnList.add(deletedTask);
+	return returnList;
+    }
 }
