@@ -15,7 +15,7 @@ public class Logic {
 		searchOrDisplayTaskList = new LinkedList<AbstractTask>();
 		undoStack = new Stack<UndoableCommand>();
 		// storageObject = new Storage();
-		// taskList = storageObject.load();
+		// taskList = storageObject.loadTaskList();
 	}
 
 	public TypeTaskPair processCommand(String taskMessages) {
@@ -38,20 +38,29 @@ public class Logic {
 
 	private void checkIsTaskListEmpty(String commandTypeString,
 			String commandMessage) {
-		if (taskList.isEmpty()) {
-			if ((commandTypeString.equalsIgnoreCase(".add"))
-					|| (commandTypeString.equalsIgnoreCase(".undo"))
-					|| (commandTypeString.equalsIgnoreCase(".help"))
-					|| (commandTypeString.equalsIgnoreCase(".exit"))) {
+		boolean isTaskListEmpty = taskList.isEmpty();
+		boolean isCommandAdd = commandTypeString.equalsIgnoreCase(".add");
+		boolean isCommandDelete = commandTypeString.equalsIgnoreCase(".delete");
+		boolean isCommandEdit = commandTypeString.equalsIgnoreCase(".edit");
+		boolean isCommandDisplay = commandTypeString
+				.equalsIgnoreCase(".display");
+		boolean isCommandSearch = commandTypeString.equalsIgnoreCase(".serch");
+		boolean isCommandUndo = commandTypeString.equalsIgnoreCase(".undo");
+		boolean isCommandClear = commandTypeString.equalsIgnoreCase(".clear");
+		boolean isCommandHelp = commandTypeString.equalsIgnoreCase(".help");
+		boolean isCommandExit = commandTypeString.equalsIgnoreCase(".exit");
+
+		// if there are no task, we only allow certain commands to work
+		if (isTaskListEmpty) {
+			if ((isCommandAdd) || (isCommandUndo) || (isCommandHelp)
+					|| (isCommandExit)) {
 				executeCommand(commandTypeString, commandMessage);
-			} else if ((commandTypeString.equalsIgnoreCase(".delete"))
-					|| (commandTypeString.equalsIgnoreCase(".edit"))
-					|| (commandTypeString.equalsIgnoreCase(".search"))
-					|| (commandTypeString.equalsIgnoreCase(".display"))
-					|| (commandTypeString.equalsIgnoreCase(".clear"))) {
+			} else if ((isCommandDelete) || (isCommandEdit)
+					|| (isCommandSearch) || (isCommandDisplay)
+					|| (isCommandClear)) {
 				taskResult = new TypeTaskPair(TypeTaskPair.Type.EMPTY, null);
 			}
-		} else if (!taskList.isEmpty()) {
+		} else if (!isTaskListEmpty) {
 			checkIsSearchOrDisplayTaskListEmpty(commandTypeString,
 					commandMessage);
 		}
@@ -59,21 +68,30 @@ public class Logic {
 
 	private void checkIsSearchOrDisplayTaskListEmpty(String commandTypeString,
 			String commandMessage) {
-		if (searchOrDisplayTaskList.isEmpty()) {
-			if ((commandTypeString.equalsIgnoreCase(".edit"))
-					|| (commandTypeString.equalsIgnoreCase(".delete"))) {
+		boolean isSearchOrDisplayTaskListEmpty = searchOrDisplayTaskList
+				.isEmpty();
+		boolean isCommandAdd = commandTypeString.equalsIgnoreCase(".add");
+		boolean isCommandDelete = commandTypeString.equalsIgnoreCase(".delete");
+		boolean isCommandEdit = commandTypeString.equalsIgnoreCase(".edit");
+		boolean isCommandDisplay = commandTypeString
+				.equalsIgnoreCase(".display");
+		boolean isCommandSearch = commandTypeString.equalsIgnoreCase(".serch");
+		boolean isCommandUndo = commandTypeString.equalsIgnoreCase(".undo");
+		boolean isCommandClear = commandTypeString.equalsIgnoreCase(".clear");
+		boolean isCommandHelp = commandTypeString.equalsIgnoreCase(".help");
+		boolean isCommandExit = commandTypeString.equalsIgnoreCase(".exit");
+
+		if (isSearchOrDisplayTaskListEmpty) {
+			if ((isCommandEdit) || (isCommandDelete)) {
 				taskResult = new TypeTaskPair(TypeTaskPair.Type.ERROR, null);
 			} else {
 				executeCommand(commandTypeString, commandMessage);
 			}
-		} else if (!searchOrDisplayTaskList.isEmpty()) {
-			if ((commandTypeString.equalsIgnoreCase(".add"))
-					|| (commandTypeString.equalsIgnoreCase(".search"))
-					|| (commandTypeString.equalsIgnoreCase(".display"))
-					|| (commandTypeString.equalsIgnoreCase(".clear"))
-					|| (commandTypeString.equalsIgnoreCase(".undo"))
-					|| (commandTypeString.equalsIgnoreCase(".help"))
-					|| (commandTypeString.equalsIgnoreCase(".exit"))) {
+		} else if (!isSearchOrDisplayTaskListEmpty) {
+			if ((isCommandAdd) || (isCommandSearch) || (isCommandDisplay)
+					|| (isCommandClear) || (isCommandUndo) || (isCommandHelp)
+					|| (isCommandExit)) {
+				// Clear the SearchOrDisplay List since it is not edit or delete
 				searchOrDisplayTaskList = new LinkedList<AbstractTask>();
 			}
 			executeCommand(commandTypeString, commandMessage);
@@ -86,6 +104,7 @@ public class Logic {
 			List<AbstractTask> addResult = addObject.execute(taskList);
 			undoStack.push(addObject);
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.ADD, addResult);
+			// storageObject.writeTaskList();
 		} else if (commandTypeString.equalsIgnoreCase(".delete")) {
 			try {
 				int index = Integer.parseInt(commandMessage);
@@ -94,35 +113,35 @@ public class Logic {
 						.execute(taskList);
 				taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE,
 						deleteResult);
+				// storageObject.writeTaskList();
 			} catch (NumberFormatException e) {
-				taskResult = new TypeTaskPair(null, null);
-				System.out.println("Error - " + e.getMessage());
-			} catch (IndexOutOfBoundsException e) {
 				taskResult = new TypeTaskPair(null, null);
 				System.out.println("Error - " + e.getMessage());
 			}
 		} else if (commandTypeString.equalsIgnoreCase(".edit")) {
 			try {
-				int index = Integer.parseInt(commandMessage);
-				Edit editObject = new Edit(searchOrDisplayTaskList, index);
-				List<AbstractTask> editResult = editObject.execute(taskList);
-				taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE,
-						editResult);
+				String indexString = getFirstWord(commandMessage);
+				String editParameter = getMessage(commandMessage);
+				int index = Integer.parseInt(indexString);
+				Edit editObject = new Edit(searchOrDisplayTaskList, index,
+						editParameter);
+				List<AbstractTask> returnEditedTask = editObject
+						.execute(taskList);
+				taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT,
+						returnEditedTask);
+				// storageObject.writeTaskList();
 			} catch (NumberFormatException e) {
 				taskResult = new TypeTaskPair(null, null);
 				System.out.println("Error - " + e.getMessage());
-			} catch (IndexOutOfBoundsException e) {
-				taskResult = new TypeTaskPair(null, null);
-				System.out.println("Error - " + e.getMessage());
 			}
+		} else if (commandTypeString.equalsIgnoreCase(".display")) {
+			searchOrDisplayTaskList = taskList;
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.DISPLAY, taskList);
 		} else if (commandTypeString.equalsIgnoreCase(".search")) {
 			// Search searchObject = new Search();
 			// searchOrDisplayTaskList = searchObject.execute(commandMessage);
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH,
 					searchOrDisplayTaskList);
-		} else if (commandTypeString.equalsIgnoreCase(".display")) {
-			searchOrDisplayTaskList = taskList;
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.DISPLAY, taskList);
 		} else if (commandTypeString.equalsIgnoreCase(".undo")) {
 			if (undoStack.isEmpty()) {
 				taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDONULL, null);
@@ -147,6 +166,7 @@ public class Logic {
 			// Clear clearObject = new Clear(taskList);
 			// clearObject.execute();
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.CLEAR, null);
+			// storageObject.writeTaskList();
 		} else if (commandTypeString.equalsIgnoreCase(".help")) {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.HELP, null);
 		} else if (commandTypeString.equalsIgnoreCase(".exit")) {

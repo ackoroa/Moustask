@@ -19,43 +19,47 @@ class CLI {
 	}
 
 	private void printMessage() {
-		if (taskResult.getType() == taskResult.type.EMPTY) {
-			System.out.println("Your task list is empty.");
-		} else if (taskResult.getType() == taskResult.type.ERROR) {
+		if (taskResult.getType() == TypeTaskPair.Type.EMPTY) {
+			System.out.println("Your task list is currently empty.");
+		} else if (taskResult.getType() == TypeTaskPair.Type.ERROR) {
 			System.out
-					.println("You must perform a search or display command first.");
-		} else if (taskResult.getType() == taskResult.type.ADD) {
+					.println("You must use a search or display command first.");
+		} else if (taskResult.getType() == TypeTaskPair.Type.ADD) {
 			System.out.println("Task "
 					+ taskResult.getTasks().get(0).getDescription()
 					+ " has been add.");
-		} else if (taskResult.getType() == taskResult.type.DELETE) {
-			System.out.println("Your task list is deleted.");
+		} else if (taskResult.getType() == TypeTaskPair.Type.DELETE) {
+			System.out.println("Task "
+					+ taskResult.getTasks().get(0).getDescription()
+					+ " has been deleted.");
 			displayTaskList(taskResult.getTasks());
-		} else if (taskResult.getType() == taskResult.type.EDIT) {
-			System.out.println("Your task list has been changed.");
+		} else if (taskResult.getType() == TypeTaskPair.Type.EDIT) {
+			System.out.println("Task "
+					+ taskResult.getTasks().get(0).getDescription()
+					+ " has been update.");
 			displayTaskList(taskResult.getTasks());
-		} else if (taskResult.getType() == taskResult.type.SEARCH) {
+		} else if (taskResult.getType() == TypeTaskPair.Type.SEARCH) {
 			if (taskResult.getTasks().isEmpty()) {
-				System.out.println("Your search has returned 0 result.");
+				System.out.println("Your search has returned no result.");
 			} else {
 				displayTaskList(taskResult.getTasks());
 			}
-		} else if (taskResult.getType() == taskResult.type.DISPLAY) {
+		} else if (taskResult.getType() == TypeTaskPair.Type.DISPLAY) {
 			displayTaskList(taskResult.getTasks());
-		} else if (taskResult.getType() == taskResult.type.CLEAR) {
-			System.out.println("All events are cleared.");
-		} else if (taskResult.getType() == taskResult.type.UNDONULL) {
+		} else if (taskResult.getType() == TypeTaskPair.Type.UNDONULL) {
 			System.out.println("There is nothing to undo.");
-		} else if (taskResult.getType() == taskResult.type.HELP) {
-			System.out.println("PRINT HELP INFORMATION");
-		} else if (taskResult.getType() == taskResult.type.INVALID) {
-			System.out.println("Invalid Command.");
+		} else if (taskResult.getType() == TypeTaskPair.Type.CLEAR) {
+			System.out.println("All tasks are cleared.");
+		} else if (taskResult.getType() == TypeTaskPair.Type.HELP) {
+			System.out.println("PRINT HELP INFORMATION...");
+		} else if (taskResult.getType() == TypeTaskPair.Type.INVALID) {
+			System.out.println("Invalid Command. Please try again.");
 		}
 	}
 
 	private static void displayTaskList(List<AbstractTask> taskList) {
 		/*
-		 * SUGGESTED FORMAT: System.out.println(
+		 * CURRENT FORMAT: System.out.println(
 		 * "123. Online Assignment afj jsfjdjfsdjja | Venue: Orchard Road" );
 		 * System.out.println("Category: Floating | Status: Undone"); System
 		 * .out.println("Start: 2012-12-20 13:00 | End: 2012-12-30 00:00" );
