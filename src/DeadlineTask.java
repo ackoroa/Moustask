@@ -11,6 +11,14 @@ public class DeadlineTask extends AbstractTask {
 	super(description, venue, AbstractTask.DEADLINE);
 	this.endDate = endDate;
     }
+    
+    public String toString() {
+	if (this.getVenue().equals(""))
+	    return this.getType() + ": " + this.getDescription() + " by " + endDate;
+	else
+	    return this.getType() + ": " + this.getDescription() + " at "
+		    + this.getVenue() + " by " + endDate;
+    }
 
     public String getEndDate() {
 	return endDate;

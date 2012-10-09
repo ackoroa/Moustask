@@ -8,4 +8,12 @@ public class FloatingTask extends AbstractTask {
 	super(description, venue, AbstractTask.FLOAT);
     }
 
+    public String toString() {
+	if (this.getVenue().equals(""))
+	    return this.getType() + ": " + this.getDescription();
+	else
+	    return this.getType() + ": " + this.getDescription() + " at "
+		    + this.getVenue();
+    }
+
 }
