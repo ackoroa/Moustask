@@ -61,7 +61,7 @@ class CLI {
 		 * .out.println("Start: 2012-12-20 13:00 | End: 2012-12-30 00:00" );
 		 */
 		for (int i = 0; i < taskList.size(); i++) {
-			if (taskList.get(i).getType() == 0) {
+			if (taskList.get(i).getType().equals(AbstractTask.TIMED)) {
 				/**
 				 * System.out.println((i + 1) + ". " +
 				 * taskList.get(i).getDescription() + " | Venue: " +
@@ -71,13 +71,13 @@ class CLI {
 				 * System.out.println("Start: " + taskList.get(i).getStartDate()
 				 * + " | End: " + taskList.get(i).getEndDate());
 				 */
-			} else if (taskList.get(i).getType() == 1) {
+			} else if (taskList.get(i).getType().equals(AbstractTask.FLOAT)) {
 				System.out.println((i + 1) + ". "
 						+ taskList.get(i).getDescription() + " | Venue: "
 						+ taskList.get(i).getVenue());
 				System.out.println("Category: Floating | Status: "
 						+ getStatus(taskList.get(i).getStatus()));
-			} else if (taskList.get(i).getType() == 2) {
+			} else if (taskList.get(i).getType().equals(AbstractTask.DEADLINE)) {
 				/**
 				 * System.out.println((i + 1) + ". " +
 				 * taskList.get(i).getDescription() + " | Venue: " +
