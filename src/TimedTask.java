@@ -7,10 +7,20 @@ public class TimedTask extends AbstractTask {
 	this.endDate = endDate;
     }
 
-    public TimedTask(String description, String startDate, String endDate, String venue) {
+    public TimedTask(String description, String startDate, String endDate,
+	    String venue) {
 	super(description, venue, AbstractTask.TIMED);
 	this.startDate = startDate;
 	this.endDate = endDate;
+    }
+
+    public String toString() {
+	if (this.getVenue().equals(""))
+	    return this.getType() + ": " + this.getDescription() + " from "
+		    + startDate + " to " + endDate;
+	else
+	    return this.getType() + ": " + this.getDescription() + " at "
+		    + this.getVenue() + " from " + startDate + " to " + endDate;
     }
 
     public String getStartDate() {

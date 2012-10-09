@@ -1,7 +1,7 @@
 public abstract class AbstractTask {
-    public final static int TIMED = 0;
-    public final static int FLOAT = 1;
-    public final static int DEADLINE = 2;
+    public final static String TIMED = "TIMED";
+    public final static String FLOAT = "FLOAT";
+    public final static String DEADLINE = "DEADLINE";
     
     public final static int UNDONE = 0;
     public final static int DONE = 1;
@@ -9,17 +9,17 @@ public abstract class AbstractTask {
 
     private String description;
     private String venue;
-    private int type;
+    private String type;
     private int status;
     
-    public AbstractTask(String desc, int t) {
+    public AbstractTask(String desc, String t) {
 	description = desc;
 	type = t;
 	venue = "";
 	status = UNDONE;
     }
-
-    public AbstractTask(String desc, String v, int t) {
+    
+    public AbstractTask(String desc, String v, String t) {
 	description = desc;
 	type = t;
 	venue = v;
@@ -42,7 +42,7 @@ public abstract class AbstractTask {
 	venue = v;
     }
 
-    public int getType() {
+    public String getType() {
 	return type;
     }
     

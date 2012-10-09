@@ -4,7 +4,7 @@ import java.util.Vector;
 
 public class Edit implements UndoableCommand {
     private List<AbstractTask> editSpace, wholeTaskList;
-    private AbstractTask editedTask;
+    private AbstractTask oldTask;
     private String editParameter;
     int index;
 
@@ -26,13 +26,13 @@ public class Edit implements UndoableCommand {
 		    "index pointer is outside the edit space");
 
 	this.wholeTaskList = wholeTaskList;
-	editedTask = editSpace.get(index);
+	oldTask = editSpace.get(index);
 
 	StringTokenizer editParameterTokenizer = new StringTokenizer(
 		editParameter, ".");
 
 	List<AbstractTask> returnList = new Vector<AbstractTask>();
-	returnList.add(editedTask);
+	returnList.add(oldTask);
 
 	return returnList;
     }
@@ -40,7 +40,7 @@ public class Edit implements UndoableCommand {
     public List<AbstractTask> undo() {
 	assert wholeTaskList != null; // the task list from where the edited
 				      // task came from must still exist
-	assert editedTask != null; // the edited task must still exist
+	assert oldTask != null; // the edited task must still exist
 
 	return null;
     }
