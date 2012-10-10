@@ -1,29 +1,29 @@
 public abstract class AbstractTask implements Cloneable {
-    public final static String TIMED = "TIMED";
-    public final static String FLOAT = "FLOAT";
-    public final static String DEADLINE = "DEADLINE";
-
-    public final static int UNDONE = 0;
-    public final static int DONE = 1;
-    public final static int IMPOSSIBLE = 2;
-
     private String description;
     private String venue;
-    private String type;
-    private int status;
+    private Type type;
+    private Status status;
 
-    public AbstractTask(String desc, String t) {
+    public static enum Type {
+	TIMED, FLOAT, DEADLINE;
+    }
+
+    public static enum Status {
+	UNDONE, DONE, IMPOSSIBLE;
+    }
+
+    public AbstractTask(String desc, Type t) {
 	description = desc;
 	type = t;
 	venue = "";
-	status = UNDONE;
+	status = Status.UNDONE;
     }
 
-    public AbstractTask(String desc, String v, String t) {
+    public AbstractTask(String desc, String v, Type t) {
 	description = desc;
 	type = t;
 	venue = v;
-	status = UNDONE;
+	status = Status.UNDONE;
     }
 
     public Object clone() {
@@ -42,13 +42,12 @@ public abstract class AbstractTask implements Cloneable {
 
 	return ((otherTask.description.equals(this.description))
 		&& (otherTask.type.equals(this.type))
-		&& (otherTask.venue.equals(this.venue)) 
-		&& (otherTask.status == this.status));
+		&& (otherTask.venue.equals(this.venue)) && (otherTask.status == this.status));
     }
 
     public int hashCode() {
 	int hashCode = description.hashCode() + type.hashCode()
-		+ venue.hashCode() + status;
+		+ venue.hashCode() + status.hashCode();
 	return hashCode;
     }
 
@@ -68,15 +67,15 @@ public abstract class AbstractTask implements Cloneable {
 	venue = v;
     }
 
-    public String getType() {
+    public Type getType() {
 	return type;
     }
 
-    public void setStatus(int s) {
+    public void setStatus(Status s) {
 	status = s;
     }
 
-    public int getStatus() {
+    public Status getStatus() {
 	return status;
     }
 }

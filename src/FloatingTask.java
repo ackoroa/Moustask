@@ -1,11 +1,11 @@
 public class FloatingTask extends AbstractTask {
 
     public FloatingTask(String description) {
-	super(description, AbstractTask.FLOAT);
+	super(description, AbstractTask.Type.FLOAT);
     }
 
     public FloatingTask(String description, String venue) {
-	super(description, venue, AbstractTask.FLOAT);
+	super(description, venue, AbstractTask.Type.FLOAT);
     }
 
     public String toString() {
