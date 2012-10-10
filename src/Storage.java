@@ -116,15 +116,34 @@ public class Storage {
 	}
 
 	public void writeTaskList(List<AbstractTask> taskList) throws IOException{
-		Writer createNewMoustaskFile= new BufferedWriter(new FileWriter("moustask.txt",false));
-		
-			
-				/*stringReadFromData.add(commandDescription);
-				writerProgram = new BufferedWriter(new FileWriter(userFile));
-				for (int i = 0; i < stringReadFromData.size(); i++) {
-					writerProgram.write(stringReadFromData.get(i) + "\r\n");*/	
+		Writer writeMoustaskFile= new BufferedWriter(new FileWriter("moustask.txt",false));
+		for (int i=0;i<taskList.size();i++){
+			Enum taskType=taskList.get(i).getType();
+			if(taskType==AbstractTask.Type.FLOAT){
+				if(((FloatingTask)taskList.get(i)).getVenue().equalsIgnoreCase("")){
+					writeMoustaskFile.write("Floating | "+((FloatingTask)taskList.get(i)).getDescription()+" | "+((FloatingTask)taskList.get(i)).getStatus().toString());
+				}
+				else{
+					writeMoustaskFile.write("Floating | "+((FloatingTask)taskList.get(i)).getDescription()+" | "+((FloatingTask)taskList.get(i)).getVenue()+" | "+taskList.get(i).getStatus().toString());
+				}
+			}
+			else if (taskType==AbstractTask.Type.DEADLINE){
+				if(((DeadlineTask)taskList.get(i)).getVenue().equalsIgnoreCase("")){
+					writeMoustaskFile.write("Deadline | "+((DeadlineTask)taskList.get(i)).getDescription()+" | "+((DeadlineTask) taskList.get(i)).getEndDate()+" | "+((DeadlineTask)taskList.get(i)).getStatus().toString());
+				}
+				else{
+					writeMoustaskFile.write("Deadline | "+((DeadlineTask)taskList.get(i)).getDescription()+" | "+((DeadlineTask) taskList.get(i)).getEndDate()+" | "+((DeadlineTask) taskList.get(i)).getVenue()+" | "+((DeadlineTask)taskList.get(i)).getStatus().toString());
+				}			
+			}
+			else{
+				if(((TimedTask)taskList.get(i)).getVenue().equalsIgnoreCase("")){
+					writeMoustaskFile.write("Timed | "+((TimedTask)taskList.get(i)).getDescription()+" | "+((TimedTask) taskList.get(i)).getStartDate()+" | "+((TimedTask)taskList.get(i)).getEndDate()+" | "+((TimedTask)taskList.get(i)).getStatus().toString());
+				}
+				else{
+					writeMoustaskFile.write("Timed | "+((TimedTask)taskList.get(i)).getDescription()+" | "+((TimedTask) taskList.get(i)).getStartDate()+" | "+((TimedTask) taskList.get(i)).getEndDate()+" | "+((TimedTask) taskList.get(i)).getVenue()+" | "+((TimedTask)taskList.get(i)).getStatus().toString());
+				}
+			}
 		}
+	}
 	
-
-
 }
