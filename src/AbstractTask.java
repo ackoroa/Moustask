@@ -1,4 +1,4 @@
-public abstract class AbstractTask {
+public abstract class AbstractTask implements Cloneable {
     public final static String TIMED = "TIMED";
     public final static String FLOAT = "FLOAT";
     public final static String DEADLINE = "DEADLINE";
@@ -27,13 +27,14 @@ public abstract class AbstractTask {
     }
 
     public Object clone() {
+	Object o = null;
 	try {
-	    return super.clone();
+	    o = super.clone();
 	} catch (CloneNotSupportedException e) {
 	    System.out.println("Cloning Task Failed");
 	    assert false;
 	}
-	return null;
+	return o;
     }
 
     public boolean equals(Object o) {
