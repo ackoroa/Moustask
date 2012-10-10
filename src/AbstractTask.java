@@ -36,6 +36,21 @@ public abstract class AbstractTask {
 	return null;
     }
 
+    public boolean equals(Object o) {
+	AbstractTask otherTask = (AbstractTask) o;
+
+	return ((otherTask.description.equals(this.description))
+		&& (otherTask.type.equals(this.type))
+		&& (otherTask.venue.equals(this.venue)) 
+		&& (otherTask.status == this.status));
+    }
+
+    public int hashCode() {
+	int hashCode = description.hashCode() + type.hashCode()
+		+ venue.hashCode() + status;
+	return hashCode;
+    }
+
     public String getDescription() {
 	return description;
     }

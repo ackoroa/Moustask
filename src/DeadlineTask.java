@@ -3,7 +3,7 @@ public class DeadlineTask extends AbstractTask {
 
     public DeadlineTask(String description, String endDate) {
 	super(description, AbstractTask.DEADLINE);
-	
+
 	this.endDate = endDate;
     }
 
@@ -11,13 +11,28 @@ public class DeadlineTask extends AbstractTask {
 	super(description, venue, AbstractTask.DEADLINE);
 	this.endDate = endDate;
     }
-    
+
     public String toString() {
 	if (this.getVenue().equals(""))
-	    return this.getType() + ": " + this.getDescription() + " by " + endDate;
+	    return this.getType() + ": " + this.getDescription() + " by "
+		    + endDate;
 	else
 	    return this.getType() + ": " + this.getDescription() + " at "
 		    + this.getVenue() + " by " + endDate;
+    }
+
+    public boolean equals(Object o) {
+	if(!o.getClass().equals(this.getClass())) return false;
+	
+	DeadlineTask otherTask = (DeadlineTask) o;
+
+	return (super.equals(o) && (otherTask.endDate.equals(this.endDate)));
+    }
+
+    public int hashCode() {
+	int hashCode = super.hashCode() + endDate.hashCode();
+
+	return hashCode;
     }
 
     public String getEndDate() {

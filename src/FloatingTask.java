@@ -16,4 +16,13 @@ public class FloatingTask extends AbstractTask {
 		    + this.getVenue();
     }
 
+    public boolean equals(Object o) {
+	return super.equals(o);
+    }
+
+    public int hashCode() {
+	int hashCode = super.hashCode();
+
+	return hashCode;
+    }
 }
