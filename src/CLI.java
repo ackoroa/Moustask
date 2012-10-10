@@ -66,15 +66,14 @@ class CLI {
 		 */
 		for (int i = 0; i < taskList.size(); i++) {
 			if (taskList.get(i).getType().equals(AbstractTask.TIMED)) {
-				/**
-				 * System.out.println((i + 1) + ". " +
-				 * taskList.get(i).getDescription() + " | Venue: " +
-				 * taskList.get(i).getVenue());
-				 * System.out.println("Category: Floating | Status: " +
-				 * getStatus(taskList.get(i).getStatus()));
-				 * System.out.println("Start: " + taskList.get(i).getStartDate()
-				 * + " | End: " + taskList.get(i).getEndDate());
-				 */
+				TimedTask timeTaskDisplay = (TimedTask) taskList.get(i);
+				System.out.println((i + 1) + ". "
+						+ timeTaskDisplay.getDescription() + " | Venue: "
+						+ timeTaskDisplay.getVenue());
+				System.out.println("Category: Timed | Status: "
+						+ getStatus(timeTaskDisplay.getStatus()));
+				System.out.println("Start: " + timeTaskDisplay.getStartDate()
+						+ " | End: " + timeTaskDisplay.getEndDate());
 			} else if (taskList.get(i).getType().equals(AbstractTask.FLOAT)) {
 				System.out.println((i + 1) + ". "
 						+ taskList.get(i).getDescription() + " | Venue: "
@@ -82,14 +81,13 @@ class CLI {
 				System.out.println("Category: Floating | Status: "
 						+ getStatus(taskList.get(i).getStatus()));
 			} else if (taskList.get(i).getType().equals(AbstractTask.DEADLINE)) {
-				/**
-				 * System.out.println((i + 1) + ". " +
-				 * taskList.get(i).getDescription() + " | Venue: " +
-				 * taskList.get(i).getVenue());
-				 * System.out.println("Category: Floating | Status: " +
-				 * getStatus(taskList.get(i).getStatus()));
-				 * System.out.println("End: " + taskList.get(i).getEndDate());
-				 */
+				DeadlineTask deadlineDisplay = (DeadlineTask) taskList.get(i);
+				System.out.println((i + 1) + ". "
+						+ deadlineDisplay.getDescription() + " | Venue: "
+						+ deadlineDisplay.getVenue());
+				System.out.println("Category: Deadline | Status: "
+						+ getStatus(deadlineDisplay.getStatus()));
+				System.out.println("End: " + deadlineDisplay.getEndDate());
 			}
 		}
 	}
