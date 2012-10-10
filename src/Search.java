@@ -26,8 +26,8 @@ public class Search implements Command {
 		searchLine = wholeSearchLine;
 	}
 	
-	public List < AbstractTask > execute(List < AbstractTask > TaskList){
-		maintainWholeTaskList(TaskList);
+	public List < AbstractTask > execute(List < AbstractTask > taskList){
+		maintainWholeTaskList(taskList);
 		
 		String [] words = searchLine.split(" ");
 		String word = "";
@@ -52,33 +52,11 @@ public class Search implements Command {
 			}
 		}
 		
-		searchCommandExecution(searchCommand, searchWords, TaskList, searchResults);
+		searchCommandExecution(searchCommand, searchWords, taskList, searchResults);
 		removeDuplicateTasks(searchResults);
 		
 		if(isChainCommand){
-			if(word.equals(OR_SEARCH)){
-				searchLine = "";
-				for(int i = currentWordIndex + 1; i < words.length; i++){
-					searchLine = searchLine + " " + words[i];
-				}
-				searchResults = execute(TaskList);
-			}
-			
-			else if(word.equals(AND_SEARCH)){
-				searchLine = "";
-				for(int i = currentWordIndex + 1; i < words.length; i++){
-					searchLine = searchLine + " " + words[i];
-				}
-				searchResults = andSearch(searchResults);		
-			}
-			
-			else if(word.equals(NOT_SEARCH)){
-				searchLine = "";
-				for(int i = currentWordIndex + 1; i < words.length; i++){
-					searchLine = searchLine + " " + words[i];
-				}
-				searchResults = notSearch(searchResults);
-			}
+			searchResults = chainCommandExecution(word, words, currentWordIndex, taskList, searchResults);
 		}
 		
 		return searchResults;
@@ -99,6 +77,34 @@ public class Search implements Command {
 		}
 	}
 	
+	public List < AbstractTask > chainCommandExecution(String chainCommand, String[] searchWords, int currentWordIndex, List < AbstractTask > TaskList, List < AbstractTask > searchResults){
+		if(chainCommand.equals(OR_SEARCH)){
+			searchLine = "";
+			for(int i = currentWordIndex + 1; i < searchWords.length; i++){
+				searchLine = searchLine + " " + searchWords[i];
+			}
+			searchResults = execute(TaskList);
+		}
+		
+		else if(chainCommand.equals(AND_SEARCH)){
+			searchLine = "";
+			for(int i = currentWordIndex + 1; i < searchWords.length; i++){
+				searchLine = searchLine + " " + searchWords[i];
+			}
+			searchResults = andSearch(searchResults);		
+		}
+		
+		else if(chainCommand.equals(NOT_SEARCH)){
+			searchLine = "";
+			for(int i = currentWordIndex + 1; i < searchWords.length; i++){
+				searchLine = searchLine + " " + searchWords[i];
+			}
+			searchResults = notSearch(searchResults);
+		}
+		return searchResults;
+	}
+	
+	
 	public void searchCommandExecution(String searchCommand, String searchWords, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
 		if(searchCommand.equals(VENUE_SEARCH)){
 			searchVenue(searchWords, tasksForSearch, searchResults);
@@ -118,15 +124,12 @@ public class Search implements Command {
 	}
 	
 	public void searchVenue(String venue, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
-		String[] venueWords = venue.split(" ");
 		for(int i = 0; i < tasksForSearch.size() ; i++){
-			for(int j = 0; j < venueWords.length; j++){
-				if(tasksForSearch.get(i).getVenue().contains(venueWords[j])){
+			if(tasksForSearch.get(i).getVenue().contains(venue)){
 					results.add(tasksForSearch.get(i));
 					break;
 				}
 			}
-		}
 	}
 	
 	public void searchCategory(String category, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
@@ -185,29 +188,7 @@ public class Search implements Command {
 		searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
 		
 		if(isChainCommand){
-			if(word.equals(OR_SEARCH)){
-				searchLine = "";
-				for(int i = currentWordIndex + 1; i < words.length; i++){
-					searchLine = searchLine + " " + words[i];
-				}
-				filteredResults = execute(taskList);
-			}
-			
-			else if(word.equals(AND_SEARCH)){
-				searchLine = "";
-				for(int i = currentWordIndex + 1; i < words.length; i++){
-					searchLine = searchLine + " " + words[i];
-				}
-				filteredResults = andSearch(filteredResults);		
-			}
-			
-			else if(word.equals(NOT_SEARCH)){
-				searchLine = "";
-				for(int i = currentWordIndex + 1; i < words.length; i++){
-					searchLine = searchLine + " " + words[i];
-				}
-				filteredResults = notSearch(filteredResults);
-			}
+			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, searchResults);
 		}
 		return filteredResults;
 	}
@@ -242,29 +223,7 @@ public class Search implements Command {
 		filteredResults = removeUnwantedTasks(taskList, filteredResults);
 		
 		if(isChainCommand){
-			if(word.equals(OR_SEARCH)){
-				searchLine = "";
-				for(int i = currentWordIndex + 1; i < words.length; i++){
-					searchLine = searchLine + " " + words[i];
-				}
-				filteredResults = execute(taskList);
-			}
-			
-			else if(word.equals(AND_SEARCH)){
-				searchLine = "";
-				for(int i = currentWordIndex + 1; i < words.length; i++){
-					searchLine = searchLine + " " + words[i];
-				}
-				filteredResults = andSearch(filteredResults);		
-			}
-			
-			else if(word.equals(NOT_SEARCH)){
-				searchLine = "";
-				for(int i = currentWordIndex + 1; i < words.length; i++){
-					searchLine = searchLine + " " + words[i];
-				}
-				filteredResults = notSearch(filteredResults);
-			}
+			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, searchResults);
 		}
 		return filteredResults;
 	}
