@@ -18,26 +18,26 @@ public class Search implements Command {
 	private final String WITHIN_MONTHS_SEARCH = ".months";
 	private final String CATEGORY_SEARCH = ".category";
 	private final String STATUS_SEARCH = ".status";
-	
+
 	private String searchLine;
 	private List < AbstractTask > searchResults = new Vector < AbstractTask > ();
 	private List < AbstractTask > wholeTaskList = new Vector < AbstractTask > ();
-	
+
 	public Search(){
 	}
-	
+
 	public Search(String wholeSearchLine){
 		searchLine = wholeSearchLine;
 	}
-	
+
 	public List < AbstractTask > execute(List < AbstractTask > taskList){
 		maintainWholeTaskList(taskList);
-		
+
 		String [] words = searchLine.split(" ");
 		String word = "";
 		String searchCommand = words[0];
 		String searchWords = "";
-		
+
 		boolean isChainCommand = false;
 		int currentWordIndex = 1;
 		while(currentWordIndex != words.length){
@@ -57,23 +57,23 @@ public class Search implements Command {
 				}
 			}
 		}
-		
+
 		searchCommandExecution(searchCommand, searchWords, taskList, searchResults);
 		removeDuplicateTasks(searchResults);
-		
+
 		if(isChainCommand){
 			searchResults = chainCommandExecution(word, words, currentWordIndex, taskList, searchResults);
 		}
-		
+
 		return searchResults;
 	}
-	
+
 	public void maintainWholeTaskList(List < AbstractTask > TaskList){
 		if(wholeTaskList.size() == 0){
 			wholeTaskList = TaskList;
 		}
 	}
-	
+
 	public boolean chainCommand(String word){
 		if(word.equalsIgnoreCase(OR_SEARCH) || word.equalsIgnoreCase(AND_SEARCH) || word.equalsIgnoreCase(NOT_SEARCH)){
 			return true;
@@ -82,7 +82,7 @@ public class Search implements Command {
 			return false;
 		}
 	}
-	
+
 	public List < AbstractTask > chainCommandExecution(String chainCommand, String[] searchWords, int currentWordIndex, List < AbstractTask > TaskList, List < AbstractTask > searchResults){
 		if(chainCommand.equalsIgnoreCase(OR_SEARCH)){
 			searchLine = "";
@@ -91,7 +91,7 @@ public class Search implements Command {
 			}
 			searchResults = execute(TaskList);
 		}
-		
+
 		else if(chainCommand.equalsIgnoreCase(AND_SEARCH)){
 			searchLine = "";
 			for(int i = currentWordIndex + 1; i < searchWords.length; i++){
@@ -99,7 +99,7 @@ public class Search implements Command {
 			}
 			searchResults = andSearch(searchResults);		
 		}
-		
+
 		else if(chainCommand.equalsIgnoreCase(NOT_SEARCH)){
 			searchLine = "";
 			for(int i = currentWordIndex + 1; i < searchWords.length; i++){
@@ -109,8 +109,8 @@ public class Search implements Command {
 		}
 		return searchResults;
 	}
-	
-	
+
+
 	public void searchCommandExecution(String searchCommand, String searchWords, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
 		if(searchCommand.equalsIgnoreCase(VENUE_SEARCH)){
 			searchVenue(searchWords, tasksForSearch, searchResults);
@@ -128,16 +128,16 @@ public class Search implements Command {
 			searchStatus(searchWords,tasksForSearch, searchResults);
 		}
 	}
-	
+
 	public void searchTimeFrame(String timeFrame, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
 		DateFormat dateformat = new SimpleDateFormat("yyyy MM dd");
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(calendar.getTime());
-		
+
 		int searchByYear = 0;
 		int searchByMonth = 0;
 		int searchByDay = 0;
-		
+
 		String[] timeFrameWords = timeFrame.split(" ");
 		if(timeFrameWords[1].equalsIgnoreCase(WITHIN_DAYS_SEARCH)){
 			int daysIncrement = Integer.parseInt(timeFrameWords[0]);
@@ -155,73 +155,6 @@ public class Search implements Command {
 			searchByMonth = Integer.parseInt(searchByDate[1]);
 			searchByDay = Integer.parseInt(searchByDate[2]);
 		}
-		
-		for(int i = 0; i < tasksForSearch.size() ; i++){
-			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("timed") || tasksForSearch.get(i).getType().toString().equalsIgnoreCase("deadline")){
-				if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("timed")){
-					TimedTask task = (TimedTask) tasksForSearch.get(i);
-					String[] taskStartDateAndTime = task.getStartDate().split(" ");
-					String[] taskStartDate = taskStartDateAndTime[0].split("-");
-					String taskStartYear = taskStartDate[0];
-					int taskStartYearInteger = Integer.parseInt(taskStartYear);
-					String taskStartMonth = taskStartDate[1];
-					int taskStartMonthInteger = Integer.parseInt(taskStartMonth);
-					String taskStartDay = taskStartDate[2];
-					int taskStartDayInteger = Integer.parseInt(taskStartDay);
-					
-					if(dateComparator(taskStartYearInteger, taskStartMonthInteger, taskStartDayInteger, searchByYear, searchByMonth, searchByDay)){
-						vectorForTasksInsertion.add(tasksForSearch.get(i));
-					}
-				}
-				
-				else if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("deadline")){
-					DeadlineTask task = (DeadlineTask) tasksForSearch.get(i);
-					String[] taskEndDateAndTime = task.getEndDate().split(" ");
-					String[] taskEndDate = taskEndDateAndTime[0].split("-");
-					String taskEndYear = taskEndDate[0];
-					int taskEndYearInteger = Integer.parseInt(taskEndYear);
-					String taskEndMonth = taskEndDate[1];
-					int taskEndMonthInteger = Integer.parseInt(taskEndMonth);
-					String taskEndDay = taskEndDate[2];
-					int taskEndDayInteger = Integer.parseInt(taskEndDay);
-					
-					if(dateComparator(taskEndYearInteger, taskEndMonthInteger, taskEndDayInteger, searchByYear, searchByMonth, searchByDay)){
-							vectorForTasksInsertion.add(tasksForSearch.get(i));
-						}
-					}
-				}
-			}
-		
-	}
-		
-		
-	public void searchFromStartTimeToEndTime(String time, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
-		String [] datesAndTimes = time.split(" ");
-		String[] startDate = datesAndTimes[0].split("-");
-		String startYear = startDate[0];
-		int startYearInteger = Integer.parseInt(startYear);
-		String startMonth = startDate[1];
-		int startMonthInteger = Integer.parseInt(startMonth);
-		String startDay = startDate[2];
-		int startDayInteger = Integer.parseInt(startDay);
-		String[] startTime = datesAndTimes[1].split(":");
-		String startHour = startTime[0];
-		String startMinute = startTime[1];
-		int startHourInteger = Integer.parseInt(startHour);
-		int startMinuteInteger = Integer.parseInt(startMinute);
-		
-		String[] endDate = datesAndTimes[2].split("-");
-		String endYear = endDate[0];
-		int endYearInteger = Integer.parseInt(endYear);
-		String endMonth = endDate[1];
-		int endMonthInteger = Integer.parseInt(endMonth);
-		String endDay = endDate[2];
-		int endDayInteger = Integer.parseInt(endDay);
-		String[] endTime = datesAndTimes[3].split(":");
-		String endHour = endTime[0];
-		String endMinute = endTime[1];
-		int endHourInteger = Integer.parseInt(endHour);
-		int endMinuteInteger = Integer.parseInt(endMinute);
 
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("timed") || tasksForSearch.get(i).getType().toString().equalsIgnoreCase("deadline")){
@@ -229,36 +162,77 @@ public class Search implements Command {
 					TimedTask task = (TimedTask) tasksForSearch.get(i);
 					String[] taskStartDateAndTime = task.getStartDate().split(" ");
 					String[] taskStartDate = taskStartDateAndTime[0].split("-");
-					String taskStartYear = taskStartDate[0];
-					int taskStartYearInteger = Integer.parseInt(taskStartYear);
-					String taskStartMonth = taskStartDate[1];
-					int taskStartMonthInteger = Integer.parseInt(taskStartMonth);
-					String taskStartDay = taskStartDate[2];
-					int taskStartDayInteger = Integer.parseInt(taskStartDay);
-					String[] taskStartTime = taskStartDateAndTime[1].split(":");
-					String taskStartHour = taskStartTime[0];
-					String taskStartMinute = taskStartTime[1];
-					int taskStartHourInteger = Integer.parseInt(taskStartHour);
-					int taskStartMinuteInteger = Integer.parseInt(taskStartMinute);
-					
+					int taskStartYear = Integer.parseInt(taskStartDate[0]);
+					int taskStartMonth = Integer.parseInt(taskStartDate[1]);
+					int taskStartDay = Integer.parseInt(taskStartDate[2]);
+
+					if(dateComparator(taskStartYear, taskStartMonth, taskStartDay, searchByYear, searchByMonth, searchByDay)){
+						vectorForTasksInsertion.add(tasksForSearch.get(i));
+					}
+				}
+
+				else if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("deadline")){
+					DeadlineTask task = (DeadlineTask) tasksForSearch.get(i);
 					String[] taskEndDateAndTime = task.getEndDate().split(" ");
 					String[] taskEndDate = taskEndDateAndTime[0].split("-");
-					String taskEndYear = taskEndDate[0];
-					int taskEndYearInteger = Integer.parseInt(taskEndYear);
-					String taskEndMonth = taskEndDate[1];
-					int taskEndMonthInteger = Integer.parseInt(taskEndMonth);
-					String taskEndDay = taskEndDate[2];
-					int taskEndDayInteger = Integer.parseInt(taskEndDay);
+					int taskEndYear = Integer.parseInt(taskEndDate[0]);
+					int taskEndMonth = Integer.parseInt(taskEndDate[1]);
+					int taskEndDay = Integer.parseInt(taskEndDate[2]);
+
+					if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, searchByYear, searchByMonth, searchByDay)){
+						vectorForTasksInsertion.add(tasksForSearch.get(i));
+					}
+				}
+			}
+		}
+
+	}
+
+
+	public void searchFromStartTimeToEndTime(String time, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
+		String [] datesAndTimes = time.split(" ");
+		String[] startDate = datesAndTimes[0].split("-");
+		int startYear = Integer.parseInt(startDate[0]);
+		int startMonth = Integer.parseInt(startDate[1]);
+		int startDay = Integer.parseInt(startDate[2]);
+		String[] startTime = datesAndTimes[1].split(":");
+		int startHour = Integer.parseInt(startTime[0]);
+		int startMinute = Integer.parseInt(startTime[1]);
+
+		String[] endDate = datesAndTimes[2].split("-");
+		int endYear = Integer.parseInt(endDate[0]);
+		int endMonth = Integer.parseInt(endDate[1]);
+		int endDay = Integer.parseInt(endDate[2]);
+		String[] endTime = datesAndTimes[3].split(":");
+		int endHour = Integer.parseInt(endTime[0]);
+		int endMinute = Integer.parseInt(endTime[1]);
+
+		for(int i = 0; i < tasksForSearch.size() ; i++){
+			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("timed") || tasksForSearch.get(i).getType().toString().equalsIgnoreCase("deadline")){
+				if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("timed")){
+					TimedTask task = (TimedTask) tasksForSearch.get(i);
+					String[] taskStartDateAndTime = task.getStartDate().split(" ");
+					String[] taskStartDate = taskStartDateAndTime[0].split("-");
+					int taskStartYear = Integer.parseInt(taskStartDate[0]);
+					int taskStartMonth = Integer.parseInt(taskStartDate[1]);
+					int taskStartDay = Integer.parseInt(taskStartDate[2]);
+					String[] taskStartTime = taskStartDateAndTime[1].split(":");
+					int taskStartHour = Integer.parseInt(taskStartTime[0]);
+					int taskStartMinute = Integer.parseInt(taskStartTime[1]);
+
+					String[] taskEndDateAndTime = task.getEndDate().split(" ");
+					String[] taskEndDate = taskEndDateAndTime[0].split("-");
+					int taskEndYear = Integer.parseInt(taskEndDate[0]);
+					int taskEndMonth = Integer.parseInt(taskEndDate[1]);
+					int taskEndDay = Integer.parseInt(taskEndDate[2]);
 					String[] taskEndTime = taskEndDateAndTime[1].split(":");
-					String taskEndHour = taskEndTime[0];
-					String taskEndMinute = taskEndTime[1];
-					int taskEndHourInteger = Integer.parseInt(taskEndHour);
-					int taskEndMinuteInteger = Integer.parseInt(taskEndMinute);
-					
-					if(dateComparator(startYearInteger, startMonthInteger, startDayInteger, taskStartYearInteger, taskStartMonthInteger, taskStartDayInteger)){
-						if(timeComparator(startHourInteger, startMinuteInteger, taskStartHourInteger, taskStartMinuteInteger)){
-							if(dateComparator(taskEndYearInteger, taskEndMonthInteger, taskEndDayInteger, endYearInteger, endMonthInteger, endDayInteger)){
-								if(timeComparator(taskEndHourInteger, taskEndMinuteInteger, endHourInteger, endMinuteInteger)){
+					int taskEndHour = Integer.parseInt(taskEndTime[0]);
+					int taskEndMinute = Integer.parseInt(taskEndTime[1]);
+
+					if(dateComparator(startYear, startMonth, startDay, taskStartYear, taskStartMonth, taskStartDay)){
+						if(timeComparator(startHour, startMinute, taskStartHour, taskStartMinute)){
+							if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
+								if(timeComparator(taskEndHour, taskEndMinute, endHour, endMinute)){
 									vectorForTasksInsertion.add(tasksForSearch.get(i));
 								}
 							}
@@ -269,29 +243,24 @@ public class Search implements Command {
 					DeadlineTask task = (DeadlineTask) tasksForSearch.get(i);
 					String[] taskEndDateAndTime = task.getEndDate().split(" ");
 					String[] taskEndDate = taskEndDateAndTime[0].split("-");
-					String taskEndYear = taskEndDate[0];
-					int taskEndYearInteger = Integer.parseInt(taskEndYear);
-					String taskEndMonth = taskEndDate[1];
-					int taskEndMonthInteger = Integer.parseInt(taskEndMonth);
-					String taskEndDay = taskEndDate[2];
-					int taskEndDayInteger = Integer.parseInt(taskEndDay);
+					int taskEndYear = Integer.parseInt(taskEndDate[0]);
+					int taskEndMonth = Integer.parseInt(taskEndDate[1]);
+					int taskEndDay = Integer.parseInt(taskEndDate[2]);
 					String[] taskEndTime = taskEndDateAndTime[1].split(":");
-					String taskEndHour = taskEndTime[0];
-					String taskEndMinute = taskEndTime[1];
-					int taskEndHourInteger = Integer.parseInt(taskEndHour);
-					int taskEndMinuteInteger = Integer.parseInt(taskEndMinute);
-					
-					if(dateComparator(taskEndYearInteger, taskEndMonthInteger, taskEndDayInteger, endYearInteger, endMonthInteger, endDayInteger)){
-						if(timeComparator(taskEndHourInteger, taskEndMinuteInteger, endHourInteger, endMinuteInteger)){
+					int taskEndHour = Integer.parseInt(taskEndTime[0]);
+					int taskEndMinute = Integer.parseInt(taskEndTime[1]);
+
+					if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
+						if(timeComparator(taskEndHour, taskEndMinute, endHour, endMinute)){
 							vectorForTasksInsertion.add(tasksForSearch.get(i));
 						}
 					}
 				}
 			}
 		}
-		
+
 	}
-	
+
 	public boolean dateComparator(int startYear, int startMonth, int startDay, int endYear, int endMonth, int endDay){
 		boolean isLater = false;
 		if(startYear <= endYear){
@@ -303,7 +272,7 @@ public class Search implements Command {
 		}
 		return isLater;
 	}
-	
+
 	public boolean timeComparator(int startHour, int startMinute, int endHour, int endMinute){
 		boolean isLater = false;
 		if(startHour <= endHour){
@@ -313,16 +282,16 @@ public class Search implements Command {
 		}
 		return isLater;
 	}
-	
+
 	public void searchVenue(String venue, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			if(tasksForSearch.get(i).getVenue().contains(venue)){
-					results.add(tasksForSearch.get(i));
-					break;
-				}
+				results.add(tasksForSearch.get(i));
+				break;
 			}
+		}
 	}
-	
+
 	public void searchCategory(String category, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase(category)){
@@ -330,7 +299,7 @@ public class Search implements Command {
 			}
 		}
 	}
-	
+
 	public void searchStatus(String status, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			if(tasksForSearch.get(i).getStatus().toString().equalsIgnoreCase(status)){
@@ -338,15 +307,15 @@ public class Search implements Command {
 			}
 		}
 	}
-	
+
 	public List < AbstractTask > andSearch (List < AbstractTask > taskList){
 		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
-		
+
 		String [] words = searchLine.split(" ");
 		String word = "";
 		String searchCommand = words[0];
 		String searchWords = "";
-		
+
 		boolean isChainCommand = false;
 		int currentWordIndex = 1;
 		while(currentWordIndex != words.length){
@@ -364,23 +333,23 @@ public class Search implements Command {
 				}
 			}
 		}
-		
+
 		searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
-		
+
 		if(isChainCommand){
 			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, searchResults);
 		}
 		return filteredResults;
 	}
-	
+
 	public List < AbstractTask > notSearch (List < AbstractTask > taskList){
 		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
-		
+
 		String [] words = searchLine.split(" ");
 		String word = "";
 		String searchCommand = words[0];
 		String searchWords = "";
-		
+
 		boolean isChainCommand = false;
 		int currentWordIndex = 1;
 		while(currentWordIndex != words.length){
@@ -398,16 +367,16 @@ public class Search implements Command {
 				}
 			}
 		}
-		
+
 		searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
 		filteredResults = removeUnwantedTasks(taskList, filteredResults);
-		
+
 		if(isChainCommand){
 			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, searchResults);
 		}
 		return filteredResults;
 	}
-	
+
 	public List < AbstractTask > removeUnwantedTasks (List < AbstractTask > taskList, List < AbstractTask > unwantedTasks){
 		List < AbstractTask > filteredResults = new Vector < AbstractTask >();
 		for(int i = 0; i < taskList.size(); i++){
@@ -424,7 +393,7 @@ public class Search implements Command {
 		}
 		return filteredResults;
 	}
-	
+
 	public List < AbstractTask > removeDuplicateTasks (List < AbstractTask > taskList){
 		List < AbstractTask > filteredResults = new Vector < AbstractTask >();
 		for(int i = 0; i < taskList.size(); i++){
