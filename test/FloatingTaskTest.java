@@ -32,4 +32,12 @@ public class FloatingTaskTest {
 		firstObject.equals(secondObject));
     }
 
+    @Test
+    public void testSetVenue() {
+	FloatingTask changedVenue = (FloatingTask) firstObject.clone();
+	changedVenue.setVenue("BK");
+	
+	assertEquals("venue changed", "BK", changedVenue.getVenue());
+    }
+    
 }

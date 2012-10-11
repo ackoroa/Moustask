@@ -32,4 +32,12 @@ public class TimedTaskTest {
 		firstObject.equals(secondObject));
     }
 
+    @Test
+    public void testSetVenue() {
+	TimedTask changedVenue = (TimedTask) firstObject.clone();
+	changedVenue.setVenue("BK");
+	
+	assertEquals("venue changed", "BK", changedVenue.getVenue());
+    }
+    
 }
