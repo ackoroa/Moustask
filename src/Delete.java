@@ -7,7 +7,8 @@ public class Delete implements UndoableCommand {
     AbstractTask deletedTask;
 
     // Initialize delete parameters
-    public Delete(List<AbstractTask> deleteSpace, int index) {
+    public Delete(List<AbstractTask> deleteSpace, int index)
+	    throws IndexOutOfBoundsException {
 	if (index < 0 || index >= deleteSpace.size())
 	    throw new IndexOutOfBoundsException(
 		    "index pointer is outside the delete space");
@@ -18,7 +19,8 @@ public class Delete implements UndoableCommand {
 
     // Deletes the specified task from taskList, stores the deletedTask and
     // returns it in a list
-    public List<AbstractTask> execute(List<AbstractTask> wholeTaskList) {
+    public List<AbstractTask> execute(List<AbstractTask> wholeTaskList)
+	    throws IllegalArgumentException {
 	if (wholeTaskList == null || wholeTaskList.size() <= 0)
 	    throw new IllegalArgumentException(
 		    "taskList cannot be empty or null");
