@@ -1,26 +1,25 @@
 import java.util.List;
 import java.util.Vector;
 
-public class Clear implements UndoableCommand{
+public class Clear implements UndoableCommand {
 
-	private List<AbstractTask> wholeTaskList;
+    private List<AbstractTask> wholeTaskList, undoList;
 
-	public Clear(){
-	}
+    public Clear() {
+    }
 
-	public List<AbstractTask> execute(List<AbstractTask> wholeTaskList){
-		return generateReturnList();
-	}
+    public List<AbstractTask> execute(List<AbstractTask> wholeTaskList) {
+	this.wholeTaskList = wholeTaskList;
+	undoList = new Vector<AbstractTask>(wholeTaskList);
+	wholeTaskList.clear();
 
+	return null;
+    }
 
-	private List<AbstractTask> generateReturnList() {
-		List<AbstractTask> returnList = new Vector<AbstractTask>();
-		return returnList;
-	}
-
-	public List<AbstractTask> undo(){
-		
-		//return undoList;
-	}
+    public List<AbstractTask> undo() {
+	wholeTaskList = undoList;
+	
+	return null;
+    }
 
 }
