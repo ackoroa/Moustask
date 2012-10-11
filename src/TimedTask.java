@@ -44,7 +44,7 @@ public class TimedTask extends AbstractTask {
 	return startDate;
     }
 
-    public void getStartDate(String sd) {
+    public void setStartDate(String sd) {
 	startDate = sd;
     }
 

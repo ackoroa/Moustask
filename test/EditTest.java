@@ -1,3 +1,4 @@
+import static org.junit.Assert.*;
 import static org.junit.Assert.fail;
 
 import java.util.Stack;
@@ -12,10 +13,11 @@ public class EditTest {
     static UndoableCommand editObject;
     static Stack<UndoableCommand> undoStack;
 
+    @SuppressWarnings("unchecked")
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
 	taskList = new Vector<AbstractTask>();
-	taskList.add(new FloatingTask("eat at mcd"));
+	taskList.add(new FloatingTask("eat"));
 
 	oldTask = new DeadlineTask("finish eating", "2012-12-12 18:00");
 	taskList.add(oldTask);
@@ -31,13 +33,65 @@ public class EditTest {
     public void testExecute() {
 	editObject = new Edit(taskList, 2, "reach restaurant");
 	editObject.execute(taskList);
+	undoStack.push(editObject);
 
-	fail("Not yet implemented");
+	assertEquals("description changed", "reach restaurant", taskList
+		.lastElement().getDescription());
+
+	editObject = new Edit(taskList, 3, ".at mcd");
+	editObject.execute(taskList);
+	undoStack.push(editObject);
+
+	assertEquals("venue changed", "mcd", taskList.lastElement().getVenue());
+
+	editObject = new Edit(taskList, 3, ".by 2012-12-12 17:30");
+	editObject.execute(taskList);
+	undoStack.push(editObject);
+
+	DeadlineTask changedDeadline = (DeadlineTask) taskList.lastElement();
+	assertEquals("deadline changed", "2012-12-12 17:30",
+		changedDeadline.getEndDate());
+	
+	editObject = new Edit(taskList, 2, ".from morning");
+	editObject.execute(taskList);
+	undoStack.push(editObject);
+
+	TimedTask changedStart = (TimedTask) taskList.lastElement();
+	assertEquals("deadline changed", "morning",
+		changedStart.getStartDate());
+	
+	editObject = new Edit(taskList, 3, ".to night");
+	editObject.execute(taskList);
+	undoStack.push(editObject);
+
+	TimedTask changedEnd = (TimedTask) taskList.lastElement();
+	assertEquals("deadline changed", "night",
+		changedEnd.getEndDate());
+	
+	editObject = new Edit(taskList, 3, "party .at comicket .from am .to pm");
+	editObject.execute(taskList);
+	undoStack.push(editObject);
+
+	TimedTask changedMultiple = (TimedTask) taskList.lastElement();
+	assertEquals("description changed in multiple changing", "party",
+		changedMultiple.getDescription());
+	assertEquals("venue changed in multiple changing", "comicket",
+		changedMultiple.getVenue());
+	assertEquals("start time changed in multiple changing", "am",
+		changedMultiple.getStartDate());
+	assertEquals("end time changed in multiple changing", "pm",
+		changedMultiple.getEndDate());
+
     }
 
     @Test
     public void testUndo() {
-	fail("Not yet implemented");
+	while (!undoStack.isEmpty()) {
+	    undoStack.pop().undo();
+	}
+
+	assertEquals("old task is the same as unoded task", oldTask,
+		taskList.get(2));
     }
 
 }
