@@ -107,10 +107,12 @@ public class Storage {
 					this.loadTaskList.add(timedTask);
 				}
 			}
+			readMoustaskFile.close();
 			return this.loadTaskList;
 		}
 		catch (Exception moustaskFileNotFound){
 			Writer createNewMoustaskFile= new BufferedWriter(new FileWriter("moustask.txt"));
+			createNewMoustaskFile.close();
 		}
 		return this.loadTaskList;
 	}
@@ -144,6 +146,7 @@ public class Storage {
 				}
 			}
 		}
+		writeMoustaskFile.close();
 	}
 	
 }
