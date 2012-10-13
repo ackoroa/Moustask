@@ -37,7 +37,7 @@ public class Help {
 		System.out.println("To search for tasks by venue, type '.search' followed by '.venue' followed by the venue name. The tasks with the exact venue will be shown.");
 		System.out.println("E.g. .search .venue orchard road");
 		System.out.println();
-		System.out.println("To search for tasks by category, type '.search' followed by '.category' followed by the category 'timed', 'deadline' or 'floating'.");
+		System.out.println("To search for tasks by category, type '.search' followed by '.category' followed by the category 'timed', 'deadline' or 'float'.");
 		System.out.println("All tasks with that category will be shown.");
 		System.out.println("E.g. .search .category timed");
 		System.out.println();
@@ -54,7 +54,7 @@ public class Help {
 		System.out.println();
 		System.out.println("To edit a task, first search for tasks. Next, type '.edit' followed by the task number of the task as shown in the search results. Next, type the new");
 		System.out.println("description and details. You may also update the status of the task. Note that you cannot change the type of task to a different");
-		System.out.println("category, e.g. changing a timed task to a floating task.");
+		System.out.println("category, e.g. changing a timed task to a float task.");
 		System.out.println("E.g. .search .venue orchard road");
 		System.out.println("E.g. .edit 2 project meeting .at raffles place .status. done");
 		System.out.println();
