@@ -34,6 +34,7 @@ class CLI {
 		boolean isClearOperation = (taskResult.getType() == TypeTaskPair.Type.CLEAR);
 		boolean isHelpOperation = (taskResult.getType() == TypeTaskPair.Type.HELP);
 		boolean isInvalidCommand = (taskResult.getType() == TypeTaskPair.Type.INVALID);
+		boolean isExitOperation = (taskResult.getType() == TypeTaskPair.Type.EXIT);
 
 		if (isTaskListEmpty) {
 			System.out.println("Your task list is currently empty.");
@@ -90,6 +91,9 @@ class CLI {
 			System.out.println("[MousTask User Guide]");
 		} else if (isInvalidCommand) {
 			System.out.println("Invalid Command. Please try again.");
+		} else if (isExitOperation) {
+			System.out.println("Thank you for using MousTask. Good Bye!");
+			System.exit(0);
 		}
 	}
 
