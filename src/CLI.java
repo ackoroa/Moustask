@@ -53,12 +53,12 @@ class CLI {
 			System.out.println("Task "
 					+ taskResult.getTasks().get(0).getDescription()
 					+ " has been deleted.");
-			displayTaskList(taskResult.getTasks());
+			logicHandler.clearSearchOrDisplayTaskList();
 		} else if (isEditOperation) {
 			System.out.println("Task "
 					+ taskResult.getTasks().get(0).getDescription()
 					+ " has been updated.");
-			displayTaskList(taskResult.getTasks());
+			logicHandler.clearSearchOrDisplayTaskList();
 		} else if (isSearchOperation) {
 			if (taskResult.getTasks().isEmpty()) {
 				System.out.println("Your search has returned no result.");
