@@ -399,7 +399,7 @@ public class Search implements Command {
 		for(int i = 0; i < taskList.size(); i++){
 			boolean isWanted = true;
 			for(int j = i + 1; j < taskList.size(); j++){
-				if(taskList.get(i).getDescription().equalsIgnoreCase(taskList.get(j).getDescription())){
+				if(taskList.get(i).equals(taskList.get(j))){
 					isWanted = false;
 					break;
 				}
