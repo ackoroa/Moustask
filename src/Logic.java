@@ -227,7 +227,7 @@ public class Logic {
 			helpObject.execute();
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.HELP, null);
 		} else if (isCommandExit) {
-			System.exit(0);
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.EXIT, null);
 		} else {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.INVALID, null);
 		}
