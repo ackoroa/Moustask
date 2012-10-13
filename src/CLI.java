@@ -105,7 +105,7 @@ class CLI {
 			boolean isTimedTask = taskList.get(i).getType()
 					.equals(AbstractTask.Type.TIMED);
 			boolean isFloatingTask = taskList.get(i).getType()
-					.equals(AbstractTask.Type.FLOAT);
+					.equals(AbstractTask.Type.FLOATING);
 			boolean isDeadlineTask = taskList.get(i).getType()
 					.equals(AbstractTask.Type.DEADLINE);
 			int displayNumber = i + 1;

@@ -5,7 +5,7 @@ public abstract class AbstractTask implements Cloneable {
     private Status status;
 
     public static enum Type {
-	TIMED, FLOAT, DEADLINE;
+	TIMED, FLOATING, DEADLINE;
     }
 
     public static enum Status {
