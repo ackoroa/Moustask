@@ -61,13 +61,13 @@ public class Edit implements UndoableCommand {
 	    String fieldValue = removeFirstWord(paramToken);
 
 	    switch (fieldType) {
-	    case "at":
+	    case "at": case "venue":
 		editVenue(editedTask, fieldValue);
 		break;
 	    case "status":
 		editStatus(editedTask, fieldValue);
 		break;
-	    case "by":
+	    case "by": case "deadline":
 		editDeadline(editedTask, fieldValue);
 		break;
 	    case "from":
