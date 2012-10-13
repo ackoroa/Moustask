@@ -119,7 +119,7 @@ public class Storage {
 				"moustask.txt", false));
 		for (int i = 0; i < taskList.size(); i++) {
 			Enum taskType = taskList.get(i).getType();
-			if (taskType == AbstractTask.Type.FLOAT) {
+			if (taskType == AbstractTask.Type.FLOATING) {
 				if (((FloatingTask) taskList.get(i)).getVenue()
 						.equalsIgnoreCase("")) {
 					writeMoustaskFile.write("Floating | "
