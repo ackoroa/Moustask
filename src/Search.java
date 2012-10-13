@@ -28,12 +28,17 @@ public class Search implements Command {
 
 	public Search(String wholeSearchLine){
 		searchLine = wholeSearchLine;
+		// System.out.println(searchLine); for debug
 	}
 
 	public List < AbstractTask > execute(List < AbstractTask > taskList){
 		maintainWholeTaskList(taskList);
 
 		String [] words = searchLine.split(" ");
+		/* for(int i = 0; i < words.length; i++ ){		for debug
+		 * System.out.println(words[i]);
+		 * } 
+		 */
 		String word = "";
 		String searchCommand = words[0];
 		String searchWords = "";
@@ -52,14 +57,19 @@ public class Search implements Command {
 					currentWordIndex = currentWordIndex + 3;
 				}
 				else{
-					searchWords = searchWords + " " + word;
+					if(currentWordIndex == 1){
+						searchWords = word;
+					}
+					else{
+						searchWords = searchWords + " " + word;
+					}
 					currentWordIndex = currentWordIndex + 1;
 				}
 			}
 		}
 
-		searchCommandExecution(searchCommand, searchWords, taskList, searchResults);
-		removeDuplicateTasks(searchResults);
+		searchResults = searchCommandExecution(searchCommand, searchWords, wholeTaskList, searchResults);
+		searchResults = removeDuplicateTasks(searchResults);
 
 		if(isChainCommand){
 			searchResults = chainCommandExecution(word, words, currentWordIndex, taskList, searchResults);
@@ -83,56 +93,78 @@ public class Search implements Command {
 		}
 	}
 
-	public List < AbstractTask > chainCommandExecution(String chainCommand, String[] searchWords, int currentWordIndex, List < AbstractTask > TaskList, List < AbstractTask > searchResults){
+	public List < AbstractTask > chainCommandExecution(String chainCommand, String[] searchWords, int currentWordIndex, List < AbstractTask > TaskList, List < AbstractTask > Results){
 		if(chainCommand.equalsIgnoreCase(OR_SEARCH)){
-			searchLine = "";
-			for(int i = currentWordIndex + 1; i < searchWords.length; i++){
+			searchLine = searchWords[currentWordIndex + 1];
+			for(int i = currentWordIndex + 2; i < searchWords.length; i++){
 				searchLine = searchLine + " " + searchWords[i];
 			}
-			searchResults = execute(TaskList);
+			Results = execute(TaskList);
 		}
 
 		else if(chainCommand.equalsIgnoreCase(AND_SEARCH)){
-			searchLine = "";
-			for(int i = currentWordIndex + 1; i < searchWords.length; i++){
+			searchLine = searchWords[currentWordIndex + 1];
+			for(int i = currentWordIndex + 2; i < searchWords.length; i++){
 				searchLine = searchLine + " " + searchWords[i];
 			}
-			searchResults = andSearch(searchResults);		
+			Results = andSearch(Results);		
 		}
 
 		else if(chainCommand.equalsIgnoreCase(NOT_SEARCH)){
-			searchLine = "";
-			for(int i = currentWordIndex + 1; i < searchWords.length; i++){
+			searchLine = searchWords[currentWordIndex + 1];
+			for(int i = currentWordIndex + 2; i < searchWords.length; i++){
 				searchLine = searchLine + " " + searchWords[i];
 			}
-			searchResults = notSearch(searchResults);
+			Results = notSearch(Results);
 		}
-		return searchResults;
+		return Results;
 	}
 
 
-	public void searchCommandExecution(String searchCommand, String searchWords, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
+	public List < AbstractTask > searchCommandExecution(String searchCommand, String searchWords, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
 		if(searchCommand.equalsIgnoreCase(VENUE_SEARCH)){
-			searchVenue(searchWords, tasksForSearch, searchResults);
+			vectorForTasksInsertion= searchVenue(searchWords, tasksForSearch, vectorForTasksInsertion);
 		}
 		else if(searchCommand.equalsIgnoreCase(START_TIME_SEARCH)){
-			searchFromStartTimeToEndTime(searchWords, tasksForSearch, searchResults);
+			vectorForTasksInsertion = searchFromStartTimeToEndTime(searchWords, tasksForSearch, vectorForTasksInsertion);
 		}
 		else if(searchCommand.equalsIgnoreCase(WITHIN_TIMEFRAME_SEARCH)){
-			searchTimeFrame(searchWords,tasksForSearch, searchResults);
+			vectorForTasksInsertion = searchTimeFrame(searchWords,tasksForSearch, vectorForTasksInsertion);
 		}
 		else if(searchCommand.equalsIgnoreCase(CATEGORY_SEARCH)){
-			searchCategory(searchWords,tasksForSearch, searchResults);
+			vectorForTasksInsertion = searchCategory(searchWords,tasksForSearch, vectorForTasksInsertion);
 		}
 		else if(searchCommand.equalsIgnoreCase(STATUS_SEARCH)){
-			searchStatus(searchWords,tasksForSearch, searchResults);
+			vectorForTasksInsertion = searchStatus(searchWords,tasksForSearch, vectorForTasksInsertion);
 		}
+		else{
+			searchWords = searchCommand + " "  + searchWords ;
+			vectorForTasksInsertion = searchKeywords(searchWords, tasksForSearch, vectorForTasksInsertion);
+		}
+		return vectorForTasksInsertion;
 	}
 
-	public void searchTimeFrame(String timeFrame, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
+	public List < AbstractTask > searchKeywords(String keywords, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+		String [] words = keywords.split(" ");
+		for(int i = 0; i < tasksForSearch.size() ; i++){
+			for(int j = 0; j < words.length; j++){
+				if(tasksForSearch.get(i).getDescription().toLowerCase().contains(words[j].toLowerCase())){
+					results.add(tasksForSearch.get(i));
+				}
+			}
+		}
+		return results;
+	}
+
+	public List < AbstractTask > searchTimeFrame(String timeFrame, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		DateFormat dateformat = new SimpleDateFormat("yyyy MM dd");
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(calendar.getTime());
+		
+		String[] todayDate = dateformat.format(calendar.getTime()).split(" ");
+		int todayYear = Integer.parseInt(todayDate[0]);
+		int todayMonth = Integer.parseInt(todayDate[1]);
+		int todayDay = Integer.parseInt(todayDate[2]);
 
 		int searchByYear = 0;
 		int searchByMonth = 0;
@@ -167,7 +199,9 @@ public class Search implements Command {
 					int taskStartDay = Integer.parseInt(taskStartDate[2]);
 
 					if(dateComparator(taskStartYear, taskStartMonth, taskStartDay, searchByYear, searchByMonth, searchByDay)){
-						vectorForTasksInsertion.add(tasksForSearch.get(i));
+						if(dateComparator(todayYear, todayMonth, todayDay ,taskStartYear, taskStartMonth, taskStartDay)){
+							results.add(tasksForSearch.get(i));
+						}
 					}
 				}
 
@@ -180,16 +214,18 @@ public class Search implements Command {
 					int taskEndDay = Integer.parseInt(taskEndDate[2]);
 
 					if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, searchByYear, searchByMonth, searchByDay)){
-						vectorForTasksInsertion.add(tasksForSearch.get(i));
+						if(dateComparator(todayYear, todayMonth, todayDay ,taskEndYear, taskEndMonth, taskEndDay)){
+						results.add(tasksForSearch.get(i));
+						}
 					}
 				}
 			}
 		}
-
+		return results;
 	}
 
 
-	public void searchFromStartTimeToEndTime(String time, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
+	public List < AbstractTask > searchFromStartTimeToEndTime(String time, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		String [] datesAndTimes = time.split(" ");
 		String[] startDate = datesAndTimes[0].split("-");
 		int startYear = Integer.parseInt(startDate[0]);
@@ -198,7 +234,8 @@ public class Search implements Command {
 		String[] startTime = datesAndTimes[1].split(":");
 		int startHour = Integer.parseInt(startTime[0]);
 		int startMinute = Integer.parseInt(startTime[1]);
-
+		// System.out.println(startYear + "," + startMonth + "," + startDay); debug
+		
 		String[] endDate = datesAndTimes[2].split("-");
 		int endYear = Integer.parseInt(endDate[0]);
 		int endMonth = Integer.parseInt(endDate[1]);
@@ -206,7 +243,8 @@ public class Search implements Command {
 		String[] endTime = datesAndTimes[3].split(":");
 		int endHour = Integer.parseInt(endTime[0]);
 		int endMinute = Integer.parseInt(endTime[1]);
-
+		// System.out.println(endYear + "," + endMonth + "," + endDay); debug
+		
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("timed") || tasksForSearch.get(i).getType().toString().equalsIgnoreCase("deadline")){
 				if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("timed")){
@@ -219,26 +257,39 @@ public class Search implements Command {
 					String[] taskStartTime = taskStartDateAndTime[1].split(":");
 					int taskStartHour = Integer.parseInt(taskStartTime[0]);
 					int taskStartMinute = Integer.parseInt(taskStartTime[1]);
-
-					String[] taskEndDateAndTime = task.getEndDate().split(" ");
-					String[] taskEndDate = taskEndDateAndTime[0].split("-");
-					int taskEndYear = Integer.parseInt(taskEndDate[0]);
-					int taskEndMonth = Integer.parseInt(taskEndDate[1]);
-					int taskEndDay = Integer.parseInt(taskEndDate[2]);
-					String[] taskEndTime = taskEndDateAndTime[1].split(":");
-					int taskEndHour = Integer.parseInt(taskEndTime[0]);
-					int taskEndMinute = Integer.parseInt(taskEndTime[1]);
+					
+					//System.out.println(taskStartYear + "," + taskStartMonth + "," + taskStartDay); debug
 
 					if(dateComparator(startYear, startMonth, startDay, taskStartYear, taskStartMonth, taskStartDay)){
-						if(timeComparator(startHour, startMinute, taskStartHour, taskStartMinute)){
-							if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
-								if(timeComparator(taskEndHour, taskEndMinute, endHour, endMinute)){
-									vectorForTasksInsertion.add(tasksForSearch.get(i));
+						if(sameDayComparator(startYear, startMonth, startDay, taskStartYear, taskStartMonth, taskStartDay)){
+							if(timeComparator(startHour, startMinute, taskStartHour, taskStartMinute)){
+								if(dateComparator(taskStartYear, taskStartMonth, taskStartDay,endYear, endMonth, endDay)){
+									if(sameDayComparator(taskStartYear, taskStartMonth, taskStartDay,endYear, endMonth, endDay)){
+										if(timeComparator( taskStartHour, taskStartMinute,endHour, endMinute )){
+											results.add(tasksForSearch.get(i));
+										}
+									}
+									else{
+										results.add(tasksForSearch.get(i));
+									}
+								}
+							}
+						}
+						else{
+							if(dateComparator(taskStartYear, taskStartMonth, taskStartDay, endYear, endMonth, endDay )){
+								if(sameDayComparator(taskStartYear, taskStartMonth, taskStartDay,endYear, endMonth, endDay)){
+									if(timeComparator( taskStartHour, taskStartMinute,endHour, endMinute )){
+										results.add(tasksForSearch.get(i));
+									}
+								}
+								else{
+									results.add(tasksForSearch.get(i));
 								}
 							}
 						}
 					}
 				}
+
 				else if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("deadline")){
 					DeadlineTask task = (DeadlineTask) tasksForSearch.get(i);
 					String[] taskEndDateAndTime = task.getEndDate().split(" ");
@@ -250,24 +301,66 @@ public class Search implements Command {
 					int taskEndHour = Integer.parseInt(taskEndTime[0]);
 					int taskEndMinute = Integer.parseInt(taskEndTime[1]);
 
+					
 					if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
-						if(timeComparator(taskEndHour, taskEndMinute, endHour, endMinute)){
-							vectorForTasksInsertion.add(tasksForSearch.get(i));
+						if(sameDayComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
+							if(timeComparator(taskEndHour, taskEndMinute, endHour, endMinute)){
+								if(dateComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){	
+									if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
+										if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
+												results.add(tasksForSearch.get(i));
+										}
+									}
+									else{
+										results.add(tasksForSearch.get(i));
+									}
+								}
+						else if(dateComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){	
+							if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
+								if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
+										results.add(tasksForSearch.get(i));
+								}
+							}
+							else{
+								results.add(tasksForSearch.get(i));
+							}
 						}
 					}
 				}
-			}
+					}
+				}
 		}
+		}
+		return results;
 
+	}
+
+	public boolean sameDayComparator(int startYear, int startMonth, int startDay, int endYear, int endMonth, int endDay){
+		if(startYear == endYear && startMonth == endMonth && startDay == endDay){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 
 	public boolean dateComparator(int startYear, int startMonth, int startDay, int endYear, int endMonth, int endDay){
 		boolean isLater = false;
 		if(startYear <= endYear){
-			if(startMonth <= endMonth){
-				if(startDay <= endDay){
-					isLater = true;
+			if(startYear == endYear){
+				if(startMonth <= endMonth){
+					if(startMonth == endMonth){
+						if(startDay <= endDay){
+							isLater = true;
+						}
+					}
+					else{
+						isLater = true;
+					}
 				}
+			}
+			else{
+				isLater = true;
 			}
 		}
 		return isLater;
@@ -276,36 +369,48 @@ public class Search implements Command {
 	public boolean timeComparator(int startHour, int startMinute, int endHour, int endMinute){
 		boolean isLater = false;
 		if(startHour <= endHour){
-			if(startMinute <= endMinute){
+			if(startHour == endHour){
+				if(startMinute <= endMinute){
+					isLater = true;
+				}
+			}
+			
+			else{
 				isLater = true;
 			}
+			
 		}
 		return isLater;
 	}
 
-	public void searchVenue(String venue, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+	public List < AbstractTask > searchVenue(String venue, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		for(int i = 0; i < tasksForSearch.size() ; i++){
-			if(tasksForSearch.get(i).getVenue().contains(venue)){
+			if(tasksForSearch.get(i).getVenue().equalsIgnoreCase(venue)){
 				results.add(tasksForSearch.get(i));
-				break;
 			}
 		}
+		return results;
 	}
 
-	public void searchCategory(String category, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+	public List < AbstractTask > searchCategory(String category, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase(category)){
 				results.add(tasksForSearch.get(i));
 			}
 		}
+		return results;
 	}
 
-	public void searchStatus(String status, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+	public List < AbstractTask > searchStatus(String status, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+		// System.out.println(status); debug
 		for(int i = 0; i < tasksForSearch.size() ; i++){
+			//System.out.println(tasksForSearch.get(i).getStatus().toString()); debug
 			if(tasksForSearch.get(i).getStatus().toString().equalsIgnoreCase(status)){
+				// System.out.println("YES"); debug
 				results.add(tasksForSearch.get(i));
 			}
 		}
+		return results;
 	}
 
 	public List < AbstractTask > andSearch (List < AbstractTask > taskList){
@@ -329,15 +434,21 @@ public class Search implements Command {
 					searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
 				}
 				else{
-					searchWords = searchWords + " " + word;
+					if(currentWordIndex == 1){
+						searchWords = word;
+					}
+					else{
+						searchWords = searchWords + " " + word;
+					}
+					currentWordIndex = currentWordIndex + 1;
 				}
 			}
 		}
 
-		searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
+		filteredResults = searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
 
 		if(isChainCommand){
-			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, searchResults);
+			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, filteredResults);
 		}
 		return filteredResults;
 	}
@@ -363,16 +474,22 @@ public class Search implements Command {
 					searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
 				}
 				else{
-					searchWords = searchWords + " " + word;
+					if(currentWordIndex == 1){
+						searchWords = word;
+					}
+					else{
+						searchWords = searchWords + " " + word;
+					}
+					currentWordIndex = currentWordIndex + 1;
 				}
 			}
 		}
 
-		searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
+		filteredResults = searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
 		filteredResults = removeUnwantedTasks(taskList, filteredResults);
 
 		if(isChainCommand){
-			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, searchResults);
+			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, filteredResults);
 		}
 		return filteredResults;
 	}
