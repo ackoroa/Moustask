@@ -1,6 +1,7 @@
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 public class Add implements UndoableCommand {
@@ -55,14 +56,24 @@ public class Add implements UndoableCommand {
 								return errorReturn;
 							} else {
 								startDate = addTokenList.get(i + 1);
-								i = i + 1;
+								boolean isStartDateValid = DateTimeValidator(startDate);
+								if (isStartDateValid) {
+									i = i + 1;
+								} else {
+									return errorReturn;
+								}
 							}
 						} else if (addTokenList.get(i).equals(".to")) {
 							if (addTokenList.get(i + 1).isEmpty()) {
 								return errorReturn;
 							} else {
 								endDate = addTokenList.get(i + 1);
-								i = i + 1;
+								boolean isEndDateValid = DateTimeValidator(endDate);
+								if (isEndDateValid) {
+									i = i + 1;
+								} else {
+									return errorReturn;
+								}
 							}
 						}
 					}
@@ -104,7 +115,12 @@ public class Add implements UndoableCommand {
 								return errorReturn;
 							} else {
 								endDate = addTokenList.get(i + 1);
-								i = i + 1;
+								boolean isEndDateValid = DateTimeValidator(endDate);
+								if (isEndDateValid) {
+									i = i + 1;
+								} else {
+									return errorReturn;
+								}
 							}
 						}
 					}
@@ -302,6 +318,92 @@ public class Add implements UndoableCommand {
 				}
 			}
 		}
+		return true;
+	}
+
+	private static boolean DateTimeValidator(String dateTime) {
+		Vector<String> dateTimeToken = new Vector<String>();
+		StringTokenizer st = new StringTokenizer(dateTime, " ");
+		while (st.hasMoreTokens()) {
+			dateTimeToken.add(st.nextToken());
+		}
+
+		if (dateTimeToken.size() != 2) {
+			return false;
+		}
+
+		boolean isValidDate = dateValidator(dateTimeToken.get(0));
+		if (!isValidDate) {
+			return false;
+		}
+
+		boolean isValidTime = timeValidator(dateTimeToken.get(1));
+		if (!isValidTime) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private static boolean dateValidator(String date) {
+		int year, month, day;
+		Vector<String> dateToken = new Vector<String>();
+		StringTokenizer st = new StringTokenizer(date, "-");
+		while (st.hasMoreTokens()) {
+			dateToken.add(st.nextToken());
+		}
+
+		if (dateToken.size() != 3) {
+			return false;
+		}
+
+		try {
+			year = Integer.parseInt(dateToken.get(0));
+			month = Integer.parseInt(dateToken.get(1));
+			day = Integer.parseInt(dateToken.get(2));
+		} catch (NumberFormatException e) {
+			return false;
+		}
+
+		if ((year < 0) || (year > 3000)) {
+			return false;
+		}
+		if ((month < 0) || (month > 12)) {
+			return false;
+		}
+		if ((day < 0) || (day > 31)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private static boolean timeValidator(String time) {
+		int hour, minutes;
+		Vector<String> timeToken = new Vector<String>();
+		StringTokenizer st = new StringTokenizer(time, ":");
+		while (st.hasMoreTokens()) {
+			timeToken.add(st.nextToken());
+		}
+
+		if (timeToken.size() != 2) {
+			return false;
+		}
+
+		try {
+			hour = Integer.parseInt(timeToken.get(0));
+			minutes = Integer.parseInt(timeToken.get(1));
+		} catch (NumberFormatException e) {
+			return false;
+		}
+
+		if ((hour < 0) || (hour > 23)) {
+			return false;
+		}
+		if ((minutes < 0) || (minutes > 59)) {
+			return false;
+		}
+
 		return true;
 	}
 
