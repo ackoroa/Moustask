@@ -21,7 +21,7 @@ public class Storage {
 			Scanner readMoustaskFile = new Scanner(moustaskFile);
 			// if moustask.txt has data, import into taskList
 			// else return empty taskList
-			if (readMoustaskFile.hasNextLine()) {
+			while (readMoustaskFile.hasNextLine()) {
 				String line = readMoustaskFile.nextLine();
 				StringTokenizer taskToken = new StringTokenizer(line, "|");
 				int numberOfTaskToken = taskToken.countTokens();
@@ -46,11 +46,10 @@ public class Storage {
 						if (taskStatus.equalsIgnoreCase("Done")) {
 							floatingTask.setStatus(AbstractTask.Status.DONE);
 						} else if (taskStatus.equalsIgnoreCase("Impossible")) {
-							floatingTask
-									.setStatus(AbstractTask.Status.IMPOSSIBLE);
+							floatingTask.setStatus(AbstractTask.Status.IMPOSSIBLE);
 						}
 					}
-					this.loadTaskList.add(floatingTask);
+					loadTaskList.add(floatingTask);
 				}
 
 				else if (taskCategory.equalsIgnoreCase("Deadline")) {
@@ -77,7 +76,7 @@ public class Storage {
 									.setStatus(AbstractTask.Status.IMPOSSIBLE);
 						}
 					}
-					this.loadTaskList.add(deadlineTask);
+					loadTaskList.add(deadlineTask);
 				}
 
 				else {
@@ -102,21 +101,21 @@ public class Storage {
 							timedTask.setStatus(AbstractTask.Status.IMPOSSIBLE);
 						}
 					}
-					this.loadTaskList.add(timedTask);
+					loadTaskList.add(timedTask);
 				}
 			}
 			readMoustaskFile.close();
-			return this.loadTaskList;
+			return loadTaskList;
 		} catch (Exception moustaskFileNotFound) {
 			Writer createNewMoustaskFile = new BufferedWriter(new FileWriter(
 					"moustask.txt"));
 			createNewMoustaskFile.close();
 		}
-		return this.loadTaskList;
+		return loadTaskList;
 	}
 
 	public void writeTaskList(List<AbstractTask> taskList) throws IOException {
-		Writer writeMoustaskFile = new BufferedWriter(new FileWriter(
+		BufferedWriter writeMoustaskFile = new BufferedWriter(new FileWriter(
 				"moustask.txt", false));
 		for (int i = 0; i < taskList.size(); i++) {
 			Enum taskType = taskList.get(i).getType();
@@ -128,12 +127,14 @@ public class Storage {
 							+ " | "
 							+ ((FloatingTask) taskList.get(i)).getStatus()
 									.toString());
+					writeMoustaskFile.newLine();
 				} else {
 					writeMoustaskFile.write("Floating | "
 							+ ((FloatingTask) taskList.get(i)).getDescription()
 							+ " | "
 							+ ((FloatingTask) taskList.get(i)).getVenue()
 							+ " | " + taskList.get(i).getStatus().toString());
+					writeMoustaskFile.newLine();
 				}
 			} else if (taskType == AbstractTask.Type.DEADLINE) {
 				if (((DeadlineTask) taskList.get(i)).getVenue()
@@ -145,6 +146,7 @@ public class Storage {
 							+ " | "
 							+ ((DeadlineTask) taskList.get(i)).getStatus()
 									.toString());
+					writeMoustaskFile.newLine();
 				} else {
 					writeMoustaskFile.write("Deadline | "
 							+ ((DeadlineTask) taskList.get(i)).getDescription()
@@ -155,6 +157,7 @@ public class Storage {
 							+ " | "
 							+ ((DeadlineTask) taskList.get(i)).getStatus()
 									.toString());
+					writeMoustaskFile.newLine();
 				}
 			} else {
 				if (((TimedTask) taskList.get(i)).getVenue().equalsIgnoreCase(
@@ -168,6 +171,7 @@ public class Storage {
 							+ " | "
 							+ ((TimedTask) taskList.get(i)).getStatus()
 									.toString());
+					writeMoustaskFile.newLine();
 				} else {
 					writeMoustaskFile.write("Timed | "
 							+ ((TimedTask) taskList.get(i)).getDescription()
@@ -180,6 +184,7 @@ public class Storage {
 							+ " | "
 							+ ((TimedTask) taskList.get(i)).getStatus()
 									.toString());
+					writeMoustaskFile.newLine();
 				}
 			}
 		}
