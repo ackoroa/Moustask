@@ -9,7 +9,7 @@ public class Delete implements UndoableCommand {
     // Initialize delete parameters
     public Delete(List<AbstractTask> deleteSpace, int index)
 	    throws IndexOutOfBoundsException {
-	if (index < 0 || index >= deleteSpace.size())
+	if (index <= 0 || index > deleteSpace.size())
 	    throw new IndexOutOfBoundsException(
 		    "index pointer is outside the delete space");
 
