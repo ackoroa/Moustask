@@ -146,15 +146,16 @@ public class Logic {
 				undoStack.push(deleteObject);
 				taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE,
 						deleteResult);
-				try {
-					storageObject.writeTaskList(taskList);
-				} catch (IOException e) {
-					System.out
-							.println("Unable to remove task from the text file.");
-				}
+				storageObject.writeTaskList(taskList);
 			} catch (NumberFormatException e) {
 				taskResult = new TypeTaskPair(null, null);
 				System.out.println("Error - " + e.getMessage());
+			} catch (IndexOutOfBoundsException e) {
+				System.out.println("Error - " + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				System.out.println("Error - " + e.getMessage());
+			} catch (IOException e) {
+				System.out.println("Unable to remove task from the text file.");
 			}
 		} else if (isCommandEdit) {
 			try {
@@ -168,15 +169,16 @@ public class Logic {
 				undoStack.push(editObject);
 				taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT,
 						returnEditedTask);
-				try {
-					storageObject.writeTaskList(taskList);
-				} catch (IOException e) {
-					System.out
-							.println("Unable to update task to the text file.");
-				}
+				storageObject.writeTaskList(taskList);
 			} catch (NumberFormatException e) {
 				taskResult = new TypeTaskPair(null, null);
 				System.out.println("Error - " + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				System.out.println("Error - " + e.getMessage());
+			} catch (IndexOutOfBoundsException e) {
+				System.out.println("Error - " + e.getMessage());
+			} catch (IOException e) {
+				System.out.println("Unable to update task to the text file.");
 			}
 		} else if (isCommandDisplay) {
 			searchOrDisplayTaskList = taskList;
