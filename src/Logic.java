@@ -105,10 +105,14 @@ public class Logic {
 					|| (isCommandClear) || (isCommandUndo) || (isCommandHelp)
 					|| (isCommandExit)) {
 				// Clear the SearchOrDisplay List since it is not edit or delete
-				searchOrDisplayTaskList = new LinkedList<AbstractTask>();
+				clearSearchOrDisplayTaskList();
 			}
 			executeCommand(commandTypeString, commandMessage);
 		}
+	}
+
+	public void clearSearchOrDisplayTaskList() {
+		searchOrDisplayTaskList = new LinkedList<AbstractTask>();
 	}
 
 	private void executeCommand(String commandTypeString, String commandMessage) {
@@ -178,8 +182,8 @@ public class Logic {
 			searchOrDisplayTaskList = taskList;
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.DISPLAY, taskList);
 		} else if (isCommandSearch) {
-			// Search searchObject = new Search();
-			// searchOrDisplayTaskList = searchObject.execute(commandMessage);
+			Search searchObject = new Search(commandMessage);
+			searchOrDisplayTaskList = searchObject.execute(taskList);
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH,
 					searchOrDisplayTaskList);
 		} else if (isCommandUndo) {
