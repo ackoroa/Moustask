@@ -40,7 +40,6 @@ public class Add implements UndoableCommand {
 				addTokenList.remove(0);
 
 				if (addTokenList.size() % 2 != 0) {
-					System.out.println("Got empty fields in this timed tasks");
 					return errorReturn;
 				} else {
 					for (int i = 0; i < addTokenList.size(); i++) {
@@ -83,8 +82,6 @@ public class Add implements UndoableCommand {
 				taskAdded = timedTaskObject;
 				return generateReturnList(timedTaskObject);
 			} else {
-				System.out
-						.println("Got not allowed keyword in this timed tasks");
 				return errorReturn;
 			}
 
@@ -98,8 +95,6 @@ public class Add implements UndoableCommand {
 				addTokenList.remove(0);
 
 				if (addTokenList.size() % 2 != 0) {
-					System.out
-							.println("Got empty fields in this deadline tasks");
 					return errorReturn;
 				} else {
 					for (int i = 0; i < addTokenList.size(); i++) {
@@ -130,8 +125,6 @@ public class Add implements UndoableCommand {
 				taskAdded = deadlineTaskObject;
 				return generateReturnList(deadlineTaskObject);
 			} else {
-				System.out
-						.println("Got not allowed keyword in this deadline tasks");
 				return errorReturn;
 			}
 		} else {
@@ -144,8 +137,6 @@ public class Add implements UndoableCommand {
 				addTokenList.remove(0);
 
 				if (addTokenList.size() % 2 != 0) {
-					System.out
-							.println("Got empty fields in this floating tasks");
 					return errorReturn;
 				} else {
 					for (int i = 0; i < addTokenList.size(); i++) {
@@ -164,8 +155,6 @@ public class Add implements UndoableCommand {
 				taskAdded = floatingTaskObject;
 				return generateReturnList(floatingTaskObject);
 			} else {
-				System.out
-						.println("Got not allowed keyword in this floating tasks");
 				return errorReturn;
 			}
 		}
@@ -180,7 +169,6 @@ public class Add implements UndoableCommand {
 
 		for (int i = 0; i < addTokenArray.length; i++) {
 			addTokenList.add(addTokenArray[i].trim());
-			System.out.println("Token " + addTokenList.get(i));
 		}
 
 		return addTokenList;
@@ -218,17 +206,12 @@ public class Add implements UndoableCommand {
 		boolean isDuplicatedKeyword = checkDuplicatedKeywords(addTokenList);
 
 		if (isDuplicatedKeyword) {
-			System.out.println("DUPLICATED KEYWORD");
 			return false;
 		} else {
-			System.out.println("NO DUPLICATED KEYWORD, continue on...");
 			boolean isAllowedKeyword = checkAllowedKeywords(addTokenList);
 
 			if (!isAllowedKeyword) {
-				System.out.println("Got fake keyword");
 				return false;
-			} else {
-				System.out.println("All are allowed keywords, continue on...");
 			}
 		}
 		return true;
@@ -243,7 +226,6 @@ public class Add implements UndoableCommand {
 				boolean isCommand = (firstCharacter == '.');
 				if (isCommand) {
 					if (!set.add(addTokenList.get(i))) {
-						System.out.println(addTokenList.get(i));
 						return true;
 					}
 				}
