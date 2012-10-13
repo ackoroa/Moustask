@@ -19,89 +19,135 @@ class CLI {
 	}
 
 	private void printMessage() {
-		if (taskResult.getType() == TypeTaskPair.Type.EMPTY) {
+		boolean isTaskListEmpty = (taskResult.getType() == TypeTaskPair.Type.EMPTY);
+		boolean isSearchOrDisplayCommandRequiredFirst = (taskResult.getType() == TypeTaskPair.Type.ERROR);
+		boolean isAddOperation = (taskResult.getType() == TypeTaskPair.Type.ADD);
+		boolean isDeleteOperation = (taskResult.getType() == TypeTaskPair.Type.DELETE);
+		boolean isEditOperation = (taskResult.getType() == TypeTaskPair.Type.EDIT);
+		boolean isSearchOperation = (taskResult.getType() == TypeTaskPair.Type.SEARCH);
+		boolean isDisplayOperation = (taskResult.getType() == TypeTaskPair.Type.DISPLAY);
+		boolean isUnableToUndo = (taskResult.getType() == TypeTaskPair.Type.UNDONULL);
+		boolean isUndoAddOperation = (taskResult.getType() == TypeTaskPair.Type.UNDOADD);
+		boolean isUndoDeleteOperation = (taskResult.getType() == TypeTaskPair.Type.UNDODELETE);
+		boolean isUndoEditOperation = (taskResult.getType() == TypeTaskPair.Type.UNDOEDIT);
+		boolean isUndoClearOperation = (taskResult.getType() == TypeTaskPair.Type.UNDOCLEAR);
+		boolean isClearOperation = (taskResult.getType() == TypeTaskPair.Type.CLEAR);
+		boolean isHelpOperation = (taskResult.getType() == TypeTaskPair.Type.HELP);
+		boolean isInvalidCommand = (taskResult.getType() == TypeTaskPair.Type.INVALID);
+
+		if (isTaskListEmpty) {
 			System.out.println("Your task list is currently empty.");
-		} else if (taskResult.getType() == TypeTaskPair.Type.ERROR) {
+		} else if (isSearchOrDisplayCommandRequiredFirst) {
 			System.out
 					.println("You must use a search or display command first.");
-		} else if (taskResult.getType() == TypeTaskPair.Type.ADD) {
-			System.out.println("Task "
-					+ taskResult.getTasks().get(0).getDescription()
-					+ " has been add.");
-		} else if (taskResult.getType() == TypeTaskPair.Type.DELETE) {
+		} else if (isAddOperation) {
+			boolean isAddResultEmpty = taskResult.getTasks().isEmpty();
+			if (isAddResultEmpty) {
+				System.out.println("Invalid Syntax. Please try again.");
+			} else {
+				System.out.println("Task "
+						+ taskResult.getTasks().get(0).getDescription()
+						+ " has been added.");
+			}
+		} else if (isDeleteOperation) {
 			System.out.println("Task "
 					+ taskResult.getTasks().get(0).getDescription()
 					+ " has been deleted.");
 			displayTaskList(taskResult.getTasks());
-		} else if (taskResult.getType() == TypeTaskPair.Type.EDIT) {
+		} else if (isEditOperation) {
 			System.out.println("Task "
 					+ taskResult.getTasks().get(0).getDescription()
-					+ " has been update.");
+					+ " has been updated.");
 			displayTaskList(taskResult.getTasks());
-		} else if (taskResult.getType() == TypeTaskPair.Type.SEARCH) {
+		} else if (isSearchOperation) {
 			if (taskResult.getTasks().isEmpty()) {
 				System.out.println("Your search has returned no result.");
 			} else {
 				displayTaskList(taskResult.getTasks());
 			}
-		} else if (taskResult.getType() == TypeTaskPair.Type.DISPLAY) {
+		} else if (isDisplayOperation) {
 			displayTaskList(taskResult.getTasks());
-		} else if (taskResult.getType() == TypeTaskPair.Type.UNDONULL) {
+		} else if (isUnableToUndo) {
 			System.out.println("There is nothing to undo.");
-		} else if (taskResult.getType() == TypeTaskPair.Type.CLEAR) {
+		} else if (isUndoAddOperation) {
+			System.out.println("Task "
+					+ taskResult.getTasks().get(0).getDescription()
+					+ " has been deleted.");
+		} else if (isUndoDeleteOperation) {
+			System.out.println("Task "
+					+ taskResult.getTasks().get(0).getDescription()
+					+ " has been added.");
+		} else if (isUndoEditOperation) {
+			System.out.println("Task "
+					+ taskResult.getTasks().get(0).getDescription()
+					+ " has been updated to "
+					+ taskResult.getTasks().get(1).getDescription() + ".");
+		} else if (isUndoClearOperation) {
+			System.out.println("All tasks are restored.");
+		} else if (isClearOperation) {
 			System.out.println("All tasks are cleared.");
-		} else if (taskResult.getType() == TypeTaskPair.Type.HELP) {
-			System.out.println("PRINT HELP INFORMATION...");
-		} else if (taskResult.getType() == TypeTaskPair.Type.INVALID) {
+		} else if (isHelpOperation) {
+			System.out.println("[MousTask User Guide]");
+		} else if (isInvalidCommand) {
 			System.out.println("Invalid Command. Please try again.");
 		}
 	}
 
 	private static void displayTaskList(List<AbstractTask> taskList) {
-		/*
-		 * CURRENT FORMAT: System.out.println(
-		 * "123. Online Assignment afj jsfjdjfsdjja | Venue: Orchard Road" );
-		 * System.out.println("Category: Floating | Status: Undone"); System
-		 * .out.println("Start: 2012-12-20 13:00 | End: 2012-12-30 00:00" );
-		 */
-		for (int i = 0; i < taskList.size(); i++) {
-			if (taskList.get(i).getType().equals(AbstractTask.TIMED)) {
-				TimedTask timeTaskDisplay = (TimedTask) taskList.get(i);
-				System.out.println((i + 1) + ". "
-						+ timeTaskDisplay.getDescription() + " | Venue: "
-						+ timeTaskDisplay.getVenue());
-				System.out.println("Category: Timed | Status: "
-						+ getStatus(timeTaskDisplay.getStatus()));
-				System.out.println("Start: " + timeTaskDisplay.getStartDate()
-						+ " | End: " + timeTaskDisplay.getEndDate());
-			} else if (taskList.get(i).getType().equals(AbstractTask.FLOAT)) {
-				System.out.println((i + 1) + ". "
-						+ taskList.get(i).getDescription() + " | Venue: "
-						+ taskList.get(i).getVenue());
-				System.out.println("Category: Floating | Status: "
-						+ getStatus(taskList.get(i).getStatus()));
-			} else if (taskList.get(i).getType().equals(AbstractTask.DEADLINE)) {
-				DeadlineTask deadlineDisplay = (DeadlineTask) taskList.get(i);
-				System.out.println((i + 1) + ". "
-						+ deadlineDisplay.getDescription() + " | Venue: "
-						+ deadlineDisplay.getVenue());
-				System.out.println("Category: Deadline | Status: "
-						+ getStatus(deadlineDisplay.getStatus()));
-				System.out.println("End: " + deadlineDisplay.getEndDate());
+		int totalTask = taskList.size();
+		System.out.println("[Displaying " + totalTask + " task(s)]");
+
+		for (int i = 0; i < totalTask; i++) {
+			boolean isTimedTask = taskList.get(i).getType()
+					.equals(AbstractTask.Type.TIMED);
+			boolean isFloatingTask = taskList.get(i).getType()
+					.equals(AbstractTask.Type.FLOAT);
+			boolean isDeadlineTask = taskList.get(i).getType()
+					.equals(AbstractTask.Type.DEADLINE);
+			int displayNumber = i + 1;
+
+			if (isTimedTask) {
+				TimedTask timedTaskDisplay = (TimedTask) taskList.get(i);
+				displayTimedTask(timedTaskDisplay, displayNumber);
+			} else if (isDeadlineTask) {
+				DeadlineTask deadlineTaskDisplay = (DeadlineTask) taskList
+						.get(i);
+				displayDeadlineTask(deadlineTaskDisplay, displayNumber);
+			} else if (isFloatingTask) {
+				FloatingTask floatingTaskDisplay = (FloatingTask) taskList
+						.get(i);
+				displayFloatingTask(floatingTaskDisplay, displayNumber);
 			}
 		}
 	}
 
-	private static String getStatus(int taskStatusNumber) {
-		switch (taskStatusNumber) {
-		case 0:
-			return "Undone";
-		case 1:
-			return "Done";
-		case 2:
-			return "Impossible";
-		default:
-			return "Unknown";
-		}
+	private static void displayTimedTask(TimedTask timedTaskDisplay,
+			int displayNumber) {
+		System.out.println(displayNumber + ". "
+				+ timedTaskDisplay.getDescription() + " | Venue: "
+				+ timedTaskDisplay.getVenue());
+		System.out.println("Category: " + timedTaskDisplay.getType()
+				+ " | Status: " + timedTaskDisplay.getStatus());
+		System.out.println("Start: " + timedTaskDisplay.getStartDate()
+				+ " | End: " + timedTaskDisplay.getEndDate() + "\n");
+	}
+
+	private static void displayDeadlineTask(DeadlineTask deadlineTaskDisplay,
+			int displayNumber) {
+		System.out.println(displayNumber + ". "
+				+ deadlineTaskDisplay.getDescription() + " | Venue: "
+				+ deadlineTaskDisplay.getVenue());
+		System.out.println("Category: " + deadlineTaskDisplay.getType()
+				+ " | Status: " + deadlineTaskDisplay.getStatus());
+		System.out.println("End: " + deadlineTaskDisplay.getEndDate() + "\n");
+	}
+
+	private static void displayFloatingTask(FloatingTask floatingTaskDisplay,
+			int displayNumber) {
+		System.out.println(displayNumber + ". "
+				+ floatingTaskDisplay.getDescription() + " | Venue: "
+				+ floatingTaskDisplay.getVenue());
+		System.out.println("Category: " + floatingTaskDisplay.getType()
+				+ " | Status: " + floatingTaskDisplay.getStatus() + "\n");
 	}
 }
