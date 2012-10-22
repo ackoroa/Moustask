@@ -2,12 +2,20 @@ import java.util.List;
 import java.util.Scanner;
 
 class CLI {
+	private static CLI commandLine;
 	private Logic logicHandler;
 	private TypeTaskPair taskResult;
 	private Scanner userInput = new Scanner(System.in);
 
-	public CLI() {
-		logicHandler = new Logic();
+	private CLI() {
+		logicHandler = Logic.getInstance();
+	}
+
+	public static CLI getInstance() {
+		if (commandLine == null) {
+			commandLine = new CLI();
+		}
+		return commandLine;
 	}
 
 	public void getUserInput() {
@@ -88,7 +96,6 @@ class CLI {
 		} else if (isClearOperation) {
 			System.out.println("All tasks are cleared.");
 		} else if (isHelpOperation) {
-			System.out.println("[MousTask User Guide]");
 		} else if (isInvalidCommand) {
 			System.out.println("Invalid Command. Please try again.");
 		} else if (isExitOperation) {
@@ -99,7 +106,9 @@ class CLI {
 
 	private static void displayTaskList(List<AbstractTask> taskList) {
 		int totalTask = taskList.size();
-		System.out.println("[Displaying " + totalTask + " task(s)]");
+		System.out
+				.println("*************************************************************");
+		System.out.println("[Displaying " + totalTask + " task(s)]\n");
 
 		for (int i = 0; i < totalTask; i++) {
 			boolean isTimedTask = taskList.get(i).getType()
@@ -127,31 +136,80 @@ class CLI {
 
 	private static void displayTimedTask(TimedTask timedTaskDisplay,
 			int displayNumber) {
-		System.out.println(displayNumber + ". "
-				+ timedTaskDisplay.getDescription() + " | Venue: "
-				+ timedTaskDisplay.getVenue());
-		System.out.println("Category: " + timedTaskDisplay.getType()
-				+ " | Status: " + timedTaskDisplay.getStatus());
-		System.out.println("Start: " + timedTaskDisplay.getStartDate()
-				+ " | End: " + timedTaskDisplay.getEndDate() + "\n");
+		showDivider();
+		System.out.println("Task #" + displayNumber);
+		displayWrapText(timedTaskDisplay.getDescription());
+		showLine();
+		if (!timedTaskDisplay.getVenue().isEmpty()) {
+			String venue = "Venue: " + timedTaskDisplay.getVenue();
+			displayWrapText(venue);
+			showLine();
+		}
+		System.out.println("From: " + timedTaskDisplay.getStartDate());
+		showLine();
+		System.out.println("To: " + timedTaskDisplay.getEndDate());
+		showLine();
+		System.out.println("Status: " + timedTaskDisplay.getStatus());
+		showDivider();
+		System.out.println("\n");
 	}
 
 	private static void displayDeadlineTask(DeadlineTask deadlineTaskDisplay,
 			int displayNumber) {
-		System.out.println(displayNumber + ". "
-				+ deadlineTaskDisplay.getDescription() + " | Venue: "
-				+ deadlineTaskDisplay.getVenue());
-		System.out.println("Category: " + deadlineTaskDisplay.getType()
-				+ " | Status: " + deadlineTaskDisplay.getStatus());
-		System.out.println("End: " + deadlineTaskDisplay.getEndDate() + "\n");
+		showDivider();
+		System.out.println("Task #" + displayNumber);
+		displayWrapText(deadlineTaskDisplay.getDescription());
+		showLine();
+		if (!deadlineTaskDisplay.getVenue().isEmpty()) {
+			String venue = "Venue: " + deadlineTaskDisplay.getVenue();
+			displayWrapText(venue);
+			showLine();
+		}
+		System.out.println("Deadline: " + deadlineTaskDisplay.getEndDate());
+		showLine();
+		System.out.println("Status: " + deadlineTaskDisplay.getStatus());
+		showDivider();
+		System.out.println("\n");
 	}
 
 	private static void displayFloatingTask(FloatingTask floatingTaskDisplay,
 			int displayNumber) {
-		System.out.println(displayNumber + ". "
-				+ floatingTaskDisplay.getDescription() + " | Venue: "
-				+ floatingTaskDisplay.getVenue());
-		System.out.println("Category: " + floatingTaskDisplay.getType()
-				+ " | Status: " + floatingTaskDisplay.getStatus() + "\n");
+		showDivider();
+		System.out.println("Task #" + displayNumber);
+		displayWrapText(floatingTaskDisplay.getDescription());
+		showLine();
+		if (!floatingTaskDisplay.getVenue().isEmpty()) {
+			String venue = "Venue: " + floatingTaskDisplay.getVenue();
+			displayWrapText(venue);
+			showLine();
+		}
+		System.out.println("Status: " + floatingTaskDisplay.getStatus());
+		showDivider();
+		System.out.println("\n");
+	}
+
+	private static void showLine() {
+		System.out
+				.println("-------------------------------------------------------------");
+	}
+
+	private static void showDivider() {
+		System.out
+				.println("=============================================================");
+	}
+
+	private static void displayWrapText(String message) {
+		int initial = 0;
+		int charLimit = 60;
+		while (initial < message.length() - 1) {
+			if (message.length() - 1 - initial > charLimit) {
+				System.out.println(message.substring(initial, initial
+						+ charLimit));
+			} else {
+				System.out
+						.println(message.substring(initial, message.length()));
+			}
+			initial += charLimit;
+		}
 	}
 }
