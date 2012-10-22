@@ -4,13 +4,14 @@ import java.util.List;
 import java.util.Stack;
 
 public class Logic {
+	private static Logic logicHandler;
 	private List<AbstractTask> taskList;
 	private List<AbstractTask> searchOrDisplayTaskList;
 	private TypeTaskPair taskResult;
 	private Stack<UndoableCommand> undoStack;
 	private Storage storageObject;
 
-	public Logic() {
+	private Logic() {
 		taskList = new LinkedList<AbstractTask>();
 		searchOrDisplayTaskList = new LinkedList<AbstractTask>();
 		undoStack = new Stack<UndoableCommand>();
@@ -20,6 +21,13 @@ public class Logic {
 		} catch (IOException e) {
 			System.out.println("Unable to load tasks from text file.");
 		}
+	}
+
+	public static Logic getInstance() {
+		if (logicHandler == null) {
+			logicHandler = new Logic();
+		}
+		return logicHandler;
 	}
 
 	public TypeTaskPair processCommand(String taskMessages) {
