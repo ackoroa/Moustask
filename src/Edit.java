@@ -1,3 +1,5 @@
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -7,6 +9,10 @@ public class Edit implements UndoableCommand {
     private AbstractTask originalTask, editedTask;
     private String editParameter;
     int index;
+
+    private static final HashSet<String> possibleTypes = new HashSet<String>(
+	    Arrays.asList(new String[] { "at", "venue", "status", "by",
+		    "deadline", "from", "to" }));
 
     // Initializes the edit parameters
     public Edit(List<AbstractTask> editSpace, int index, String editParameter) {
@@ -41,14 +47,15 @@ public class Edit implements UndoableCommand {
 
     // edits a task according to the parameter given and returns it
     private AbstractTask editTask(AbstractTask originalTask) {
-	String paramToken;
+	String paramToken, fieldType, fieldValue, last = "";
 	AbstractTask editedTask = (AbstractTask) originalTask.clone();
 	StringTokenizer parameterTokenizer = new StringTokenizer(editParameter,
 		".", true);
 
-	paramToken = parameterTokenizer.nextToken().trim();
+	paramToken = parameterTokenizer.nextToken();
 	if (!paramToken.equals(".")) {
-	    editDescription(editedTask, paramToken);
+	    last = "desc";
+	    editDescription(editedTask, paramToken.trim());
 	}
 
 	while (parameterTokenizer.hasMoreTokens()) {
@@ -57,29 +64,48 @@ public class Edit implements UndoableCommand {
 	    if (paramToken.equals("."))
 		continue;
 
-	    String fieldType = getFirstWord(paramToken).toLowerCase();
-	    String fieldValue = removeFirstWord(paramToken);
+	    fieldType = getFirstWord(paramToken).toLowerCase();
+	    if (possibleTypes.contains(fieldType)) {
+		fieldValue = removeFirstWord(paramToken).trim();
 
-	    switch (fieldType) {
-	    case "at": case "venue":
-		editVenue(editedTask, fieldValue);
-		break;
-	    case "status":
-		editStatus(editedTask, fieldValue);
-		break;
-	    case "by": case "deadline":
-		editDeadline(editedTask, fieldValue);
-		break;
-	    case "from":
-		editStartTime(editedTask, fieldValue);
-		break;
-	    case "to":
-		editEndTime(editedTask, fieldValue);
-		break;
-	    }
+		switch (fieldType) {
+		case "at":
+		case "venue":
+		    last = "venue";
+		    editVenue(editedTask, fieldValue);
+		    break;
+		case "status":
+		    editStatus(editedTask, fieldValue);
+		    break;
+		case "by":
+		case "deadline":
+		    editDeadline(editedTask, fieldValue);
+		    break;
+		case "from":
+		    editStartTime(editedTask, fieldValue);
+		    break;
+		case "to":
+		    editEndTime(editedTask, fieldValue);
+		    break;
+		}
+	    } else
+		addToLast(editedTask, fieldType, last);
 	}
 
 	return editedTask;
+    }
+
+    private void addToLast(AbstractTask task, String value, String last) {
+	switch (last) {
+	case "desc":
+	    editDescription(task, task.getDescription() + "." + value);
+	    break;
+	case "venue":
+	    editVenue(task, task.getVenue() + "." + value);
+	    break;
+	default:
+	    assert false;
+	}
     }
 
     private void editEndTime(AbstractTask editedTask, String fieldValue) {
