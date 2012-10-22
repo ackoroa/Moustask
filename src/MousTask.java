@@ -1,8 +1,8 @@
 class MousTask {
-	private CLI commandLine;
+	private static CLI commandLine;
 
 	private MousTask() {
-		commandLine = new CLI();
+		commandLine = CLI.getInstance();
 	}
 
 	private void startProgram() {
