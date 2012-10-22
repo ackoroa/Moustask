@@ -1,8 +1,12 @@
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.Date;
 
 public class Add implements UndoableCommand {
 	private List<AbstractTask> wholeTaskList;
@@ -78,7 +82,8 @@ public class Add implements UndoableCommand {
 					}
 				}
 				TimedTask timedTaskObject = new TimedTask(description,
-						startDate, endDate, venue);
+						generateDateTime(startDate), generateDateTime(endDate),
+						venue);
 				taskAdded = timedTaskObject;
 				return generateReturnList(timedTaskObject);
 			} else {
@@ -121,7 +126,7 @@ public class Add implements UndoableCommand {
 					}
 				}
 				DeadlineTask deadlineTaskObject = new DeadlineTask(description,
-						endDate, venue);
+						generateDateTime(endDate), venue);
 				taskAdded = deadlineTaskObject;
 				return generateReturnList(deadlineTaskObject);
 			} else {
@@ -164,13 +169,12 @@ public class Add implements UndoableCommand {
 		String[] addTokenArray;
 		List<String> addTokenList = new Vector<String>();
 
-		addTokenArray = messageToAdd.replaceAll("(\\.\\w+)",
+		addTokenArray = messageToAdd.replaceAll("(\\s\\.\\w+)",
 				"DELIMITER$1DELIMITER").split("DELIMITER");
 
 		for (int i = 0; i < addTokenArray.length; i++) {
 			addTokenList.add(addTokenArray[i].trim());
 		}
-
 		return addTokenList;
 	}
 
@@ -303,90 +307,72 @@ public class Add implements UndoableCommand {
 		return true;
 	}
 
-	private static boolean DateTimeValidator(String dateTime) {
+	private static Vector<String> splitDateTime(String dateTime) {
 		Vector<String> dateTimeToken = new Vector<String>();
 		StringTokenizer st = new StringTokenizer(dateTime, " ");
 		while (st.hasMoreTokens()) {
 			dateTimeToken.add(st.nextToken());
 		}
+		return dateTimeToken;
+	}
 
-		if (dateTimeToken.size() != 2) {
-			return false;
-		}
+	private static boolean DateTimeValidator(String dateTime) {
+		Vector<String> dateTimeToken = new Vector<String>();
+		dateTimeToken = splitDateTime(dateTime);
+		boolean isDateTimeTokenSizeOne = dateTimeToken.size() == 1;
+		boolean isDateTimeTokenSizeTwo = dateTimeToken.size() == 2;
 
-		boolean isValidDate = dateValidator(dateTimeToken.get(0));
-		if (!isValidDate) {
-			return false;
-		}
+		if (isDateTimeTokenSizeOne) {
+			SimpleDateFormat dayFormat = new SimpleDateFormat("E");
+			dayFormat.setLenient(false);
+			try {
+				dayFormat.parse(dateTime);
 
-		boolean isValidTime = timeValidator(dateTimeToken.get(1));
-		if (!isValidTime) {
+			} catch (ParseException e) {
+				return false;
+			}
+		} else if (isDateTimeTokenSizeTwo) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat(
+					"yyyy-MM-dd HH:mm");
+			dateFormat.setLenient(false);
+			try {
+				dateFormat.parse(dateTime);
+			} catch (ParseException e) {
+				return false;
+			}
+		} else {
 			return false;
 		}
 
 		return true;
 	}
 
-	private static boolean dateValidator(String date) {
-		int year, month, day;
-		Vector<String> dateToken = new Vector<String>();
-		StringTokenizer st = new StringTokenizer(date, "-");
-		while (st.hasMoreTokens()) {
-			dateToken.add(st.nextToken());
-		}
+	private static String generateDateTime(String dateTime) {
+		Vector<String> dateTimeToken = new Vector<String>();
+		dateTimeToken = splitDateTime(dateTime);
+		boolean isDateTimeTokenSizeOne = dateTimeToken.size() == 1;
 
-		if (dateToken.size() != 3) {
-			return false;
-		}
+		if (isDateTimeTokenSizeOne) {
+			SimpleDateFormat dayFormat = new SimpleDateFormat("E");
+			dayFormat.setLenient(false);
+			try {
+				Date date1 = dayFormat.parse(dateTime);
+				Calendar calendar = Calendar.getInstance();
+				Calendar nowCalendar = Calendar.getInstance();
+				nowCalendar.setTime(date1);
+				while (calendar.get(Calendar.DAY_OF_WEEK) != nowCalendar
+						.get(Calendar.DAY_OF_WEEK)) {
+					calendar.add(Calendar.DAY_OF_MONTH, 1);
+				}
+				String formattedDateTime = new SimpleDateFormat(
+						"yyyy-MM-dd 00:00").format(calendar.getTime());
+				return formattedDateTime;
 
-		try {
-			year = Integer.parseInt(dateToken.get(0));
-			month = Integer.parseInt(dateToken.get(1));
-			day = Integer.parseInt(dateToken.get(2));
-		} catch (NumberFormatException e) {
-			return false;
+			} catch (ParseException e) {
+				System.out.println("Error - " + e);
+			}
 		}
-
-		if ((year < 0) || (year > 3000)) {
-			return false;
-		}
-		if ((month < 0) || (month > 12)) {
-			return false;
-		}
-		if ((day < 0) || (day > 31)) {
-			return false;
-		}
-
-		return true;
-	}
-
-	private static boolean timeValidator(String time) {
-		int hour, minutes;
-		Vector<String> timeToken = new Vector<String>();
-		StringTokenizer st = new StringTokenizer(time, ":");
-		while (st.hasMoreTokens()) {
-			timeToken.add(st.nextToken());
-		}
-
-		if (timeToken.size() != 2) {
-			return false;
-		}
-
-		try {
-			hour = Integer.parseInt(timeToken.get(0));
-			minutes = Integer.parseInt(timeToken.get(1));
-		} catch (NumberFormatException e) {
-			return false;
-		}
-
-		if ((hour < 0) || (hour > 23)) {
-			return false;
-		}
-		if ((minutes < 0) || (minutes > 59)) {
-			return false;
-		}
-
-		return true;
+		return dateTime;
 	}
 
 	private List<AbstractTask> generateReturnList(AbstractTask taskAdded) {
