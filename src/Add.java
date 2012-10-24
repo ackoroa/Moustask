@@ -1,12 +1,7 @@
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.Date;
 
 public class Add implements UndoableCommand {
 	private List<AbstractTask> wholeTaskList;
@@ -23,23 +18,150 @@ public class Add implements UndoableCommand {
 		List<String> addTokenList = new Vector<String>();
 		List<AbstractTask> errorReturn = new LinkedList<AbstractTask>();
 
+		boolean isValidAddMessage = addMessageValidation(messageToAdd,
+				addTokenList);
+		if (isValidAddMessage) {
+			return differentiateAndAddTask(addTokenList, errorReturn);
+		} else {
+			return errorReturn;
+		}
+	}
+
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Validation
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	private boolean addMessageValidation(String messageToAdd,
+			List<String> addTokenList) {
+		// Validation #1 - Determine whether the input is empty
+		if (checkMessageEmpty(messageToAdd) == true) {
+			return false;
+		}
+
+		// Validation #2 - Determine whether the first token is keyword
+		splitStringIntoTokens(messageToAdd, addTokenList);
+		if (checkFirstTokenForKeyword(addTokenList.get(0)) == true) {
+			return false;
+		}
+
+		// Validation #3 - Determine whether there is a syntax error in the
+		// command
+		if (checkSyntax(addTokenList) == false) {
+			return false;
+		}
+
+		return true;
+	}
+
+	// Validation #1
+	private static boolean checkMessageEmpty(String messageToAdd) {
 		boolean isMessageEmpty = messageToAdd.isEmpty();
 		if (isMessageEmpty) {
-			return errorReturn;
+			return true;
 		}
+		return false;
+	}
 
-		addTokenList = splitStringIntoTokens(messageToAdd);
+	// Validation #2
+	private static List<String> splitStringIntoTokens(String messageToAdd,
+			List<String> addTokenList) {
+		String[] addTokenArray;
 
-		boolean isError = errorCheck(addTokenList);
-		if (isError) {
-			return errorReturn;
+		addTokenArray = messageToAdd.replaceAll("(\\s\\.\\w+)",
+				"DELIMITER$1DELIMITER").split("DELIMITER");
+
+		for (int i = 0; i < addTokenArray.length; i++) {
+			addTokenList.add(addTokenArray[i].trim());
 		}
+		return addTokenList;
+	}
 
-		if ((addTokenList.contains(".from")) && (addTokenList.contains(".to"))) {
+	private boolean checkFirstTokenForKeyword(String firstToken) {
+		if (firstToken.matches("\\.\\w+")) {
+			return true;
+		}
+		return false;
+	}
+
+	// Validation #3
+	private static boolean checkSyntax(List<String> addTokenList) {
+		// Syntax Check Sequence:
+		// After separated the message into string tokens,
+		// 1. check for duplicated keywords
+		// 2. check for allowed keywords
+		// 3. identify the correct task based on the keywords
+		// 3a. ensure only correct keywords are used for the right task
+		// 3b. ensure that all respective fields are not empty
+		// 3c. check for correct date and time
+		// 3d. ensure that there are flexibility in the ordering of keywords
+		boolean isDuplicatedKeyword = checkDuplicatedKeywords(addTokenList);
+
+		if (isDuplicatedKeyword) {
+			return false;
+		} else {
+			boolean isAllowedKeyword = checkAllowedKeywords(addTokenList);
+
+			if (!isAllowedKeyword) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean checkDuplicatedKeywords(List<String> addTokenList) {
+		HashSet<String> set = new HashSet<String>();
+
+		for (int i = 0; i < addTokenList.size(); i++) {
+			boolean isTokenEmpty = addTokenList.get(i).isEmpty();
+			if (!isTokenEmpty) {
+				char firstCharacter = addTokenList.get(i).charAt(0);
+				boolean isCommand = (firstCharacter == '.');
+				if (isCommand) {
+					if (!set.add(addTokenList.get(i))) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private static boolean checkAllowedKeywords(List<String> addTokenList) {
+		for (int i = 0; i < addTokenList.size(); i++) {
+			boolean isTokenEmpty = addTokenList.get(i).isEmpty();
+			if (!isTokenEmpty) {
+				char firstCharacter = addTokenList.get(i).charAt(0);
+				boolean isCommand = (firstCharacter == '.');
+				if (isCommand) {
+					if (!((addTokenList.get(i).equalsIgnoreCase(".from"))
+							|| (addTokenList.get(i).equalsIgnoreCase(".to"))
+							|| (addTokenList.get(i).equalsIgnoreCase(".by")) || (addTokenList
+								.get(i).equalsIgnoreCase(".at")))) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Differentiate and Add into Respective Task
+	// Categories
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	private List<AbstractTask> differentiateAndAddTask(
+			List<String> addTokenList, List<AbstractTask> errorReturn) {
+		boolean isFromKeyword = addTokenList.contains(".from");
+		boolean isToKeyword = addTokenList.contains(".to");
+		boolean isByKeyword = addTokenList.contains(".by");
+
+		// For TimedTask
+		if ((isFromKeyword) && (isToKeyword)) {
 			boolean hasValidKeywords = checkValidKeywords("timed", addTokenList);
 
 			if (hasValidKeywords) {
 				String startDate = "", endDate = "", venue = "";
+				DateTime timedTaskStartDate = null;
+				DateTime timedTaskEndDate = null;
 				String description = addTokenList.get(0);
 				addTokenList.remove(0);
 
@@ -59,7 +181,9 @@ public class Add implements UndoableCommand {
 								return errorReturn;
 							} else {
 								startDate = addTokenList.get(i + 1);
-								boolean isStartDateValid = DateTimeValidator(startDate);
+								timedTaskStartDate = new DateTime(startDate);
+								boolean isStartDateValid = timedTaskStartDate
+										.validateDateTime();
 								if (isStartDateValid) {
 									i = i + 1;
 								} else {
@@ -71,7 +195,9 @@ public class Add implements UndoableCommand {
 								return errorReturn;
 							} else {
 								endDate = addTokenList.get(i + 1);
-								boolean isEndDateValid = DateTimeValidator(endDate);
+								timedTaskEndDate = new DateTime(endDate);
+								boolean isEndDateValid = timedTaskEndDate
+										.validateDateTime();
 								if (isEndDateValid) {
 									i = i + 1;
 								} else {
@@ -81,21 +207,29 @@ public class Add implements UndoableCommand {
 						}
 					}
 				}
-				TimedTask timedTaskObject = new TimedTask(description,
-						generateDateTime(startDate), generateDateTime(endDate),
-						venue);
-				taskAdded = timedTaskObject;
-				return generateReturnList(timedTaskObject);
+				timedTaskStartDate.generateDateTime();
+				timedTaskEndDate.generateDateTime();
+				if (timedTaskStartDate
+						.compareTo(timedTaskEndDate.getDateTime()) < 0) {
+					TimedTask timedTaskObject = new TimedTask(description,
+							timedTaskStartDate.getDateTime(),
+							timedTaskEndDate.getDateTime(), venue);
+					taskAdded = timedTaskObject;
+					return generateReturnList(timedTaskObject);
+				} else {
+					return errorReturn;
+				}
 			} else {
 				return errorReturn;
 			}
 
-		} else if (addTokenList.contains(".by")) {
+		} else if (isByKeyword) { // For Deadline Task
 			boolean hasValidKeywords = checkValidKeywords("deadline",
 					addTokenList);
 
 			if (hasValidKeywords) {
 				String endDate = "", venue = "";
+				DateTime deadlineTaskEndDate = null;
 				String description = addTokenList.get(0);
 				addTokenList.remove(0);
 
@@ -115,7 +249,9 @@ public class Add implements UndoableCommand {
 								return errorReturn;
 							} else {
 								endDate = addTokenList.get(i + 1);
-								boolean isEndDateValid = DateTimeValidator(endDate);
+								deadlineTaskEndDate = new DateTime(endDate);
+								boolean isEndDateValid = deadlineTaskEndDate
+										.validateDateTime();
 								if (isEndDateValid) {
 									i = i + 1;
 								} else {
@@ -126,13 +262,13 @@ public class Add implements UndoableCommand {
 					}
 				}
 				DeadlineTask deadlineTaskObject = new DeadlineTask(description,
-						generateDateTime(endDate), venue);
+						deadlineTaskEndDate.generateDateTime(), venue);
 				taskAdded = deadlineTaskObject;
 				return generateReturnList(deadlineTaskObject);
 			} else {
 				return errorReturn;
 			}
-		} else {
+		} else { // For Floating Task
 			boolean hasValidKeywords = checkValidKeywords("floating",
 					addTokenList);
 
@@ -163,100 +299,10 @@ public class Add implements UndoableCommand {
 				return errorReturn;
 			}
 		}
+
 	}
 
-	private static List<String> splitStringIntoTokens(String messageToAdd) {
-		String[] addTokenArray;
-		List<String> addTokenList = new Vector<String>();
-
-		addTokenArray = messageToAdd.replaceAll("(\\s\\.\\w+)",
-				"DELIMITER$1DELIMITER").split("DELIMITER");
-
-		for (int i = 0; i < addTokenArray.length; i++) {
-			addTokenList.add(addTokenArray[i].trim());
-		}
-		return addTokenList;
-	}
-
-	private boolean errorCheck(List<String> addTokenList) {
-		boolean isFirstStringKeyword = checkFirstStringForKeyword(addTokenList
-				.get(0));
-		if (isFirstStringKeyword) {
-			return true;
-		}
-
-		boolean isSyntaxPass = checkSyntax(addTokenList);
-		if (!isSyntaxPass) {
-			return true;
-		}
-
-		return false;
-	}
-
-	private boolean checkFirstStringForKeyword(String firstToken) {
-		return (firstToken.isEmpty());
-	}
-
-	private static boolean checkSyntax(List<String> addTokenList) {
-		// Syntax Check Sequence:
-		// After separated the message into string tokens,
-		// 1. check for duplicated keywords
-		// 2. check for allowed keywords
-		// 3. identify the correct task based on the keywords
-		// 3a. ensure only correct keywords are used for the right task
-		// 3b. ensure that all respective fields are not empty
-		// 3c. check for correct date and time
-		// 3d. ensure that there are flexibility in the ordering of keywords
-		boolean isDuplicatedKeyword = checkDuplicatedKeywords(addTokenList);
-
-		if (isDuplicatedKeyword) {
-			return false;
-		} else {
-			boolean isAllowedKeyword = checkAllowedKeywords(addTokenList);
-
-			if (!isAllowedKeyword) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private static boolean checkDuplicatedKeywords(List<String> addTokenList) {
-		HashSet<String> set = new HashSet<String>();
-
-		for (int i = 0; i < addTokenList.size(); i++) {
-			if (!addTokenList.get(i).isEmpty()) {
-				char firstCharacter = addTokenList.get(i).charAt(0);
-				boolean isCommand = (firstCharacter == '.');
-				if (isCommand) {
-					if (!set.add(addTokenList.get(i))) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	private static boolean checkAllowedKeywords(List<String> addTokenList) {
-		for (int i = 0; i < addTokenList.size(); i++) {
-			if (!addTokenList.get(i).isEmpty()) {
-				char firstCharacter = addTokenList.get(i).charAt(0);
-				boolean isCommand = (firstCharacter == '.');
-				if (isCommand) {
-					if (!((addTokenList.get(i).equalsIgnoreCase(".from"))
-							|| (addTokenList.get(i).equalsIgnoreCase(".to"))
-							|| (addTokenList.get(i).equalsIgnoreCase(".by")) || (addTokenList
-								.get(i).equalsIgnoreCase(".at")))) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-	private boolean checkValidKeywords(String taskType,
+	private static boolean checkValidKeywords(String taskType,
 			List<String> addTokenList) {
 		boolean isTimedTask = taskType.equals("timed");
 		boolean isDeadlineTask = taskType.equals("deadline");
@@ -305,74 +351,6 @@ public class Add implements UndoableCommand {
 			}
 		}
 		return true;
-	}
-
-	private static Vector<String> splitDateTime(String dateTime) {
-		Vector<String> dateTimeToken = new Vector<String>();
-		StringTokenizer st = new StringTokenizer(dateTime, " ");
-		while (st.hasMoreTokens()) {
-			dateTimeToken.add(st.nextToken());
-		}
-		return dateTimeToken;
-	}
-
-	private static boolean DateTimeValidator(String dateTime) {
-		Vector<String> dateTimeToken = new Vector<String>();
-		dateTimeToken = splitDateTime(dateTime);
-		boolean isDateTimeTokenSizeOne = dateTimeToken.size() == 1;
-		boolean isDateTimeTokenSizeTwo = dateTimeToken.size() == 2;
-
-		if (isDateTimeTokenSizeOne) {
-			SimpleDateFormat dayFormat = new SimpleDateFormat("E");
-			dayFormat.setLenient(false);
-			try {
-				dayFormat.parse(dateTime);
-
-			} catch (ParseException e) {
-				return false;
-			}
-		} else if (isDateTimeTokenSizeTwo) {
-			SimpleDateFormat dateFormat = new SimpleDateFormat(
-					"yyyy-MM-dd HH:mm");
-			dateFormat.setLenient(false);
-			try {
-				dateFormat.parse(dateTime);
-			} catch (ParseException e) {
-				return false;
-			}
-		} else {
-			return false;
-		}
-
-		return true;
-	}
-
-	private static String generateDateTime(String dateTime) {
-		Vector<String> dateTimeToken = new Vector<String>();
-		dateTimeToken = splitDateTime(dateTime);
-		boolean isDateTimeTokenSizeOne = dateTimeToken.size() == 1;
-
-		if (isDateTimeTokenSizeOne) {
-			SimpleDateFormat dayFormat = new SimpleDateFormat("E");
-			dayFormat.setLenient(false);
-			try {
-				Date date1 = dayFormat.parse(dateTime);
-				Calendar calendar = Calendar.getInstance();
-				Calendar nowCalendar = Calendar.getInstance();
-				nowCalendar.setTime(date1);
-				while (calendar.get(Calendar.DAY_OF_WEEK) != nowCalendar
-						.get(Calendar.DAY_OF_WEEK)) {
-					calendar.add(Calendar.DAY_OF_MONTH, 1);
-				}
-				String formattedDateTime = new SimpleDateFormat(
-						"yyyy-MM-dd 00:00").format(calendar.getTime());
-				return formattedDateTime;
-
-			} catch (ParseException e) {
-				System.out.println("Error - " + e);
-			}
-		}
-		return dateTime;
 	}
 
 	private List<AbstractTask> generateReturnList(AbstractTask taskAdded) {
