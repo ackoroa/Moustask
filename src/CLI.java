@@ -69,7 +69,8 @@ class CLI {
 					+ " has been updated.");
 			logicHandler.clearSearchOrDisplayTaskList();
 		} else if (isSearchOperation) {
-			if (taskResult.getTasks().isEmpty()) {
+			boolean isSearchResultEmpty = taskResult.getTasks().isEmpty();
+			if (isSearchResultEmpty) {
 				System.out.println("Your search has returned no result.");
 			} else {
 				displayTaskList(taskResult.getTasks());
