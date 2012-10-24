@@ -46,7 +46,8 @@ public class Storage {
 						if (taskStatus.equalsIgnoreCase("Done")) {
 							floatingTask.setStatus(AbstractTask.Status.DONE);
 						} else if (taskStatus.equalsIgnoreCase("Impossible")) {
-							floatingTask.setStatus(AbstractTask.Status.IMPOSSIBLE);
+							floatingTask
+									.setStatus(AbstractTask.Status.IMPOSSIBLE);
 						}
 					}
 					loadTaskList.add(floatingTask);
@@ -118,7 +119,7 @@ public class Storage {
 		BufferedWriter writeMoustaskFile = new BufferedWriter(new FileWriter(
 				"moustask.txt", false));
 		for (int i = 0; i < taskList.size(); i++) {
-			Enum taskType = taskList.get(i).getType();
+			AbstractTask.Type taskType = taskList.get(i).getType();
 			if (taskType == AbstractTask.Type.FLOATING) {
 				if (((FloatingTask) taskList.get(i)).getVenue()
 						.equalsIgnoreCase("")) {
