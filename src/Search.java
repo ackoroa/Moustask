@@ -160,7 +160,7 @@ public class Search implements Command {
 		DateFormat dateformat = new SimpleDateFormat("yyyy MM dd");
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(calendar.getTime());
-		
+
 		String[] todayDate = dateformat.format(calendar.getTime()).split(" ");
 		int todayYear = Integer.parseInt(todayDate[0]);
 		int todayMonth = Integer.parseInt(todayDate[1]);
@@ -215,7 +215,7 @@ public class Search implements Command {
 
 					if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, searchByYear, searchByMonth, searchByDay)){
 						if(dateComparator(todayYear, todayMonth, todayDay ,taskEndYear, taskEndMonth, taskEndDay)){
-						results.add(tasksForSearch.get(i));
+							results.add(tasksForSearch.get(i));
 						}
 					}
 				}
@@ -235,7 +235,7 @@ public class Search implements Command {
 		int startHour = Integer.parseInt(startTime[0]);
 		int startMinute = Integer.parseInt(startTime[1]);
 		// System.out.println(startYear + "," + startMonth + "," + startDay); debug
-		
+
 		String[] endDate = datesAndTimes[2].split("-");
 		int endYear = Integer.parseInt(endDate[0]);
 		int endMonth = Integer.parseInt(endDate[1]);
@@ -244,7 +244,7 @@ public class Search implements Command {
 		int endHour = Integer.parseInt(endTime[0]);
 		int endMinute = Integer.parseInt(endTime[1]);
 		// System.out.println(endYear + "," + endMonth + "," + endDay); debug
-		
+
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("timed") || tasksForSearch.get(i).getType().toString().equalsIgnoreCase("deadline")){
 				if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("timed")){
@@ -257,7 +257,7 @@ public class Search implements Command {
 					String[] taskStartTime = taskStartDateAndTime[1].split(":");
 					int taskStartHour = Integer.parseInt(taskStartTime[0]);
 					int taskStartMinute = Integer.parseInt(taskStartTime[1]);
-					
+
 					//System.out.println(taskStartYear + "," + taskStartMonth + "," + taskStartDay); debug
 
 					if(dateComparator(startYear, startMonth, startDay, taskStartYear, taskStartMonth, taskStartDay)){
@@ -301,35 +301,37 @@ public class Search implements Command {
 					int taskEndHour = Integer.parseInt(taskEndTime[0]);
 					int taskEndMinute = Integer.parseInt(taskEndTime[1]);
 
-					
+
 					if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
 						if(sameDayComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
 							if(timeComparator(taskEndHour, taskEndMinute, endHour, endMinute)){
-								if(dateComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){	
+								if(dateComparator(startYear, startMonth, startDay, taskEndYear, taskEndMonth, taskEndDay)){	
 									if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
 										if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
-												results.add(tasksForSearch.get(i));
+											results.add(tasksForSearch.get(i));
 										}
 									}
 									else{
 										results.add(tasksForSearch.get(i));
 									}
 								}
-						else if(dateComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){	
-							if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
-								if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
-										results.add(tasksForSearch.get(i));
-								}
 							}
-							else{
-								results.add(tasksForSearch.get(i));
+						}
+						else {
+							if(dateComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){	
+								if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
+									if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
+										results.add(tasksForSearch.get(i));
+									}
+								}
+								else{
+									results.add(tasksForSearch.get(i));
+								}
 							}
 						}
 					}
 				}
-					}
-				}
-		}
+			}
 		}
 		return results;
 
@@ -374,11 +376,11 @@ public class Search implements Command {
 					isLater = true;
 				}
 			}
-			
+
 			else{
 				isLater = true;
 			}
-			
+
 		}
 		return isLater;
 	}
