@@ -73,6 +73,46 @@ public class SearchTest {
 		
 		assertEquals("time frame search successful", expectedResults, searchResults);
 		
+		searchObject = new Search(".from 2012-12-15 13:00 .to 2012-12-15 15:00");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		expectedResults.add(taskList.get(3));
+		
+		assertEquals("time frame search successful", expectedResults, searchResults);
+		
+		searchObject = new Search(".from 2012-12-10 .to 2012-12-15 15:00");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		expectedResults.add(taskList.get(1));
+		expectedResults.add(taskList.get(2));
+		expectedResults.add(taskList.get(3));
+		
+		assertEquals("time frame search successful", expectedResults, searchResults);
+		
+		searchObject = new Search(".from 2012-12-10 00:00 .to 2012-12-15");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		expectedResults.add(taskList.get(1));
+		expectedResults.add(taskList.get(2));
+		expectedResults.add(taskList.get(3));
+		
+		assertEquals("time frame search successful", expectedResults, searchResults);
+		
+		searchObject = new Search(".category timed .and .from 2012-12-10 00:00 .to 2012-12-15");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		expectedResults.add(taskList.get(2));
+		expectedResults.add(taskList.get(3));
+		
+		assertEquals("multiple time frame search successful", expectedResults, searchResults);
+		
+		searchObject = new Search(".category deadline .not .from 2012-12-10 00:00 .to 2012-12-15  ");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		expectedResults.add(taskList.get(4));
+		
+		assertEquals("multiple time frame search successful", expectedResults, searchResults);
+		
 		searchObject = new Search(".by 5 .months");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
 		expectedResults = new Vector<AbstractTask>();
@@ -83,12 +123,32 @@ public class SearchTest {
 		
 		assertEquals("by date search successful", expectedResults, searchResults);
 		
-		searchObject = new Search(".by 5 .months .or eat .not .status done .and .category floating");
+		searchObject = new Search(".by 5 .days .or eat .not .status done .and .category floating");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
 		expectedResults = new Vector<AbstractTask>();
 		expectedResults.add(taskList.get(0));
 		
+		
 		assertEquals("multiple search successful", expectedResults, searchResults);
+		
+		searchObject = new Search("eat .not eating");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		expectedResults.add(taskList.get(0));
+		expectedResults.add(taskList.get(2));
+		expectedResults.add(taskList.get(3));
+		
+		assertEquals("not search successful", expectedResults, searchResults);
+		
+		searchObject = new Search("eat .and eat");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		expectedResults.add(taskList.get(0));
+		expectedResults.add(taskList.get(1));
+		expectedResults.add(taskList.get(2));
+		expectedResults.add(taskList.get(3));
+		
+		assertEquals("and search successful", expectedResults, searchResults);
 		
 		searchObject = new Search(".........................................................");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
@@ -101,5 +161,45 @@ public class SearchTest {
 		expectedResults = new Vector<AbstractTask>();
 		
 		assertEquals("invalid search successful", expectedResults, searchResults);
+		
+		searchObject = new Search(".from apple orange .to watermelon grape fruit");
+		try {
+			searchObject.execute(taskList);
+		} catch (IllegalArgumentException e) {
+		    assertEquals("correct exception for invalid date format",
+		    		"the end date parameter cannot be missing", e.getMessage());
+		}
+		
+		searchObject = new Search(".from apple orange .to 2012-10-10");
+		try {
+			searchResults  = (Vector<AbstractTask>) searchObject.execute(taskList);
+		} catch (IllegalArgumentException e) {
+		    assertEquals("correct exception for invalid date format",
+		    		"Invalid date format!", e.getMessage());
+		}
+		
+		searchObject = new Search(".from");
+		try {
+			searchObject.execute(taskList);
+		} catch (IllegalArgumentException e) {
+		    assertEquals("correct exception for invalid date format",
+		    		"Date parameters cannot be empty!", e.getMessage());
+		}
+		
+		searchObject = new Search(".from 2012-10-12 .to");
+		try {
+			searchObject.execute(taskList);
+		} catch (ArrayIndexOutOfBoundsException e) {
+		    assertEquals("correct exception for invalid date format",
+		    		"the end date parameter cannot be empty or null", e.getMessage());
+		}
+		
+		searchObject = new Search(null);
+		try{
+			searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		} catch (NullPointerException e){
+			assertEquals("null search", "Search line cannot be empty!",e.getMessage());
+		}
+		
 	}
 }
