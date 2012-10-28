@@ -75,6 +75,10 @@ public class DeleteTest {
 	    assertEquals("correct exception for index > deleteSpace.size()",
 		    "index pointer is outside the delete space", e.getMessage());
 	}
+
+	// all correct
+	deleteObject = new Delete(taskList, 1);
+	assertTrue("deleteObject created", deleteObject != null);
     }
 
     @Test
@@ -153,16 +157,16 @@ public class DeleteTest {
 		.clone();
 	Stack<UndoableCommand> undoStack = new Stack<>();
 
-	for(int i=0;i<origTaskList.size();i++){
-	    UndoableCommand deleteObject = new Delete(taskList,1);
+	for (int i = 0; i < origTaskList.size(); i++) {
+	    UndoableCommand deleteObject = new Delete(taskList, 1);
 	    deleteObject.execute(taskList);
 	    undoStack.push(deleteObject);
 	}
-	
-	for(int i=0;i<origTaskList.size();i++){
-		undoStack.pop().undo();
+
+	for (int i = 0; i < origTaskList.size(); i++) {
+	    undoStack.pop().undo();
 	}
-	
+
 	assertTrue(
 		"undoed taskList == original list",
 		taskList.containsAll(origTaskList)

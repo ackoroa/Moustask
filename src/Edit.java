@@ -7,27 +7,62 @@ public class Edit implements UndoableCommand {
     private AbstractTask originalTask, editedTask;
     private String editParameter;
     int index;
+    private Logging editLog = new Logging("Edit");
 
     // Initializes the edit parameters
-    public Edit(List<AbstractTask> editSpace, int index, String editParameter) {
-	if (editParameter == null || editParameter.length() <= 0)
+    public Edit(List<AbstractTask> editSpace, int index, String editParameter)
+	    throws IndexOutOfBoundsException, IllegalArgumentException {
+
+	if (editSpace == null || editSpace.size() <= 0) {
+	    editLog.addLog(Logging.LoggingLevel.WARNING,
+		    "Edit(): edit object initialization failed. Illegal editSpace (editSpace = "
+			    + editSpace + ")");
+
 	    throw new IllegalArgumentException(
-		    "the edit parameter cannot be empty or null");
-	if (index <= 0 || index > editSpace.size())
+		    "editSpace cannot be empty or null");
+	}
+
+	if (editParameter == null) {
+	    editLog.addLog(
+		    Logging.LoggingLevel.WARNING,
+		    "Edit(): edit object initialization failed. Illegal editParameter (editParameter = "
+			    + editParameter + ")");
+
+	    throw new IllegalArgumentException(
+		    "the edit parameter cannot be null");
+	}
+
+	if (index <= 0 || index > editSpace.size()) {
+	    editLog.addLog(Logging.LoggingLevel.WARNING,
+		    "Edit(): edit object initialization failed. Index is out of bounds (index = "
+			    + index + ")");
+
 	    throw new IndexOutOfBoundsException(
 		    "index pointer is outside the edit space");
+	}
 
 	this.editSpace = editSpace;
 	this.index = index;
 	this.editParameter = editParameter;
+
+	editLog.addLog(Logging.LoggingLevel.INFO,
+		"Edit(): edit object initialized with editSpace of size: "
+			+ editSpace.size() + " index: " + index
+			+ " and editParameter: " + editParameter);
     }
 
     // Executes the edit operation, saving both the original and edited tasks
     // and returning them in a list original->edited
-    public List<AbstractTask> execute(List<AbstractTask> wholeTaskList) {
-	if (wholeTaskList == null || wholeTaskList.size() <= 0)
+    public List<AbstractTask> execute(List<AbstractTask> wholeTaskList)
+	    throws IllegalArgumentException {
+	if (wholeTaskList == null || wholeTaskList.size() <= 0) {
+	    editLog.addLog(Logging.LoggingLevel.WARNING,
+		    "Edit.execute(): delete execution failed. Illegal task list (wholeTaskList = "
+			    + wholeTaskList + ")");
+
 	    throw new IllegalArgumentException(
 		    "taskList cannot be empty or null");
+	}
 
 	this.wholeTaskList = wholeTaskList;
 	originalTask = editSpace.get(index - 1);
@@ -35,6 +70,10 @@ public class Edit implements UndoableCommand {
 
 	wholeTaskList.remove(originalTask);
 	wholeTaskList.add(editedTask);
+
+	editLog.addLog(Logging.LoggingLevel.INFO, "Edit.execute(): The task \""
+		+ originalTask + "\" has been changed to \"" + editedTask
+		+ "\"");
 
 	return generateReturnList(originalTask, editedTask);
     }
@@ -48,13 +87,11 @@ public class Edit implements UndoableCommand {
 
 	if (!paramToken.startsWith(".")) {
 	    editDescription(editedTask, paramToken);
-	    paramToken = st.nextToken();
 
-	    while (!paramToken.startsWith(".")) {
-		addToField(editedTask, paramToken, "desc");
-
-		if (st.hasMoreTokens())
-		    paramToken = st.nextToken();
+	    while (st.hasMoreTokens()) {
+		paramToken = st.nextToken();
+		if (!paramToken.startsWith("."))
+		    addToField(editedTask, paramToken, "desc");
 		else
 		    break;
 	    }
@@ -81,26 +118,69 @@ public class Edit implements UndoableCommand {
 		break;
 	    case ".by":
 	    case ".deadline":
-		paramToken = st.nextToken() + " " + st.nextToken();
-		editDeadline(editedTask, paramToken);
+		String deadline = st.nextToken();
+		if (st.hasMoreTokens())
+		    paramToken = st.nextToken();
+		else
+		    paramToken = "";
+
+		deadline = checkAndInsertTime(deadline, paramToken, "end");
+		if (!(new DateTime(deadline)).validateDateTime())
+		    throw new IllegalArgumentException(
+			    "invalid deadline format");
+
+		editDeadline(editedTask, deadline);
 		break;
 	    case ".from":
-		paramToken = st.nextToken() + " " + st.nextToken();
-		editStartTime(editedTask, paramToken);
+		String from = st.nextToken();
+		if (st.hasMoreTokens())
+		    paramToken = st.nextToken();
+		else
+		    paramToken = "";
+
+		from = checkAndInsertTime(from, paramToken, "start");
+		if (!(new DateTime(from)).validateDateTime())
+		    throw new IllegalArgumentException(
+			    "invalid start time format");
+
+		editStartTime(editedTask, from);
 		break;
 	    case ".to":
-		paramToken = st.nextToken() + " " + st.nextToken();
-		editEndTime(editedTask, paramToken);
+		String to = st.nextToken();
+		if (st.hasMoreTokens())
+		    paramToken = st.nextToken();
+		else
+		    paramToken = "";
+
+		to = checkAndInsertTime(to, paramToken, "end");
+		if (!(new DateTime(to)).validateDateTime())
+		    throw new IllegalArgumentException(
+			    "invalid end time format");
+
+		editEndTime(editedTask, to);
 		break;
 	    }
 
-	    if (st.hasMoreTokens())
+	    if (paramToken.startsWith("."))
+		continue;
+	    else if (st.hasMoreTokens())
 		paramToken = st.nextToken();
 	    else
 		break;
 	}
 
 	return editedTask;
+    }
+
+    private String checkAndInsertTime(String date, String time, String type) {
+	if (!time.startsWith(".") && !time.equals(""))
+	    date = date + " " + time;
+	else if (type.equals("start"))
+	    date = date + " 00:00";
+	else
+	    date = date + " 23:59";
+
+	return date;
     }
 
     private void addToField(AbstractTask task, String value, String last) {
@@ -163,6 +243,10 @@ public class Edit implements UndoableCommand {
 
 	wholeTaskList.remove(editedTask);
 	wholeTaskList.add(originalTask);
+
+	editLog.addLog(Logging.LoggingLevel.INFO, "Edit.undo(): The task \""
+		+ editedTask + "\" has been changed back to \"" + originalTask
+		+ "\"");
 
 	return generateReturnList(editedTask, originalTask);
     }
