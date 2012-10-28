@@ -89,5 +89,17 @@ public class SearchTest {
 		expectedResults.add(taskList.get(0));
 		
 		assertEquals("multiple search successful", expectedResults, searchResults);
+		
+		searchObject = new Search(".........................................................");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		
+		assertEquals("garbage search successful", expectedResults, searchResults);
+		
+		searchObject = new Search(".by 5 .moths");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		
+		assertEquals("invalid search successful", expectedResults, searchResults);
 	}
 }
