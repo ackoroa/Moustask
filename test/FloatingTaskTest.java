@@ -40,4 +40,24 @@ public class FloatingTaskTest {
 	assertEquals("venue changed", "BK", changedVenue.getVenue());
     }
     
+    @Test
+    public void testGetType() {
+	assertEquals("type is floating", AbstractTask.Type.FLOATING, firstObject.getType());
+    }
+    
+    @Test
+    public void testGetSetStatus() {
+	assertEquals("status is initially undone", AbstractTask.Status.UNDONE, firstObject.getStatus());
+	
+	firstObject.setStatus(AbstractTask.Status.IMPOSSIBLE);
+	assertEquals("status changed to impossible", AbstractTask.Status.IMPOSSIBLE, firstObject.getStatus());
+	
+	firstObject.setStatus(AbstractTask.Status.DONE);
+	assertEquals("status changed to done", AbstractTask.Status.DONE, firstObject.getStatus());
+	
+	firstObject.setStatus(AbstractTask.Status.UNDONE);
+	assertEquals("status changed to undone", AbstractTask.Status.UNDONE, firstObject.getStatus());
+    }
+
+    
 }

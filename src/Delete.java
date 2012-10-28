@@ -8,11 +8,14 @@ public class Delete implements UndoableCommand {
 
     // Initialize delete parameters
     public Delete(List<AbstractTask> deleteSpace, int index)
-	    throws IndexOutOfBoundsException {
+	    throws IndexOutOfBoundsException, IllegalArgumentException {
+	if (deleteSpace == null || deleteSpace.size() <= 0)
+	    throw new IllegalArgumentException(
+		    "deleteSpace cannot be empty or null");
 	if (index <= 0 || index > deleteSpace.size())
 	    throw new IndexOutOfBoundsException(
 		    "index pointer is outside the delete space");
-
+	
 	this.deleteSpace = deleteSpace;
 	this.index = index;
     }
