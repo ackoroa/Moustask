@@ -4,11 +4,17 @@ import java.util.List;
 import java.util.Vector;
 
 public class Add implements UndoableCommand {
+	private static final boolean LOGGING_ENABLED = false;
+	private Logging addLog = new Logging("Add Function");
 	private List<AbstractTask> wholeTaskList;
 	private String messageToAdd;
 	private AbstractTask taskAdded;
 
 	public Add(String commandMessage) {
+		if (LOGGING_ENABLED) {
+			addLog.addLog(Logging.LoggingLevel.INFO, "User Input: "
+					+ commandMessage);
+		}
 		this.messageToAdd = commandMessage;
 	}
 
@@ -21,8 +27,16 @@ public class Add implements UndoableCommand {
 		boolean isValidAddMessage = addMessageValidation(messageToAdd,
 				addTokenList);
 		if (isValidAddMessage) {
+			if (LOGGING_ENABLED) {
+				addLog.addLog(Logging.LoggingLevel.INFO, messageToAdd
+						+ " passes validation.");
+			}
 			return differentiateAndAddTask(addTokenList, errorReturn);
 		} else {
+			if (LOGGING_ENABLED) {
+				addLog.addLog(Logging.LoggingLevel.WARNING, messageToAdd
+						+ " fails validation.");
+			}
 			return errorReturn;
 		}
 	}
@@ -145,8 +159,7 @@ public class Add implements UndoableCommand {
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////
-	// //////////////////////////// Differentiate and Add into Respective Task
-	// Categories
+	// ////////////////// Differentiate and Add into Respective Task Categories
 	// ////////////////////////////////////////////////////////////////////////////////////////
 	private List<AbstractTask> differentiateAndAddTask(
 			List<String> addTokenList, List<AbstractTask> errorReturn) {
@@ -207,14 +220,21 @@ public class Add implements UndoableCommand {
 						}
 					}
 				}
-				timedTaskStartDate.generateDateTime();
-				timedTaskEndDate.generateDateTime();
+				timedTaskStartDate.generateDateTime(false);
+				timedTaskEndDate.generateDateTime(true);
 				if (timedTaskStartDate
 						.compareTo(timedTaskEndDate.getDateTime()) < 0) {
 					TimedTask timedTaskObject = new TimedTask(description,
 							timedTaskStartDate.getDateTime(),
 							timedTaskEndDate.getDateTime(), venue);
 					taskAdded = timedTaskObject;
+					if (LOGGING_ENABLED) {
+						addLog.addLog(
+								Logging.LoggingLevel.INFO,
+								taskAdded.getType() + " TASK - "
+										+ taskAdded.getDescription()
+										+ " is added.");
+					}
 					return generateReturnList(timedTaskObject);
 				} else {
 					return errorReturn;
@@ -223,7 +243,8 @@ public class Add implements UndoableCommand {
 				return errorReturn;
 			}
 
-		} else if (isByKeyword) { // For Deadline Task
+		} // For Deadline Task
+		else if (isByKeyword) {
 			boolean hasValidKeywords = checkValidKeywords("deadline",
 					addTokenList);
 
@@ -262,13 +283,20 @@ public class Add implements UndoableCommand {
 					}
 				}
 				DeadlineTask deadlineTaskObject = new DeadlineTask(description,
-						deadlineTaskEndDate.generateDateTime(), venue);
+						deadlineTaskEndDate.generateDateTime(true), venue);
 				taskAdded = deadlineTaskObject;
+				if (LOGGING_ENABLED) {
+					addLog.addLog(
+							Logging.LoggingLevel.INFO,
+							taskAdded.getType() + " TASK - "
+									+ taskAdded.getDescription() + " is added.");
+				}
 				return generateReturnList(deadlineTaskObject);
 			} else {
 				return errorReturn;
 			}
-		} else { // For Floating Task
+		} // For Floating Task
+		else {
 			boolean hasValidKeywords = checkValidKeywords("floating",
 					addTokenList);
 
@@ -294,6 +322,12 @@ public class Add implements UndoableCommand {
 				FloatingTask floatingTaskObject = new FloatingTask(description,
 						venue);
 				taskAdded = floatingTaskObject;
+				if (LOGGING_ENABLED) {
+					addLog.addLog(
+							Logging.LoggingLevel.INFO,
+							taskAdded.getType() + " TASK - "
+									+ taskAdded.getDescription() + " is added.");
+				}
 				return generateReturnList(floatingTaskObject);
 			} else {
 				return errorReturn;
@@ -360,10 +394,19 @@ public class Add implements UndoableCommand {
 		return returnList;
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// UNDO FUNCTION
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	public List<AbstractTask> undo() {
 		List<AbstractTask> returnList = new Vector<AbstractTask>();
 		wholeTaskList.remove(taskAdded);
 		returnList.add(taskAdded);
+		if (LOGGING_ENABLED) {
+			addLog.addLog(
+					Logging.LoggingLevel.INFO,
+					"Task Undo - " + taskAdded.getType() + ": "
+							+ taskAdded.getDescription());
+		}
 		return returnList;
 	}
 }
