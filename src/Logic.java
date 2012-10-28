@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Stack;
 
 public class Logic {
+	private static final boolean LOGGING_ENABLED = false;
+	private static Logging logicLog = new Logging("Logic Handler");
 	private static Logic logicHandler;
 	private List<AbstractTask> taskList;
 	private List<AbstractTask> searchOrDisplayTaskList;
@@ -39,12 +41,20 @@ public class Logic {
 
 	private static String getFirstWord(String userCommand) {
 		String commandTypeString = userCommand.trim().split("\\s+")[0];
+		if (LOGGING_ENABLED) {
+			logicLog.addLog(Logging.LoggingLevel.INFO,
+					"Command that user input: " + commandTypeString);
+		}
 		return commandTypeString;
 	}
 
 	private static String getMessage(String userCommand) {
 		String checkCommandType = userCommand.replace(
 				getFirstWord(userCommand), "").trim();
+		if (LOGGING_ENABLED) {
+			logicLog.addLog(Logging.LoggingLevel.INFO,
+					"Message that user input: " + checkCommandType);
+		}
 		return checkCommandType;
 	}
 
@@ -135,12 +145,17 @@ public class Logic {
 		boolean isCommandHelp = commandTypeString.equalsIgnoreCase(".help");
 		boolean isCommandExit = commandTypeString.equalsIgnoreCase(".exit");
 
+		if (LOGGING_ENABLED) {
+			logicLog.addLog(Logging.LoggingLevel.INFO, "Execute "
+					+ commandTypeString + " function");
+		}
+
 		if (isCommandAdd) {
-			Add addObject = new Add(commandMessage);
-			List<AbstractTask> addResult = addObject.execute(taskList);
-			undoStack.push(addObject);
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.ADD, addResult);
 			try {
+				Add addObject = new Add(commandMessage);
+				List<AbstractTask> addResult = addObject.execute(taskList);
+				undoStack.push(addObject);
+				taskResult = new TypeTaskPair(TypeTaskPair.Type.ADD, addResult);
 				storageObject.writeTaskList(taskList);
 			} catch (IOException e) {
 				System.out.println("Unable to write task to the text file.");
@@ -186,16 +201,24 @@ public class Logic {
 			} catch (IndexOutOfBoundsException e) {
 				System.out.println("Error - " + e.getMessage());
 			} catch (IOException e) {
-				System.out.println("Unable to update task to the text file.");
+				System.out.println("Unable to update text file.");
 			}
 		} else if (isCommandDisplay) {
 			searchOrDisplayTaskList = taskList;
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.DISPLAY, taskList);
 		} else if (isCommandSearch) {
-			Search searchObject = new Search(commandMessage);
-			searchOrDisplayTaskList = searchObject.execute(taskList);
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH,
-					searchOrDisplayTaskList);
+			try {
+				Search searchObject = new Search(commandMessage);
+				searchOrDisplayTaskList = searchObject.execute(taskList);
+				taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH,
+						searchOrDisplayTaskList);
+			} catch (NullPointerException e) {
+				System.out.println("Error - " + e.getMessage());
+			} catch (ArrayIndexOutOfBoundsException e) {
+				System.out.println("Error - " + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				System.out.println("Error - " + e.getMessage());
+			}
 		} else if (isCommandUndo) {
 			if (undoStack.isEmpty()) {
 				taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDONULL, null);
@@ -218,8 +241,7 @@ public class Logic {
 				try {
 					storageObject.writeTaskList(taskList);
 				} catch (IOException e) {
-					System.out
-							.println("Unable to update task to the text file.");
+					System.out.println("Unable to update text file.");
 				}
 			}
 		} else if (isCommandClear) {
@@ -230,7 +252,7 @@ public class Logic {
 			try {
 				storageObject.writeTaskList(taskList);
 			} catch (IOException e) {
-				System.out.println("Unable to clear task from the text file.");
+				System.out.println("Unable to clear text file.");
 			}
 		} else if (isCommandHelp) {
 			Help helpObject = new Help();
