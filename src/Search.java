@@ -30,7 +30,11 @@ public class Search implements Command {
 		searchLine = wholeSearchLine;
 		// System.out.println(searchLine); for debug
 	}
-
+	
+	// //////////////////////////////////////////////////////////////////////////////////////////////////
+	// //////// Modes of searching (Chain Commands)
+	// /////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	public List < AbstractTask > execute(List < AbstractTask > taskList){
 		maintainWholeTaskList(taskList);
 
@@ -77,6 +81,87 @@ public class Search implements Command {
 
 		return searchResults;
 	}
+	
+	public List < AbstractTask > andSearch (List < AbstractTask > taskList){
+		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
+
+		String [] words = searchLine.split(" ");
+		String word = "";
+		String searchCommand = words[0];
+		String searchWords = "";
+
+		boolean isChainCommand = false;
+		int currentWordIndex = 1;
+		while(currentWordIndex != words.length){
+			word = words[currentWordIndex];
+			if(chainCommand(word)){
+				isChainCommand = true;
+				break;
+			}
+			else{
+				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
+					searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
+				}
+				else{
+					if(currentWordIndex == 1){
+						searchWords = word;
+					}
+					else{
+						searchWords = searchWords + " " + word;
+					}
+					currentWordIndex = currentWordIndex + 1;
+				}
+			}
+		}
+
+		filteredResults = searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
+
+		if(isChainCommand){
+			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, filteredResults);
+		}
+		return filteredResults;
+	}
+
+	public List < AbstractTask > notSearch (List < AbstractTask > taskList){
+		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
+
+		String [] words = searchLine.split(" ");
+		String word = "";
+		String searchCommand = words[0];
+		String searchWords = "";
+
+		boolean isChainCommand = false;
+		int currentWordIndex = 1;
+		while(currentWordIndex != words.length){
+			word = words[currentWordIndex];
+			if(chainCommand(word)){
+				isChainCommand = true;
+				break;
+			}
+			else{
+				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
+					searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
+				}
+				else{
+					if(currentWordIndex == 1){
+						searchWords = word;
+					}
+					else{
+						searchWords = searchWords + " " + word;
+					}
+					currentWordIndex = currentWordIndex + 1;
+				}
+			}
+		}
+
+		filteredResults = searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
+		filteredResults = removeUnwantedTasks(taskList, filteredResults);
+
+		if(isChainCommand){
+			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, filteredResults);
+		}
+		return filteredResults;
+	}
 
 	public void maintainWholeTaskList(List < AbstractTask > TaskList){
 		if(wholeTaskList.size() == 0){
@@ -120,7 +205,9 @@ public class Search implements Command {
 		return Results;
 	}
 
-
+	// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// /////////// Searching functions
+	// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public List < AbstractTask > searchCommandExecution(String searchCommand, String searchWords, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
 		if(searchCommand.equalsIgnoreCase(VENUE_SEARCH)){
 			vectorForTasksInsertion= searchVenue(searchWords, tasksForSearch, vectorForTasksInsertion);
@@ -337,6 +424,71 @@ public class Search implements Command {
 
 	}
 
+	public List < AbstractTask > searchVenue(String venue, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+		for(int i = 0; i < tasksForSearch.size() ; i++){
+			if(tasksForSearch.get(i).getVenue().equalsIgnoreCase(venue)){
+				results.add(tasksForSearch.get(i));
+			}
+		}
+		return results;
+	}
+
+	public List < AbstractTask > searchCategory(String category, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+		for(int i = 0; i < tasksForSearch.size() ; i++){
+			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase(category)){
+				results.add(tasksForSearch.get(i));
+			}
+		}
+		return results;
+	}
+
+	public List < AbstractTask > searchStatus(String status, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+		// System.out.println(status); debug
+		for(int i = 0; i < tasksForSearch.size() ; i++){
+			//System.out.println(tasksForSearch.get(i).getStatus().toString()); debug
+			if(tasksForSearch.get(i).getStatus().toString().equalsIgnoreCase(status)){
+				// System.out.println("YES"); debug
+				results.add(tasksForSearch.get(i));
+			}
+		}
+		return results;
+	}
+
+	
+
+	public List < AbstractTask > removeUnwantedTasks (List < AbstractTask > taskList, List < AbstractTask > unwantedTasks){
+		List < AbstractTask > filteredResults = new Vector < AbstractTask >();
+		for(int i = 0; i < taskList.size(); i++){
+			boolean isWanted = true;
+			for(int j = 0; j < unwantedTasks.size(); j++){
+				if(taskList.get(i).getDescription().equalsIgnoreCase(unwantedTasks.get(j).getDescription())){
+					isWanted = false;
+					break;
+				}
+			}
+			if(isWanted){
+				filteredResults.add(taskList.get(i));
+			}
+		}
+		return filteredResults;
+	}
+
+	public List < AbstractTask > removeDuplicateTasks (List < AbstractTask > taskList){
+		List < AbstractTask > filteredResults = new Vector < AbstractTask >();
+		for(int i = 0; i < taskList.size(); i++){
+			boolean isWanted = true;
+			for(int j = i + 1; j < taskList.size(); j++){
+				if(taskList.get(i).equals(taskList.get(j))){
+					isWanted = false;
+					break;
+				}
+			}
+			if(isWanted){
+				filteredResults.add(taskList.get(i));
+			}
+		}
+		return filteredResults;
+	}
 	public boolean sameDayComparator(int startYear, int startMonth, int startDay, int endYear, int endMonth, int endDay){
 		if(startYear == endYear && startMonth == endMonth && startDay == endDay){
 			return true;
@@ -383,150 +535,5 @@ public class Search implements Command {
 
 		}
 		return isLater;
-	}
-
-	public List < AbstractTask > searchVenue(String venue, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
-		for(int i = 0; i < tasksForSearch.size() ; i++){
-			if(tasksForSearch.get(i).getVenue().equalsIgnoreCase(venue)){
-				results.add(tasksForSearch.get(i));
-			}
-		}
-		return results;
-	}
-
-	public List < AbstractTask > searchCategory(String category, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
-		for(int i = 0; i < tasksForSearch.size() ; i++){
-			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase(category)){
-				results.add(tasksForSearch.get(i));
-			}
-		}
-		return results;
-	}
-
-	public List < AbstractTask > searchStatus(String status, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
-		// System.out.println(status); debug
-		for(int i = 0; i < tasksForSearch.size() ; i++){
-			//System.out.println(tasksForSearch.get(i).getStatus().toString()); debug
-			if(tasksForSearch.get(i).getStatus().toString().equalsIgnoreCase(status)){
-				// System.out.println("YES"); debug
-				results.add(tasksForSearch.get(i));
-			}
-		}
-		return results;
-	}
-
-	public List < AbstractTask > andSearch (List < AbstractTask > taskList){
-		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
-
-		String [] words = searchLine.split(" ");
-		String word = "";
-		String searchCommand = words[0];
-		String searchWords = "";
-
-		boolean isChainCommand = false;
-		int currentWordIndex = 1;
-		while(currentWordIndex != words.length){
-			word = words[currentWordIndex];
-			if(chainCommand(word)){
-				isChainCommand = true;
-				break;
-			}
-			else{
-				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
-					searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
-				}
-				else{
-					if(currentWordIndex == 1){
-						searchWords = word;
-					}
-					else{
-						searchWords = searchWords + " " + word;
-					}
-					currentWordIndex = currentWordIndex + 1;
-				}
-			}
-		}
-
-		filteredResults = searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
-
-		if(isChainCommand){
-			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, filteredResults);
-		}
-		return filteredResults;
-	}
-
-	public List < AbstractTask > notSearch (List < AbstractTask > taskList){
-		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
-
-		String [] words = searchLine.split(" ");
-		String word = "";
-		String searchCommand = words[0];
-		String searchWords = "";
-
-		boolean isChainCommand = false;
-		int currentWordIndex = 1;
-		while(currentWordIndex != words.length){
-			word = words[currentWordIndex];
-			if(chainCommand(word)){
-				isChainCommand = true;
-				break;
-			}
-			else{
-				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
-					searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
-				}
-				else{
-					if(currentWordIndex == 1){
-						searchWords = word;
-					}
-					else{
-						searchWords = searchWords + " " + word;
-					}
-					currentWordIndex = currentWordIndex + 1;
-				}
-			}
-		}
-
-		filteredResults = searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
-		filteredResults = removeUnwantedTasks(taskList, filteredResults);
-
-		if(isChainCommand){
-			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, filteredResults);
-		}
-		return filteredResults;
-	}
-
-	public List < AbstractTask > removeUnwantedTasks (List < AbstractTask > taskList, List < AbstractTask > unwantedTasks){
-		List < AbstractTask > filteredResults = new Vector < AbstractTask >();
-		for(int i = 0; i < taskList.size(); i++){
-			boolean isWanted = true;
-			for(int j = 0; j < unwantedTasks.size(); j++){
-				if(taskList.get(i).getDescription().equalsIgnoreCase(unwantedTasks.get(j).getDescription())){
-					isWanted = false;
-					break;
-				}
-			}
-			if(isWanted){
-				filteredResults.add(taskList.get(i));
-			}
-		}
-		return filteredResults;
-	}
-
-	public List < AbstractTask > removeDuplicateTasks (List < AbstractTask > taskList){
-		List < AbstractTask > filteredResults = new Vector < AbstractTask >();
-		for(int i = 0; i < taskList.size(); i++){
-			boolean isWanted = true;
-			for(int j = i + 1; j < taskList.size(); j++){
-				if(taskList.get(i).equals(taskList.get(j))){
-					isWanted = false;
-					break;
-				}
-			}
-			if(isWanted){
-				filteredResults.add(taskList.get(i));
-			}
-		}
-		return filteredResults;
 	}
 }
