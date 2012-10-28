@@ -9,10 +9,14 @@ public class Edit implements UndoableCommand {
     int index;
 
     // Initializes the edit parameters
-    public Edit(List<AbstractTask> editSpace, int index, String editParameter) {
-	if (editParameter == null || editParameter.length() <= 0)
+    public Edit(List<AbstractTask> editSpace, int index, String editParameter)
+	    throws IndexOutOfBoundsException, IllegalArgumentException {
+	if (editSpace == null || editSpace.size() <= 0)
 	    throw new IllegalArgumentException(
-		    "the edit parameter cannot be empty or null");
+		    "editSpace cannot be empty or null");
+	if (editParameter == null)
+	    throw new IllegalArgumentException(
+		    "the edit parameter cannot be null");
 	if (index <= 0 || index > editSpace.size())
 	    throw new IndexOutOfBoundsException(
 		    "index pointer is outside the edit space");
@@ -48,13 +52,11 @@ public class Edit implements UndoableCommand {
 
 	if (!paramToken.startsWith(".")) {
 	    editDescription(editedTask, paramToken);
-	    paramToken = st.nextToken();
 
-	    while (!paramToken.startsWith(".")) {
-		addToField(editedTask, paramToken, "desc");
-
-		if (st.hasMoreTokens())
-		    paramToken = st.nextToken();
+	    while (st.hasMoreTokens()) {
+		paramToken = st.nextToken();
+		if (!paramToken.startsWith("."))
+		    addToField(editedTask, paramToken, "desc");
 		else
 		    break;
 	    }
