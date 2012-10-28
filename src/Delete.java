@@ -44,7 +44,7 @@ public class Delete implements UndoableCommand {
 
 	if (wholeTaskList == null || wholeTaskList.size() <= 0) {
 	    deleteLog.addLog(Logging.LoggingLevel.WARNING,
-		    "Delete.undo(): delete execution failed. Illegal task list (wholeTaskList = "
+		    "Delete.execute(): delete execution failed. Illegal task list (wholeTaskList = "
 			    + wholeTaskList + ")");
 
 	    throw new IllegalArgumentException(

@@ -7,32 +7,62 @@ public class Edit implements UndoableCommand {
     private AbstractTask originalTask, editedTask;
     private String editParameter;
     int index;
+    private Logging editLog = new Logging("Edit");
 
     // Initializes the edit parameters
     public Edit(List<AbstractTask> editSpace, int index, String editParameter)
 	    throws IndexOutOfBoundsException, IllegalArgumentException {
-	if (editSpace == null || editSpace.size() <= 0)
+
+	if (editSpace == null || editSpace.size() <= 0) {
+	    editLog.addLog(Logging.LoggingLevel.WARNING,
+		    "Edit(): edit object initialization failed. Illegal editSpace (editSpace = "
+			    + editSpace + ")");
+
 	    throw new IllegalArgumentException(
 		    "editSpace cannot be empty or null");
-	if (editParameter == null)
+	}
+
+	if (editParameter == null) {
+	    editLog.addLog(
+		    Logging.LoggingLevel.WARNING,
+		    "Edit(): edit object initialization failed. Illegal editParameter (editParameter = "
+			    + editParameter + ")");
+
 	    throw new IllegalArgumentException(
 		    "the edit parameter cannot be null");
-	if (index <= 0 || index > editSpace.size())
+	}
+
+	if (index <= 0 || index > editSpace.size()) {
+	    editLog.addLog(Logging.LoggingLevel.WARNING,
+		    "Edit(): edit object initialization failed. Index is out of bounds (index = "
+			    + index + ")");
+
 	    throw new IndexOutOfBoundsException(
 		    "index pointer is outside the edit space");
+	}
 
 	this.editSpace = editSpace;
 	this.index = index;
 	this.editParameter = editParameter;
+
+	editLog.addLog(Logging.LoggingLevel.INFO,
+		"Edit(): edit object initialized with editSpace of size: "
+			+ editSpace.size() + " index: " + index
+			+ " and editParameter: " + editParameter);
     }
 
     // Executes the edit operation, saving both the original and edited tasks
     // and returning them in a list original->edited
     public List<AbstractTask> execute(List<AbstractTask> wholeTaskList)
 	    throws IllegalArgumentException {
-	if (wholeTaskList == null || wholeTaskList.size() <= 0)
+	if (wholeTaskList == null || wholeTaskList.size() <= 0) {
+	    editLog.addLog(Logging.LoggingLevel.WARNING,
+		    "Edit.execute(): delete execution failed. Illegal task list (wholeTaskList = "
+			    + wholeTaskList + ")");
+
 	    throw new IllegalArgumentException(
 		    "taskList cannot be empty or null");
+	}
 
 	this.wholeTaskList = wholeTaskList;
 	originalTask = editSpace.get(index - 1);
@@ -40,6 +70,10 @@ public class Edit implements UndoableCommand {
 
 	wholeTaskList.remove(originalTask);
 	wholeTaskList.add(editedTask);
+
+	editLog.addLog(Logging.LoggingLevel.INFO, "Edit.execute(): The task \""
+		+ originalTask + "\" has been changed to \"" + editedTask
+		+ "\"");
 
 	return generateReturnList(originalTask, editedTask);
     }
@@ -103,7 +137,7 @@ public class Edit implements UndoableCommand {
 		    paramToken = st.nextToken();
 		else
 		    paramToken = "";
-		
+
 		from = checkAndInsertTime(from, paramToken, "start");
 		if (!(new DateTime(from)).validateDateTime())
 		    throw new IllegalArgumentException(
@@ -117,7 +151,7 @@ public class Edit implements UndoableCommand {
 		    paramToken = st.nextToken();
 		else
 		    paramToken = "";
-		
+
 		to = checkAndInsertTime(to, paramToken, "end");
 		if (!(new DateTime(to)).validateDateTime())
 		    throw new IllegalArgumentException(
@@ -209,6 +243,10 @@ public class Edit implements UndoableCommand {
 
 	wholeTaskList.remove(editedTask);
 	wholeTaskList.add(originalTask);
+
+	editLog.addLog(Logging.LoggingLevel.INFO, "Edit.undo(): The task \""
+		+ editedTask + "\" has been changed back to \"" + originalTask
+		+ "\"");
 
 	return generateReturnList(editedTask, originalTask);
     }

@@ -3,6 +3,7 @@ public abstract class AbstractTask implements Cloneable {
     private String venue;
     private Type type;
     private Status status;
+    private Logging taskLog = new Logging("Task");
 
     public static enum Type {
 	TIMED, FLOATING, DEADLINE;
@@ -31,7 +32,7 @@ public abstract class AbstractTask implements Cloneable {
 	try {
 	    o = super.clone();
 	} catch (CloneNotSupportedException e) {
-	    System.out.println("Cloning Task Failed");
+	    taskLog.addLog(Logging.LoggingLevel.SEVERE, "Task: Cloning Task Failed");
 	    assert false;
 	}
 	return o;
