@@ -10,10 +10,6 @@ public class Edit implements UndoableCommand {
     private String editParameter;
     int index;
 
-    private static final HashSet<String> possibleTypes = new HashSet<String>(
-	    Arrays.asList(new String[] { "at", "venue", "status", "by",
-		    "deadline", "from", "to" }));
-
     // Initializes the edit parameters
     public Edit(List<AbstractTask> editSpace, int index, String editParameter) {
 	if (editParameter == null || editParameter.length() <= 0)
@@ -47,61 +43,76 @@ public class Edit implements UndoableCommand {
 
     // edits a task according to the parameter given and returns it
     private AbstractTask editTask(AbstractTask originalTask) {
-	String paramToken, fieldType, fieldValue, last = "";
 	AbstractTask editedTask = (AbstractTask) originalTask.clone();
-	StringTokenizer parameterTokenizer = new StringTokenizer(editParameter,
-		".", true);
 
-	paramToken = parameterTokenizer.nextToken();
-	if (!paramToken.equals(".")) {
-	    last = "desc";
-	    editDescription(editedTask, paramToken.trim());
+	StringTokenizer st = new StringTokenizer(editParameter);
+	String paramToken = st.nextToken();
+	String last;
+
+	if (!paramToken.startsWith(".")) {
+	    editDescription(editedTask, paramToken);
+	    paramToken = st.nextToken();
+
+	    while (!paramToken.startsWith(".")) {
+		addToField(editedTask, paramToken, "desc");
+
+		if (st.hasMoreTokens())
+		    paramToken = st.nextToken();
+		else
+		    break;
+	    }
 	}
 
-	while (parameterTokenizer.hasMoreTokens()) {
-	    paramToken = parameterTokenizer.nextToken();
+	while (true) {
+	    switch (paramToken) {
+	    case ".at":
+	    case ".venue":
+		paramToken = st.nextToken();
+		editVenue(editedTask, paramToken);
 
-	    if (paramToken.equals("."))
-		continue;
-
-	    fieldType = getFirstWord(paramToken).toLowerCase();
-	    if (possibleTypes.contains(fieldType)) {
-		fieldValue = removeFirstWord(paramToken).trim();
-
-		switch (fieldType) {
-		case "at":
-		case "venue":
-		    last = "venue";
-		    editVenue(editedTask, fieldValue);
-		    break;
-		case "status":
-		    editStatus(editedTask, fieldValue);
-		    break;
-		case "by":
-		case "deadline":
-		    editDeadline(editedTask, fieldValue);
-		    break;
-		case "from":
-		    editStartTime(editedTask, fieldValue);
-		    break;
-		case "to":
-		    editEndTime(editedTask, fieldValue);
-		    break;
+		while (st.hasMoreTokens()) {
+		    paramToken = st.nextToken();
+		    if (!paramToken.startsWith("."))
+			addToField(editedTask, paramToken, "venue");
+		    else
+			break;
 		}
-	    } else
-		addToLast(editedTask, fieldType, last);
+		break;
+	    case ".status":
+		paramToken = st.nextToken();
+		editStatus(editedTask, paramToken);
+		break;
+	    case ".by":
+	    case ".deadline":
+		paramToken = st.nextToken() + " " + st.nextToken();
+		editDeadline(editedTask, paramToken);
+		break;
+	    case ".from":
+		paramToken = st.nextToken() + " " + st.nextToken();
+		editStartTime(editedTask, paramToken);
+		break;
+	    case ".to":
+		paramToken = st.nextToken() + " " + st.nextToken();
+		editEndTime(editedTask, paramToken);
+		break;
+	    }
+
+	    if (st.hasMoreTokens())
+		paramToken = st.nextToken();
+	    else
+		break;
 	}
 
 	return editedTask;
     }
 
-    private void addToLast(AbstractTask task, String value, String last) {
+    private void addToField(AbstractTask task, String value, String last) {
 	switch (last) {
 	case "desc":
-	    editDescription(task, task.getDescription() + "." + value);
+	    editDescription(task, task.getDescription() + " " + value);
 	    break;
 	case "venue":
-	    editVenue(task, task.getVenue() + "." + value);
+	    editVenue(task, task.getVenue() + " " + value);
 	    break;
 	default:
 	    assert false;
@@ -168,14 +179,4 @@ public class Edit implements UndoableCommand {
 
 	return returnList;
     }
-
-    private String getFirstWord(String s) {
-	StringTokenizer st = new StringTokenizer(s);
-	return st.nextToken();
-    }
-
-    private String removeFirstWord(String s) {
-	return s.replaceFirst(getFirstWord(s), "").trim();
-    }
-
 }
