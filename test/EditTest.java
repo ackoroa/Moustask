@@ -52,23 +52,23 @@ public class EditTest {
 	assertEquals("deadline changed", "2012-12-12 17:30",
 		changedDeadline.getEndDate());
 	
-	editObject = new Edit(taskList, 2, ".from morning");
+	editObject = new Edit(taskList, 2, ".from 2012-12-12 08:00");
 	editObject.execute(taskList);
 	undoStack.push(editObject);
 
 	TimedTask changedStart = (TimedTask) taskList.lastElement();
-	assertEquals("deadline changed", "morning",
+	assertEquals("deadline changed", "2012-12-12 08:00",
 		changedStart.getStartDate());
 	
-	editObject = new Edit(taskList, 3, ".to night");
+	editObject = new Edit(taskList, 3, ".to 2012-12-12 20:00");
 	editObject.execute(taskList);
 	undoStack.push(editObject);
 
 	TimedTask changedEnd = (TimedTask) taskList.lastElement();
-	assertEquals("deadline changed", "night",
+	assertEquals("deadline changed", "2012-12-12 20:00",
 		changedEnd.getEndDate());
 	
-	editObject = new Edit(taskList, 3, "party .at comicket .from am .to pm");
+	editObject = new Edit(taskList, 3, "party .at comicket .from 2012-12-12 08:00 .to 2012-12-12 20:00");
 	editObject.execute(taskList);
 	undoStack.push(editObject);
 
@@ -77,9 +77,9 @@ public class EditTest {
 		changedMultiple.getDescription());
 	assertEquals("venue changed in multiple changing", "comicket",
 		changedMultiple.getVenue());
-	assertEquals("start time changed in multiple changing", "am",
+	assertEquals("start time changed in multiple changing", "2012-12-12 08:00",
 		changedMultiple.getStartDate());
-	assertEquals("end time changed in multiple changing", "pm",
+	assertEquals("end time changed in multiple changing", "2012-12-12 20:00",
 		changedMultiple.getEndDate());
 
     }
