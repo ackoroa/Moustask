@@ -71,7 +71,6 @@ public class SearchTest {
 		expectedResults.add(taskList.get(2));
 		expectedResults.add(taskList.get(3));
 		
-		
 		assertEquals("time frame search successful", expectedResults, searchResults);
 		
 		searchObject = new Search(".by 5 .months");
