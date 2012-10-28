@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+// throws NullPointerException, ArrayIndexOutOfBoundsException, IllegalArgumentException
 public class Search implements Command {
 	private final String OR_SEARCH = ".or";
 	private final String AND_SEARCH = ".and";
@@ -23,9 +24,6 @@ public class Search implements Command {
 	private List < AbstractTask > searchResults = new Vector < AbstractTask > ();
 	private List < AbstractTask > wholeTaskList = new Vector < AbstractTask > ();
 
-	public Search(){
-	}
-
 	public Search(String wholeSearchLine){
 		searchLine = wholeSearchLine;
 		// System.out.println(searchLine); for debug
@@ -37,7 +35,9 @@ public class Search implements Command {
 
 	public List < AbstractTask > execute(List < AbstractTask > taskList){
 		maintainWholeTaskList(taskList);
-
+		if(searchLine == null) {
+			throw new NullPointerException("Search line cannot be empty!");
+		}
 		String [] words = searchLine.split(" ");
 		/* for(int i = 0; i < words.length; i++ ){		for debug
 		 * System.out.println(words[i]);
@@ -57,9 +57,8 @@ public class Search implements Command {
 			}
 			else{
 				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
-					if(words[currentWordIndex + 1] == null){
-						throw new ArrayIndexOutOfBoundsException(
-							    "the end date parameter cannot be empty or null");
+					if(currentWordIndex + 1 >= words.length){
+						throw new ArrayIndexOutOfBoundsException("the end date parameter cannot be empty or null");
 					}
 					if(!words[currentWordIndex + 1].contains("-")){
 						throw new IllegalArgumentException(
