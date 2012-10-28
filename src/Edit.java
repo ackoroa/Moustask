@@ -1,5 +1,3 @@
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -47,7 +45,6 @@ public class Edit implements UndoableCommand {
 
 	StringTokenizer st = new StringTokenizer(editParameter);
 	String paramToken = st.nextToken();
-	String last;
 
 	if (!paramToken.startsWith(".")) {
 	    editDescription(editedTask, paramToken);
