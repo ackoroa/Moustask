@@ -1,8 +1,9 @@
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Stack;
 import java.util.Vector;
 
 import org.junit.Before;
@@ -97,7 +98,7 @@ public class EditTest {
 	int editIndex;
 	String editParameter;
 	DeadlineTask changedDeadline;
-	TimedTask changedStart, changedEnd;
+	TimedTask changedTime, changedEnd;
 
 	// wholeTaskList is null
 	editObject = new Edit(taskList, 1, "");
@@ -217,7 +218,7 @@ public class EditTest {
 		editedTask);
 	assertEquals("status changed", AbstractTask.Status.DONE, taskList
 		.lastElement().getStatus());
-	
+
 	// to undone
 	editIndex = taskList.size();
 	editParameter = ".status UNdone";
@@ -249,6 +250,19 @@ public class EditTest {
 		editedTask);
 	assertEquals("status changed", AbstractTask.Status.IMPOSSIBLE, taskList
 		.lastElement().getStatus());
+
+	// edit deadline only (fail)
+	editIndex = taskList.size() - 1;
+	editParameter = ".by 20121212 2100";
+	editObject = new Edit(taskList, editIndex, editParameter);
+	origTask = taskList.get(editIndex - 1);
+	origTaskList = (Vector<AbstractTask>) taskList.clone();
+	try {
+	    editReturn = editObject.execute(taskList);
+	} catch (IllegalArgumentException e) {
+	    assertEquals("correct exception for wrong time format",
+		    "invalid deadline format", e.getMessage());
+	}
 
 	// edit deadline only
 	editIndex = taskList.size() - 1;
@@ -284,6 +298,36 @@ public class EditTest {
 	assertEquals("deadline changed", "2012-12-12 21:15",
 		changedDeadline.getEndDate());
 
+	// edit deadline without time
+	editIndex = taskList.size();
+	editParameter = ".deadline 2012-12-12";
+	editObject = new Edit(taskList, editIndex, editParameter);
+	origTask = taskList.get(editIndex - 1);
+	origTaskList = (Vector<AbstractTask>) taskList.clone();
+	editReturn = editObject.execute(taskList);
+	editedTask = taskList.lastElement();
+	changedDeadline = (DeadlineTask) editedTask;
+
+	assertEquals("Original task returned in list", editReturn.get(0),
+		origTask);
+	assertEquals("Edited task returned in list", editReturn.get(1),
+		editedTask);
+	assertEquals("deadline changed", "2012-12-12 23:59",
+		changedDeadline.getEndDate());
+
+	// edit start only (fail)
+	editIndex = taskList.size() - 1;
+	editParameter = ".from 201wer2 2";
+	editObject = new Edit(taskList, editIndex, editParameter);
+	origTask = taskList.get(editIndex - 1);
+	origTaskList = (Vector<AbstractTask>) taskList.clone();
+	try {
+	    editReturn = editObject.execute(taskList);
+	} catch (IllegalArgumentException e) {
+	    assertEquals("correct exception for wrong time format",
+		    "invalid start time format", e.getMessage());
+	}
+
 	// edit start only
 	editIndex = taskList.size() - 1;
 	editParameter = ".from 2012-12-12 21:00";
@@ -292,14 +336,44 @@ public class EditTest {
 	origTaskList = (Vector<AbstractTask>) taskList.clone();
 	editReturn = editObject.execute(taskList);
 	editedTask = taskList.lastElement();
-	changedStart = (TimedTask) editedTask;
+	changedTime = (TimedTask) editedTask;
 
 	assertEquals("Original task returned in list", editReturn.get(0),
 		origTask);
 	assertEquals("Edited task returned in list", editReturn.get(1),
 		editedTask);
 	assertEquals("start changed", "2012-12-12 21:00",
-		changedStart.getStartDate());
+		changedTime.getStartDate());
+
+	// edit start without time
+	editIndex = taskList.size();
+	editParameter = ".from 2012-12-12";
+	editObject = new Edit(taskList, editIndex, editParameter);
+	origTask = taskList.get(editIndex - 1);
+	origTaskList = (Vector<AbstractTask>) taskList.clone();
+	editReturn = editObject.execute(taskList);
+	editedTask = taskList.lastElement();
+	changedTime = (TimedTask) editedTask;
+
+	assertEquals("Original task returned in list", editReturn.get(0),
+		origTask);
+	assertEquals("Edited task returned in list", editReturn.get(1),
+		editedTask);
+	assertEquals("start changed", "2012-12-12 00:00",
+		changedTime.getStartDate());
+
+	// edit end only (fail)
+	editIndex = taskList.size();
+	editParameter = ".to apple";
+	editObject = new Edit(taskList, editIndex, editParameter);
+	origTask = taskList.get(editIndex - 1);
+	origTaskList = (Vector<AbstractTask>) taskList.clone();
+	try {
+	    editReturn = editObject.execute(taskList);
+	} catch (IllegalArgumentException e) {
+	    assertEquals("correct exception for wrong time format",
+		    "invalid end time format", e.getMessage());
+	}
 
 	// edit end only
 	editIndex = taskList.size();
@@ -309,22 +383,103 @@ public class EditTest {
 	origTaskList = (Vector<AbstractTask>) taskList.clone();
 	editReturn = editObject.execute(taskList);
 	editedTask = taskList.lastElement();
-	changedStart = (TimedTask) editedTask;
+	changedTime = (TimedTask) editedTask;
 
 	assertEquals("Original task returned in list", editReturn.get(0),
 		origTask);
 	assertEquals("Edited task returned in list", editReturn.get(1),
 		editedTask);
 	assertEquals("end changed", "2012-12-12 22:30",
-		changedStart.getEndDate());
-	
+		changedTime.getEndDate());
+
+	// edit end without time
+	editIndex = taskList.size();
+	editParameter = ".to 2012-12-12";
+	editObject = new Edit(taskList, editIndex, editParameter);
+	origTask = taskList.get(editIndex - 1);
+	origTaskList = (Vector<AbstractTask>) taskList.clone();
+	editReturn = editObject.execute(taskList);
+	editedTask = taskList.lastElement();
+	changedTime = (TimedTask) editedTask;
+
+	assertEquals("Original task returned in list", editReturn.get(0),
+		origTask);
+	assertEquals("Edited task returned in list", editReturn.get(1),
+		editedTask);
+	assertEquals("end changed", "2012-12-12 23:59",
+		changedTime.getEndDate());
+
 	// edit multiple fields
+	editIndex = taskList.size();
+	editParameter = "do homework .at room .from 2012-12-12 23:12 "
+		+ ".to 2012-12-13 04:30 .status impossible";
+	editObject = new Edit(taskList, editIndex, editParameter);
+	origTask = taskList.get(editIndex - 1);
+	origTaskList = (Vector<AbstractTask>) taskList.clone();
+	editReturn = editObject.execute(taskList);
+	editedTask = taskList.lastElement();
+	changedTime = (TimedTask) editedTask;
+
+	assertEquals("Original task returned in list", editReturn.get(0),
+		origTask);
+	assertEquals("Edited task returned in list", editReturn.get(1),
+		editedTask);
+	assertEquals("description changed", "do homework",
+		editedTask.getDescription());
+	assertEquals("venue changed", "room", editedTask.getVenue());
+	assertEquals("start changed", "2012-12-12 23:12",
+		changedTime.getStartDate());
+	assertEquals("end changed", "2012-12-13 04:30",
+		changedTime.getEndDate());
+	assertEquals("status changed", AbstractTask.Status.IMPOSSIBLE,
+		editedTask.getStatus());
+
 	// mix up order
+	editIndex = taskList.size();
+	editParameter = "do homework and project  .to 2012-12-13 "
+		+ ".from 2012-12-12 .status undone .at lounge";
+	editObject = new Edit(taskList, editIndex, editParameter);
+	origTask = taskList.get(editIndex - 1);
+	origTaskList = (Vector<AbstractTask>) taskList.clone();
+	editReturn = editObject.execute(taskList);
+	editedTask = taskList.lastElement();
+	changedTime = (TimedTask) editedTask;
+
+	assertEquals("Original task returned in list", editReturn.get(0),
+		origTask);
+	assertEquals("Edited task returned in list", editReturn.get(1),
+		editedTask);
+	assertEquals("description changed", "do homework and project",
+		editedTask.getDescription());
+	assertEquals("venue changed", "lounge", editedTask.getVenue());
+	assertEquals("start changed", "2012-12-12 00:00",
+		changedTime.getStartDate());
+	assertEquals("end changed", "2012-12-13 23:59",
+		changedTime.getEndDate());
+	assertEquals("status changed", AbstractTask.Status.UNDONE,
+		editedTask.getStatus());
     }
 
     @Test
     public void testUndo() {
+	List<AbstractTask> origTaskList = (Vector<AbstractTask>) taskList
+		.clone();
+	Stack<UndoableCommand> undoStack = new Stack<>();
 
+	for (int i = 0; i < origTaskList.size(); i++) {
+	    UndoableCommand editObject = new Edit(taskList, 1, "hahaha");
+	    editObject.execute(taskList);
+	    undoStack.push(editObject);
+	}
+
+	for (int i = 0; i < origTaskList.size(); i++) {
+	    undoStack.pop().undo();
+	}
+
+	assertTrue(
+		"undoed taskList == original list",
+		taskList.containsAll(origTaskList)
+			&& origTaskList.containsAll(taskList));
     }
 
 }

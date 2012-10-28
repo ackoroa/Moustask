@@ -9,6 +9,7 @@ public class DeadlineTask extends AbstractTask {
 
     public DeadlineTask(String description, String endDate, String venue) {
 	super(description, venue, AbstractTask.Type.DEADLINE);
+
 	this.endDate = endDate;
     }
 
@@ -22,8 +23,9 @@ public class DeadlineTask extends AbstractTask {
     }
 
     public boolean equals(Object o) {
-	if(!o.getClass().equals(this.getClass())) return false;
-	
+	if (!o.getClass().equals(this.getClass()))
+	    return false;
+
 	DeadlineTask otherTask = (DeadlineTask) o;
 
 	return (super.equals(o) && (otherTask.endDate.equals(this.endDate)));
@@ -42,5 +44,4 @@ public class DeadlineTask extends AbstractTask {
     public void setEndDate(String ed) {
 	endDate = ed;
     }
-
 }

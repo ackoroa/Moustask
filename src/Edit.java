@@ -28,7 +28,8 @@ public class Edit implements UndoableCommand {
 
     // Executes the edit operation, saving both the original and edited tasks
     // and returning them in a list original->edited
-    public List<AbstractTask> execute(List<AbstractTask> wholeTaskList) {
+    public List<AbstractTask> execute(List<AbstractTask> wholeTaskList)
+	    throws IllegalArgumentException {
 	if (wholeTaskList == null || wholeTaskList.size() <= 0)
 	    throw new IllegalArgumentException(
 		    "taskList cannot be empty or null");
@@ -83,26 +84,69 @@ public class Edit implements UndoableCommand {
 		break;
 	    case ".by":
 	    case ".deadline":
-		paramToken = st.nextToken() + " " + st.nextToken();
-		editDeadline(editedTask, paramToken);
+		String deadline = st.nextToken();
+		if (st.hasMoreTokens())
+		    paramToken = st.nextToken();
+		else
+		    paramToken = "";
+
+		deadline = checkAndInsertTime(deadline, paramToken, "end");
+		if (!(new DateTime(deadline)).validateDateTime())
+		    throw new IllegalArgumentException(
+			    "invalid deadline format");
+
+		editDeadline(editedTask, deadline);
 		break;
 	    case ".from":
-		paramToken = st.nextToken() + " " + st.nextToken();
-		editStartTime(editedTask, paramToken);
+		String from = st.nextToken();
+		if (st.hasMoreTokens())
+		    paramToken = st.nextToken();
+		else
+		    paramToken = "";
+		
+		from = checkAndInsertTime(from, paramToken, "start");
+		if (!(new DateTime(from)).validateDateTime())
+		    throw new IllegalArgumentException(
+			    "invalid start time format");
+
+		editStartTime(editedTask, from);
 		break;
 	    case ".to":
-		paramToken = st.nextToken() + " " + st.nextToken();
-		editEndTime(editedTask, paramToken);
+		String to = st.nextToken();
+		if (st.hasMoreTokens())
+		    paramToken = st.nextToken();
+		else
+		    paramToken = "";
+		
+		to = checkAndInsertTime(to, paramToken, "end");
+		if (!(new DateTime(to)).validateDateTime())
+		    throw new IllegalArgumentException(
+			    "invalid end time format");
+
+		editEndTime(editedTask, to);
 		break;
 	    }
 
-	    if (st.hasMoreTokens())
+	    if (paramToken.startsWith("."))
+		continue;
+	    else if (st.hasMoreTokens())
 		paramToken = st.nextToken();
 	    else
 		break;
 	}
 
 	return editedTask;
+    }
+
+    private String checkAndInsertTime(String date, String time, String type) {
+	if (!time.startsWith(".") && !time.equals(""))
+	    date = date + " " + time;
+	else if (type.equals("start"))
+	    date = date + " 00:00";
+	else
+	    date = date + " 23:59";
+
+	return date;
     }
 
     private void addToField(AbstractTask task, String value, String last) {
