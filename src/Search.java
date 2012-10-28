@@ -30,11 +30,11 @@ public class Search implements Command {
 		searchLine = wholeSearchLine;
 		// System.out.println(searchLine); for debug
 	}
-	
+
 	// //////////////////////////////////////////////////////////////////////////////////////////////////
 	// //////// Modes of searching (Chain Commands)
 	// /////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	public List < AbstractTask > execute(List < AbstractTask > taskList){
 		maintainWholeTaskList(taskList);
 
@@ -57,8 +57,27 @@ public class Search implements Command {
 			}
 			else{
 				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
-					searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
-					currentWordIndex = currentWordIndex + 3;
+					if(words[currentWordIndex + 1] == null){
+						throw new ArrayIndexOutOfBoundsException(
+							    "the end date parameter cannot be empty or null");
+					}
+					if(!words[currentWordIndex + 1].contains("-")){
+						throw new IllegalArgumentException(
+							    "the end date parameter cannot be missing");
+					}
+					if(currentWordIndex + 2 < words.length){
+						if(words[currentWordIndex + 2].contains(":")){
+							searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
+							currentWordIndex = currentWordIndex + 3;
+						}
+						else{
+							currentWordIndex = currentWordIndex + 1;
+						}
+					}
+					else{
+						searchWords = searchWords + " " + words[currentWordIndex + 1];
+						currentWordIndex = currentWordIndex + 2;
+					}
 				}
 				else{
 					if(currentWordIndex == 1){
@@ -81,7 +100,7 @@ public class Search implements Command {
 
 		return searchResults;
 	}
-	
+
 	public List < AbstractTask > andSearch (List < AbstractTask > taskList){
 		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
 
@@ -100,7 +119,27 @@ public class Search implements Command {
 			}
 			else{
 				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
-					searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
+					if(!words[currentWordIndex + 1].contains("-")){
+						throw new IllegalArgumentException(
+							    "the end date parameter cannot be missing");
+					}
+					if(words[currentWordIndex + 1] == null){
+						throw new ArrayIndexOutOfBoundsException(
+							    "the end date parameter cannot be empty or null");
+					}
+					if(currentWordIndex + 2 < words.length){
+						if(words[currentWordIndex + 2].contains(":")){
+							searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
+							currentWordIndex = currentWordIndex + 3;
+						}
+						else{
+							currentWordIndex = currentWordIndex + 1;
+						}
+					}
+					else{
+						searchWords = searchWords + " " + words[currentWordIndex + 1];
+						currentWordIndex = currentWordIndex + 2;
+					}
 				}
 				else{
 					if(currentWordIndex == 1){
@@ -140,7 +179,27 @@ public class Search implements Command {
 			}
 			else{
 				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
-					searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
+					if(words[currentWordIndex + 1] == null){
+						throw new ArrayIndexOutOfBoundsException(
+							    "the end date parameter cannot be empty or null");
+					}
+					if(!words[currentWordIndex + 1].contains("-")){
+						throw new IllegalArgumentException(
+							    "the end date parameter cannot be missing");
+					}
+					if(currentWordIndex + 2 < words.length){
+						if(words[currentWordIndex + 2].contains(":")){
+							searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
+							currentWordIndex = currentWordIndex + 3;
+						}
+						else{
+							currentWordIndex = currentWordIndex + 1;
+						}
+					}
+					else{
+						searchWords = searchWords + " " + words[currentWordIndex + 1];
+						currentWordIndex = currentWordIndex + 2;
+					}
 				}
 				else{
 					if(currentWordIndex == 1){
@@ -314,23 +373,69 @@ public class Search implements Command {
 
 	public List < AbstractTask > searchFromStartTimeToEndTime(String time, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		String [] datesAndTimes = time.split(" ");
-		String[] startDate = datesAndTimes[0].split("-");
-		int startYear = Integer.parseInt(startDate[0]);
-		int startMonth = Integer.parseInt(startDate[1]);
-		int startDay = Integer.parseInt(startDate[2]);
-		String[] startTime = datesAndTimes[1].split(":");
-		int startHour = Integer.parseInt(startTime[0]);
-		int startMinute = Integer.parseInt(startTime[1]);
-		// System.out.println(startYear + "," + startMonth + "," + startDay); debug
+		if(datesAndTimes.length < 2){
+			throw new IllegalArgumentException("Date parameters cannot be empty!");
+		}
+		int endYear = -1;
+		int endMonth = -1;
+		int endDay = -1;
+		int endHour = 0;
+		int endMinute = 0;
+		int startYear = -1;
+		int startMonth = -1;
+		int startDay = -1;
+		int startHour = 0;
+		int startMinute = 0;
+		
+		if(datesAndTimes[0].contains("-")){
+			String[] startDate = datesAndTimes[0].split("-");
+			startYear = Integer.parseInt(startDate[0]);
+			startMonth = Integer.parseInt(startDate[1]);
+			startDay = Integer.parseInt(startDate[2]);
+		}
 
-		String[] endDate = datesAndTimes[2].split("-");
-		int endYear = Integer.parseInt(endDate[0]);
-		int endMonth = Integer.parseInt(endDate[1]);
-		int endDay = Integer.parseInt(endDate[2]);
-		String[] endTime = datesAndTimes[3].split(":");
-		int endHour = Integer.parseInt(endTime[0]);
-		int endMinute = Integer.parseInt(endTime[1]);
+		if(datesAndTimes[1].contains(":")){
+			String[] startTime = datesAndTimes[1].split(":");
+			startHour = Integer.parseInt(startTime[0]);
+			startMinute = Integer.parseInt(startTime[1]);
+		}
+		else{
+			startHour = 00;
+			startMinute = 00;
+		}
+		// System.out.println(startYear + "," + startMonth + "," + startDay); debug
+		if(datesAndTimes[1].contains("-")){
+			String[] endDate = datesAndTimes[1].split("-");
+			endYear = Integer.parseInt(endDate[0]);
+			endMonth = Integer.parseInt(endDate[1]);
+			endDay = Integer.parseInt(endDate[2]);
+		}
+		if(datesAndTimes.length >= 3 && datesAndTimes[2].contains("-")){
+			String[] endDate = datesAndTimes[2].split("-");
+			endYear = Integer.parseInt(endDate[0]);
+			endMonth = Integer.parseInt(endDate[1]);
+			endDay = Integer.parseInt(endDate[2]);
+		}
+		if(datesAndTimes.length >= 3 && datesAndTimes[2].contains(":")){
+			String[] endTime = datesAndTimes[2].split(":");
+			endHour = Integer.parseInt(endTime[0]);
+			endMinute = Integer.parseInt(endTime[1]);
+		}
+		else if(datesAndTimes.length >= 4 && datesAndTimes[3].contains(":")){
+			String[] endTime = datesAndTimes[3].split(":");
+			endHour = Integer.parseInt(endTime[0]);
+			endMinute = Integer.parseInt(endTime[1]);
+		}
+
+		else{
+			endHour = 23;
+			endMinute = 59;
+		}
 		// System.out.println(endYear + "," + endMonth + "," + endDay); debug
+		
+		if(!dateChecker(startYear,startMonth,startDay,startHour,startMinute) || !dateChecker(endYear,endMonth,endDay,endHour,endMinute)){
+			throw new IllegalArgumentException("Invalid date format!");
+		}
 
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase("timed") || tasksForSearch.get(i).getType().toString().equalsIgnoreCase("deadline")){
@@ -454,7 +559,7 @@ public class Search implements Command {
 		return results;
 	}
 
-	
+
 
 	public List < AbstractTask > removeUnwantedTasks (List < AbstractTask > taskList, List < AbstractTask > unwantedTasks){
 		List < AbstractTask > filteredResults = new Vector < AbstractTask >();
@@ -535,5 +640,13 @@ public class Search implements Command {
 
 		}
 		return isLater;
+	}
+	
+	public boolean dateChecker(int year, int month, int day, int hour, int minute){
+		if(year == -1 || month == -1 || day == -1 || hour > 23 || minute > 59 ){
+			return false;
+		}
+		
+		return true;
 	}
 }
