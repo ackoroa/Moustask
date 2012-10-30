@@ -194,9 +194,58 @@ public class SearchTest {
 		    		"the end date parameter cannot be empty or null", e.getMessage());
 		}
 		
-		searchObject = new Search(null);
+		searchObject = new Search("cat .and .from");
+		try {
+			searchObject.execute(taskList);
+		} catch (IllegalArgumentException e) {
+		    assertEquals("correct exception for invalid date format",
+		    		"Date parameters cannot be empty!", e.getMessage());
+		}
+		
+		searchObject = new Search("cat .and .from 2012-10-12 .to");
+		try {
+			searchObject.execute(taskList);
+		} catch (ArrayIndexOutOfBoundsException e) {
+		    assertEquals("correct exception for invalid date format",
+		    		"the end date parameter cannot be empty or null", e.getMessage());
+		}
+		
+		searchObject = new Search("cat .and .from 2012-10-12 .to 20121015");
+		try {
+			searchObject.execute(taskList);
+		} catch (IllegalArgumentException e) {
+		    assertEquals("correct exception for invalid date format",
+		    		"the end date parameter cannot be missing", e.getMessage());
+		}
+		
+		searchObject = new Search("cat .not .from 2012-10-12 .to 20121015");
+		try {
+			searchObject.execute(taskList);
+		} catch (IllegalArgumentException e) {
+		    assertEquals("correct exception for invalid date format",
+		    		"the end date parameter cannot be missing", e.getMessage());
+		}
+		
+		
+		searchObject = new Search("cat .not .from");
+		try {
+			searchObject.execute(taskList);
+		} catch (IllegalArgumentException e) {
+		    assertEquals("correct exception for invalid date format",
+		    		"Date parameters cannot be empty!", e.getMessage());
+		}
+		
+		searchObject = new Search("cat .not .from 2012-10-12 .to");
+		try {
+			searchObject.execute(taskList);
+		} catch (ArrayIndexOutOfBoundsException e) {
+		    assertEquals("correct exception for invalid date format",
+		    		"the end date parameter cannot be empty or null", e.getMessage());
+		}
+		
+		
 		try{
-			searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+			searchObject = new Search(null);
 		} catch (NullPointerException e){
 			assertEquals("null search", "Search line cannot be empty!",e.getMessage());
 		}
