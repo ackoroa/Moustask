@@ -5,8 +5,8 @@ public class Clear implements UndoableCommand {
 
 	private List<AbstractTask> wholeTaskList;
 	private List<AbstractTask> undoTaskList = new LinkedList<AbstractTask>();
-	private Logging clearLog = new Logging("Clear Function");
-
+	private Logging clearLog = new Logging("Clear Function"); 
+	
 	public Clear() {
 	}
 
