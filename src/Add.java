@@ -4,17 +4,14 @@ import java.util.List;
 import java.util.Vector;
 
 public class Add implements UndoableCommand {
-	private static final boolean LOGGING_ENABLED = false;
 	private Logging addLog = new Logging("Add Function");
 	private List<AbstractTask> wholeTaskList;
 	private String messageToAdd;
 	private AbstractTask taskAdded;
 
 	public Add(String commandMessage) {
-		if (LOGGING_ENABLED) {
-			addLog.addLog(Logging.LoggingLevel.INFO, "User Input: "
-					+ commandMessage);
-		}
+		addLog.addLog(Logging.LoggingLevel.INFO, "Add(): User Input: "
+				+ commandMessage);
 		this.messageToAdd = commandMessage;
 	}
 
@@ -27,39 +24,40 @@ public class Add implements UndoableCommand {
 		boolean isValidAddMessage = addMessageValidation(messageToAdd,
 				addTokenList);
 		if (isValidAddMessage) {
-			if (LOGGING_ENABLED) {
-				addLog.addLog(Logging.LoggingLevel.INFO, messageToAdd
-						+ " passes validation.");
-			}
+			addLog.addLog(Logging.LoggingLevel.INFO, "Add(): " + messageToAdd
+					+ " passes validation.");
 			return differentiateAndAddTask(addTokenList, errorReturn);
 		} else {
-			if (LOGGING_ENABLED) {
-				addLog.addLog(Logging.LoggingLevel.WARNING, messageToAdd
-						+ " fails validation.");
-			}
+			addLog.addLog(Logging.LoggingLevel.WARNING, "Add(): "
+					+ messageToAdd + " fails validation.");
 			return errorReturn;
 		}
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////
-	// //////////////////////////// Validation
+	// //////////////////////////// Validations
 	// ////////////////////////////////////////////////////////////////////////////////////////
 	private boolean addMessageValidation(String messageToAdd,
 			List<String> addTokenList) {
 		// Validation #1 - Determine whether the input is empty
 		if (checkMessageEmpty(messageToAdd) == true) {
+			addLog.addLog(Logging.LoggingLevel.WARNING, "Add(): "
+					+ messageToAdd + " is empty.");
 			return false;
 		}
 
 		// Validation #2 - Determine whether the first token is keyword
 		splitStringIntoTokens(messageToAdd, addTokenList);
 		if (checkFirstTokenForKeyword(addTokenList.get(0)) == true) {
+			addLog.addLog(Logging.LoggingLevel.WARNING, "Add(): "
+					+ messageToAdd + " has a keyword in the first word.");
 			return false;
 		}
 
-		// Validation #3 - Determine whether there is a syntax error in the
-		// command
+		// Validation #3 - Determine whether there is a syntax error
 		if (checkSyntax(addTokenList) == false) {
+			addLog.addLog(Logging.LoggingLevel.WARNING, "Add(): "
+					+ messageToAdd + " has a syntax error.");
 			return false;
 		}
 
@@ -98,15 +96,6 @@ public class Add implements UndoableCommand {
 
 	// Validation #3
 	private static boolean checkSyntax(List<String> addTokenList) {
-		// Syntax Check Sequence:
-		// After separated the message into string tokens,
-		// 1. check for duplicated keywords
-		// 2. check for allowed keywords
-		// 3. identify the correct task based on the keywords
-		// 3a. ensure only correct keywords are used for the right task
-		// 3b. ensure that all respective fields are not empty
-		// 3c. check for correct date and time
-		// 3d. ensure that there are flexibility in the ordering of keywords
 		boolean isDuplicatedKeyword = checkDuplicatedKeywords(addTokenList);
 
 		if (isDuplicatedKeyword) {
@@ -167,168 +156,33 @@ public class Add implements UndoableCommand {
 		boolean isToKeyword = addTokenList.contains(".to");
 		boolean isByKeyword = addTokenList.contains(".by");
 
-		// For TimedTask
+		// Timed Task
 		if ((isFromKeyword) && (isToKeyword)) {
 			boolean hasValidKeywords = checkValidKeywords("timed", addTokenList);
 
 			if (hasValidKeywords) {
-				String startDate = "", endDate = "", venue = "";
-				DateTime timedTaskStartDate = null;
-				DateTime timedTaskEndDate = null;
-				String description = addTokenList.get(0);
-				addTokenList.remove(0);
-
-				if (addTokenList.size() % 2 != 0) {
-					return errorReturn;
-				} else {
-					for (int i = 0; i < addTokenList.size(); i++) {
-						if (addTokenList.get(i).equals(".at")) {
-							if (addTokenList.get(i + 1).isEmpty()) {
-								return errorReturn;
-							} else {
-								venue = addTokenList.get(i + 1);
-								i = i + 1;
-							}
-						} else if (addTokenList.get(i).equals(".from")) {
-							if (addTokenList.get(i + 1).isEmpty()) {
-								return errorReturn;
-							} else {
-								startDate = addTokenList.get(i + 1);
-								timedTaskStartDate = new DateTime(startDate);
-								boolean isStartDateValid = timedTaskStartDate
-										.validateDateTime();
-								if (isStartDateValid) {
-									i = i + 1;
-								} else {
-									return errorReturn;
-								}
-							}
-						} else if (addTokenList.get(i).equals(".to")) {
-							if (addTokenList.get(i + 1).isEmpty()) {
-								return errorReturn;
-							} else {
-								endDate = addTokenList.get(i + 1);
-								timedTaskEndDate = new DateTime(endDate);
-								boolean isEndDateValid = timedTaskEndDate
-										.validateDateTime();
-								if (isEndDateValid) {
-									i = i + 1;
-								} else {
-									return errorReturn;
-								}
-							}
-						}
-					}
-				}
-				timedTaskStartDate.generateDateTime(false);
-				timedTaskEndDate.generateDateTime(true);
-				if (timedTaskStartDate
-						.compareTo(timedTaskEndDate.getDateTime()) < 0) {
-					TimedTask timedTaskObject = new TimedTask(description,
-							timedTaskStartDate.getDateTime(),
-							timedTaskEndDate.getDateTime(), venue);
-					taskAdded = timedTaskObject;
-					if (LOGGING_ENABLED) {
-						addLog.addLog(
-								Logging.LoggingLevel.INFO,
-								taskAdded.getType() + " TASK - "
-										+ taskAdded.getDescription()
-										+ " is added.");
-					}
-					return generateReturnList(timedTaskObject);
-				} else {
-					return errorReturn;
-				}
+				return processTimedTask(addTokenList, errorReturn);
 			} else {
 				return errorReturn;
 			}
 
-		} // For Deadline Task
+		} // Deadline Task
 		else if (isByKeyword) {
 			boolean hasValidKeywords = checkValidKeywords("deadline",
 					addTokenList);
 
 			if (hasValidKeywords) {
-				String endDate = "", venue = "";
-				DateTime deadlineTaskEndDate = null;
-				String description = addTokenList.get(0);
-				addTokenList.remove(0);
-
-				if (addTokenList.size() % 2 != 0) {
-					return errorReturn;
-				} else {
-					for (int i = 0; i < addTokenList.size(); i++) {
-						if (addTokenList.get(i).equals(".at")) {
-							if (addTokenList.get(i + 1).isEmpty()) {
-								return errorReturn;
-							} else {
-								venue = addTokenList.get(i + 1);
-								i = i + 1;
-							}
-						} else if (addTokenList.get(i).equals(".by")) {
-							if (addTokenList.get(i + 1).isEmpty()) {
-								return errorReturn;
-							} else {
-								endDate = addTokenList.get(i + 1);
-								deadlineTaskEndDate = new DateTime(endDate);
-								boolean isEndDateValid = deadlineTaskEndDate
-										.validateDateTime();
-								if (isEndDateValid) {
-									i = i + 1;
-								} else {
-									return errorReturn;
-								}
-							}
-						}
-					}
-				}
-				DeadlineTask deadlineTaskObject = new DeadlineTask(description,
-						deadlineTaskEndDate.generateDateTime(true), venue);
-				taskAdded = deadlineTaskObject;
-				if (LOGGING_ENABLED) {
-					addLog.addLog(
-							Logging.LoggingLevel.INFO,
-							taskAdded.getType() + " TASK - "
-									+ taskAdded.getDescription() + " is added.");
-				}
-				return generateReturnList(deadlineTaskObject);
+				return processDeadlineTask(addTokenList, errorReturn);
 			} else {
 				return errorReturn;
 			}
-		} // For Floating Task
+		} // Floating Task
 		else {
 			boolean hasValidKeywords = checkValidKeywords("floating",
 					addTokenList);
 
 			if (hasValidKeywords) {
-				String venue = "";
-				String description = addTokenList.get(0);
-				addTokenList.remove(0);
-
-				if (addTokenList.size() % 2 != 0) {
-					return errorReturn;
-				} else {
-					for (int i = 0; i < addTokenList.size(); i++) {
-						if (addTokenList.get(i).equals(".at")) {
-							if (addTokenList.get(i + 1).isEmpty()) {
-								return errorReturn;
-							} else {
-								venue = addTokenList.get(i + 1);
-								i = i + 1;
-							}
-						}
-					}
-				}
-				FloatingTask floatingTaskObject = new FloatingTask(description,
-						venue);
-				taskAdded = floatingTaskObject;
-				if (LOGGING_ENABLED) {
-					addLog.addLog(
-							Logging.LoggingLevel.INFO,
-							taskAdded.getType() + " TASK - "
-									+ taskAdded.getDescription() + " is added.");
-				}
-				return generateReturnList(floatingTaskObject);
+				return processFloatingTask(addTokenList, errorReturn);
 			} else {
 				return errorReturn;
 			}
@@ -336,49 +190,167 @@ public class Add implements UndoableCommand {
 
 	}
 
+	private List<AbstractTask> processTimedTask(List<String> addTokenList,
+			List<AbstractTask> errorReturn) {
+		String startDate = "", endDate = "", venue = "";
+		DateTime timedTaskStartDate = null;
+		DateTime timedTaskEndDate = null;
+		String description = addTokenList.get(0);
+		addTokenList.remove(0);
+
+		if (addTokenList.size() % 2 != 0) {
+			return errorReturn;
+		} else {
+			for (int i = 0; i < addTokenList.size(); i++) {
+				if (addTokenList.get(i).equals(".at")) {
+					if (addTokenList.get(i + 1).isEmpty()) {
+						return errorReturn;
+					} else {
+						venue = addTokenList.get(i + 1);
+						i = i + 1;
+					}
+				} else if (addTokenList.get(i).equals(".from")) {
+					if (addTokenList.get(i + 1).isEmpty()) {
+						return errorReturn;
+					} else {
+						startDate = addTokenList.get(i + 1);
+						timedTaskStartDate = new DateTime(startDate);
+						boolean isStartDateValid = timedTaskStartDate
+								.validateDateTime();
+						if (isStartDateValid) {
+							i = i + 1;
+						} else {
+							return errorReturn;
+						}
+					}
+				} else if (addTokenList.get(i).equals(".to")) {
+					if (addTokenList.get(i + 1).isEmpty()) {
+						return errorReturn;
+					} else {
+						endDate = addTokenList.get(i + 1);
+						timedTaskEndDate = new DateTime(endDate);
+						boolean isEndDateValid = timedTaskEndDate
+								.validateDateTime();
+						if (isEndDateValid) {
+							i = i + 1;
+						} else {
+							return errorReturn;
+						}
+					}
+				}
+			}
+		}
+		timedTaskStartDate.generateDateTime(false);
+		timedTaskEndDate.generateDateTime(true);
+		if (timedTaskStartDate.compareTo(timedTaskEndDate.getDateTime()) < 0) {
+			TimedTask timedTaskObject = new TimedTask(description,
+					timedTaskStartDate.getDateTime(),
+					timedTaskEndDate.getDateTime(), venue);
+			taskAdded = timedTaskObject;
+			addLog.addLog(Logging.LoggingLevel.INFO, taskAdded.getType()
+					+ " TASK - " + taskAdded.getDescription() + " is added.");
+			return generateReturnList(timedTaskObject);
+		} else {
+			return errorReturn;
+		}
+	}
+
+	private List<AbstractTask> processDeadlineTask(List<String> addTokenList,
+			List<AbstractTask> errorReturn) {
+		String endDate = "", venue = "";
+		DateTime deadlineTaskEndDate = null;
+		String description = addTokenList.get(0);
+		addTokenList.remove(0);
+
+		if (addTokenList.size() % 2 != 0) {
+			return errorReturn;
+		} else {
+			for (int i = 0; i < addTokenList.size(); i++) {
+				if (addTokenList.get(i).equals(".at")) {
+					if (addTokenList.get(i + 1).isEmpty()) {
+						return errorReturn;
+					} else {
+						venue = addTokenList.get(i + 1);
+						i = i + 1;
+					}
+				} else if (addTokenList.get(i).equals(".by")) {
+					if (addTokenList.get(i + 1).isEmpty()) {
+						return errorReturn;
+					} else {
+						endDate = addTokenList.get(i + 1);
+						deadlineTaskEndDate = new DateTime(endDate);
+						boolean isEndDateValid = deadlineTaskEndDate
+								.validateDateTime();
+						if (isEndDateValid) {
+							i = i + 1;
+						} else {
+							return errorReturn;
+						}
+					}
+				}
+			}
+		}
+		DeadlineTask deadlineTaskObject = new DeadlineTask(description,
+				deadlineTaskEndDate.generateDateTime(true), venue);
+		taskAdded = deadlineTaskObject;
+		addLog.addLog(Logging.LoggingLevel.INFO, taskAdded.getType()
+				+ " TASK - " + taskAdded.getDescription() + " is added.");
+		return generateReturnList(deadlineTaskObject);
+	}
+
+	private List<AbstractTask> processFloatingTask(List<String> addTokenList,
+			List<AbstractTask> errorReturn) {
+		String venue = "";
+		String description = addTokenList.get(0);
+		addTokenList.remove(0);
+
+		if (addTokenList.size() % 2 != 0) {
+			return errorReturn;
+		} else {
+			for (int i = 0; i < addTokenList.size(); i++) {
+				if (addTokenList.get(i).equals(".at")) {
+					if (addTokenList.get(i + 1).isEmpty()) {
+						return errorReturn;
+					} else {
+						venue = addTokenList.get(i + 1);
+						i = i + 1;
+					}
+				}
+			}
+		}
+		FloatingTask floatingTaskObject = new FloatingTask(description, venue);
+		taskAdded = floatingTaskObject;
+		addLog.addLog(Logging.LoggingLevel.INFO, taskAdded.getType()
+				+ " TASK - " + taskAdded.getDescription() + " is added.");
+		return generateReturnList(floatingTaskObject);
+	}
+
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Check for Valid Keywords
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private static boolean checkValidKeywords(String taskType,
 			List<String> addTokenList) {
 		boolean isTimedTask = taskType.equals("timed");
 		boolean isDeadlineTask = taskType.equals("deadline");
 		boolean isFloatingTask = taskType.equals("floating");
 
-		if (isTimedTask) {
-			for (int i = 0; i < addTokenList.size(); i++) {
-				if (!addTokenList.get(i).isEmpty()) {
-					char firstCharacter = addTokenList.get(i).charAt(0);
-					boolean isCommand = ((firstCharacter == '.') && (!addTokenList
-							.get(i).equals(".at")));
+		for (int i = 0; i < addTokenList.size(); i++) {
+			if (!addTokenList.get(i).isEmpty()) {
+				char firstCharacter = addTokenList.get(i).charAt(0);
+				boolean hasMoreKeyword = ((firstCharacter == '.') && (!addTokenList
+						.get(i).equals(".at")));
 
-					if (isCommand) {
+				if (hasMoreKeyword) {
+					if (isTimedTask) {
 						if (!((addTokenList.get(i).equalsIgnoreCase(".from")) || (addTokenList
 								.get(i).equalsIgnoreCase(".to")))) {
 							return false;
 						}
-					}
-				}
-			}
-		} else if (isDeadlineTask) {
-			for (int i = 0; i < addTokenList.size(); i++) {
-				if (!addTokenList.get(i).isEmpty()) {
-					char firstCharacter = addTokenList.get(i).charAt(0);
-					boolean isCommand = ((firstCharacter == '.') && (!addTokenList
-							.get(i).equals(".at")));
-
-					if (isCommand) {
+					} else if (isDeadlineTask) {
 						if ((!addTokenList.get(i).equalsIgnoreCase(".by"))) {
 							return false;
 						}
-					}
-				}
-			}
-		} else if (isFloatingTask) {
-			for (int i = 0; i < addTokenList.size(); i++) {
-				if (!addTokenList.get(i).isEmpty()) {
-					char firstCharacter = addTokenList.get(i).charAt(0);
-					boolean isCommand = ((firstCharacter == '.') && (!addTokenList
-							.get(i).equals(".at")));
-
-					if (isCommand) {
+					} else if (isFloatingTask) {
 						return false;
 					}
 				}
@@ -387,6 +359,9 @@ public class Add implements UndoableCommand {
 		return true;
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Generate List for return
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private List<AbstractTask> generateReturnList(AbstractTask taskAdded) {
 		List<AbstractTask> returnList = new Vector<AbstractTask>();
 		wholeTaskList.add(taskAdded);
@@ -401,12 +376,8 @@ public class Add implements UndoableCommand {
 		List<AbstractTask> returnList = new Vector<AbstractTask>();
 		wholeTaskList.remove(taskAdded);
 		returnList.add(taskAdded);
-		if (LOGGING_ENABLED) {
-			addLog.addLog(
-					Logging.LoggingLevel.INFO,
-					"Task Undo - " + taskAdded.getType() + ": "
-							+ taskAdded.getDescription());
-		}
+		addLog.addLog(Logging.LoggingLevel.INFO, "Add(): Task Undo - "
+				+ taskAdded.getType() + ": " + taskAdded.getDescription());
 		return returnList;
 	}
 }
