@@ -50,14 +50,7 @@ class CLI {
 			System.out
 					.println("You must use a search or display command first.");
 		} else if (isAddOperation) {
-			boolean isAddResultEmpty = taskResult.getTasks().isEmpty();
-			if (isAddResultEmpty) {
-				System.out.println("Invalid Syntax. Please try again.");
-			} else {
-				System.out.println("Task "
-						+ taskResult.getTasks().get(0).getDescription()
-						+ " has been added.");
-			}
+			processAddOperation(taskResult);
 		} else if (isDeleteOperation) {
 			System.out.println("Task "
 					+ taskResult.getTasks().get(0).getDescription()
@@ -69,12 +62,7 @@ class CLI {
 					+ " has been updated.");
 			logicHandler.clearSearchOrDisplayTaskList();
 		} else if (isSearchOperation) {
-			boolean isSearchResultEmpty = taskResult.getTasks().isEmpty();
-			if (isSearchResultEmpty) {
-				System.out.println("Your search has returned no result.");
-			} else {
-				displayTaskList(taskResult.getTasks());
-			}
+			processSearchOperation(taskResult);
 		} else if (isDisplayOperation) {
 			displayTaskList(taskResult.getTasks());
 		} else if (isUnableToUndo) {
@@ -105,88 +93,83 @@ class CLI {
 		}
 	}
 
-	private static void displayTaskList(List<AbstractTask> taskList) {
-		int totalTask = taskList.size();
-		System.out
-				.println("*************************************************************");
-		System.out.println("[Displaying " + totalTask + " task(s)]\n");
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Add Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	private static void processAddOperation(TypeTaskPair taskResult) {
+		boolean isAddResultEmpty = taskResult.getTasks().isEmpty();
+		if (isAddResultEmpty) {
+			System.out.println("Invalid Syntax. Please try again.");
+		} else {
+			System.out.println("Task "
+					+ taskResult.getTasks().get(0).getDescription()
+					+ " has been added.");
+		}
+	}
 
-		for (int i = 0; i < totalTask; i++) {
-			boolean isTimedTask = taskList.get(i).getType()
-					.equals(AbstractTask.Type.TIMED);
-			boolean isFloatingTask = taskList.get(i).getType()
-					.equals(AbstractTask.Type.FLOATING);
-			boolean isDeadlineTask = taskList.get(i).getType()
-					.equals(AbstractTask.Type.DEADLINE);
-			int displayNumber = i + 1;
-
-			if (isTimedTask) {
-				TimedTask timedTaskDisplay = (TimedTask) taskList.get(i);
-				displayTimedTask(timedTaskDisplay, displayNumber);
-			} else if (isDeadlineTask) {
-				DeadlineTask deadlineTaskDisplay = (DeadlineTask) taskList
-						.get(i);
-				displayDeadlineTask(deadlineTaskDisplay, displayNumber);
-			} else if (isFloatingTask) {
-				FloatingTask floatingTaskDisplay = (FloatingTask) taskList
-						.get(i);
-				displayFloatingTask(floatingTaskDisplay, displayNumber);
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Search Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	private static void processSearchOperation(TypeTaskPair taskResult) {
+		boolean isSearchResultInvalid = taskResult.getTasks() != null;
+		if (isSearchResultInvalid) {
+			boolean isSearchResultEmpty = taskResult.getTasks().isEmpty();
+			if (isSearchResultEmpty) {
+				System.out.println("Your search has returned no result.");
+			} else {
+				displayTaskList(taskResult.getTasks());
 			}
 		}
 	}
 
-	private static void displayTimedTask(TimedTask timedTaskDisplay,
-			int displayNumber) {
-		showDivider();
-		System.out.println("Task #" + displayNumber);
-		displayWrapText(timedTaskDisplay.getDescription());
-		showLine();
-		if (!timedTaskDisplay.getVenue().isEmpty()) {
-			String venue = "Venue: " + timedTaskDisplay.getVenue();
-			displayWrapText(venue);
-			showLine();
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Display Operations
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	private static void displayTaskList(List<AbstractTask> taskList) {
+		int totalNumberOfTask = taskList.size();
+		System.out
+				.println("*************************************************************");
+		System.out.println("[Displaying " + totalNumberOfTask + " task(s)]\n");
+
+		for (int i = 0; i < totalNumberOfTask; i++) {
+			showDivider();
+			showDetailedTaskInfo(taskList, i);
+			showDivider();
+			System.out.println("\n");
 		}
-		System.out.println("From: " + timedTaskDisplay.getStartDate());
-		showLine();
-		System.out.println("To: " + timedTaskDisplay.getEndDate());
-		showLine();
-		System.out.println("Status: " + timedTaskDisplay.getStatus());
-		showDivider();
-		System.out.println("\n");
 	}
 
-	private static void displayDeadlineTask(DeadlineTask deadlineTaskDisplay,
-			int displayNumber) {
-		showDivider();
-		System.out.println("Task #" + displayNumber);
-		displayWrapText(deadlineTaskDisplay.getDescription());
-		showLine();
-		if (!deadlineTaskDisplay.getVenue().isEmpty()) {
-			String venue = "Venue: " + deadlineTaskDisplay.getVenue();
-			displayWrapText(venue);
-			showLine();
-		}
-		System.out.println("Deadline: " + deadlineTaskDisplay.getEndDate());
-		showLine();
-		System.out.println("Status: " + deadlineTaskDisplay.getStatus());
-		showDivider();
-		System.out.println("\n");
-	}
+	private static void showDetailedTaskInfo(List<AbstractTask> taskList,
+			int index) {
+		boolean isTimedTask = taskList.get(index).getType()
+				.equals(AbstractTask.Type.TIMED);
+		boolean isDeadlineTask = taskList.get(index).getType()
+				.equals(AbstractTask.Type.DEADLINE);
+		int displayNumber = index + 1;
 
-	private static void displayFloatingTask(FloatingTask floatingTaskDisplay,
-			int displayNumber) {
-		showDivider();
 		System.out.println("Task #" + displayNumber);
-		displayWrapText(floatingTaskDisplay.getDescription());
+		displayWrapText(taskList.get(index).getDescription());
 		showLine();
-		if (!floatingTaskDisplay.getVenue().isEmpty()) {
-			String venue = "Venue: " + floatingTaskDisplay.getVenue();
+		if (!taskList.get(index).getVenue().isEmpty()) {
+			String venue = "Venue: " + taskList.get(index).getVenue();
 			displayWrapText(venue);
 			showLine();
 		}
-		System.out.println("Status: " + floatingTaskDisplay.getStatus());
-		showDivider();
-		System.out.println("\n");
+		if (isTimedTask) {
+			System.out.println("From: "
+					+ ((TimedTask) taskList.get(index)).getStartDate());
+			showLine();
+		}
+		if (isTimedTask) {
+			System.out.println("To: "
+					+ ((TimedTask) taskList.get(index)).getEndDate());
+			showLine();
+		} else if (isDeadlineTask) {
+			System.out.println("To: "
+					+ ((DeadlineTask) taskList.get(index)).getEndDate());
+			showLine();
+		}
+		System.out.println("Status: " + taskList.get(index).getStatus());
 	}
 
 	private static void showLine() {
