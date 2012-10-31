@@ -17,9 +17,11 @@ public class Logging {
 
 	public void addLog(LoggingLevel logLevel, String loggingMessage) {	
 		Logger moustaskLogger = Logger.getLogger(logType);
+		moustaskLogger.setUseParentHandlers(false);
 		try {
 			FileHandler fileHandler = new FileHandler("moustaskLog.log", true);
-			moustaskLogger.addHandler(fileHandler);			
+			moustaskLogger.addHandler(fileHandler);		
+			
 			if (logLevel == LoggingLevel.INFO) {
 				moustaskLogger.log(Level.INFO, loggingMessage);
 			} else if (logLevel == LoggingLevel.WARNING) {
