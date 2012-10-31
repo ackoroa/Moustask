@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Stack;
 
 public class Logic {
-	private static final boolean LOGGING_ENABLED = false;
 	private static Logging logicLog = new Logging("Logic Handler");
 	private static Logic logicHandler;
 	private List<AbstractTask> taskList;
@@ -41,20 +40,16 @@ public class Logic {
 
 	private static String getFirstWord(String userCommand) {
 		String commandTypeString = userCommand.trim().split("\\s+")[0];
-		if (LOGGING_ENABLED) {
-			logicLog.addLog(Logging.LoggingLevel.INFO,
-					"Command that user input: " + commandTypeString);
-		}
+		logicLog.addLog(Logging.LoggingLevel.INFO, "Command that user input: "
+				+ commandTypeString);
 		return commandTypeString;
 	}
 
 	private static String getMessage(String userCommand) {
 		String checkCommandType = userCommand.replace(
 				getFirstWord(userCommand), "").trim();
-		if (LOGGING_ENABLED) {
-			logicLog.addLog(Logging.LoggingLevel.INFO,
-					"Message that user input: " + checkCommandType);
-		}
+		logicLog.addLog(Logging.LoggingLevel.INFO, "Message that user input: "
+				+ checkCommandType);
 		return checkCommandType;
 	}
 
@@ -145,123 +140,149 @@ public class Logic {
 		boolean isCommandHelp = commandTypeString.equalsIgnoreCase(".help");
 		boolean isCommandExit = commandTypeString.equalsIgnoreCase(".exit");
 
-		if (LOGGING_ENABLED) {
-			logicLog.addLog(Logging.LoggingLevel.INFO, "Execute "
-					+ commandTypeString + " function");
-		}
+		logicLog.addLog(Logging.LoggingLevel.INFO, "Execute "
+				+ commandTypeString + " function");
 
 		if (isCommandAdd) {
-			try {
-				Add addObject = new Add(commandMessage);
-				List<AbstractTask> addResult = addObject.execute(taskList);
-				undoStack.push(addObject);
-				taskResult = new TypeTaskPair(TypeTaskPair.Type.ADD, addResult);
-				storageObject.writeTaskList(taskList);
-			} catch (IOException e) {
-				System.out.println("Unable to write task to the text file.");
-			}
+			processAddCommand(commandMessage);
 		} else if (isCommandDelete) {
-			try {
-				int index = Integer.parseInt(commandMessage);
-				Delete deleteObject = new Delete(searchOrDisplayTaskList, index);
-				List<AbstractTask> deleteResult = deleteObject
-						.execute(taskList);
-				undoStack.push(deleteObject);
-				taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE,
-						deleteResult);
-				storageObject.writeTaskList(taskList);
-			} catch (NumberFormatException e) {
-				taskResult = new TypeTaskPair(null, null);
-				System.out.println("Error - " + e.getMessage());
-			} catch (IndexOutOfBoundsException e) {
-				System.out.println("Error - " + e.getMessage());
-			} catch (IllegalArgumentException e) {
-				System.out.println("Error - " + e.getMessage());
-			} catch (IOException e) {
-				System.out.println("Unable to remove task from the text file.");
-			}
+			prcoessDeleteCommand(commandMessage);
 		} else if (isCommandEdit) {
-			try {
-				String indexString = getFirstWord(commandMessage);
-				String editParameter = getMessage(commandMessage);
-				int index = Integer.parseInt(indexString);
-				Edit editObject = new Edit(searchOrDisplayTaskList, index,
-						editParameter);
-				List<AbstractTask> returnEditedTask = editObject
-						.execute(taskList);
-				undoStack.push(editObject);
-				taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT,
-						returnEditedTask);
-				storageObject.writeTaskList(taskList);
-			} catch (NumberFormatException e) {
-				taskResult = new TypeTaskPair(null, null);
-				System.out.println("Error - " + e.getMessage());
-			} catch (IllegalArgumentException e) {
-				System.out.println("Error - " + e.getMessage());
-			} catch (IndexOutOfBoundsException e) {
-				System.out.println("Error - " + e.getMessage());
-			} catch (IOException e) {
-				System.out.println("Unable to update text file.");
-			}
+			processEditCommand(commandMessage);
 		} else if (isCommandDisplay) {
 			searchOrDisplayTaskList = taskList;
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.DISPLAY, taskList);
 		} else if (isCommandSearch) {
-			try {
-				Search searchObject = new Search(commandMessage);
-				searchOrDisplayTaskList = searchObject.execute(taskList);
-				taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH,
-						searchOrDisplayTaskList);
-			} catch (NullPointerException e) {
-				System.out.println("Error - " + e.getMessage());
-			} catch (ArrayIndexOutOfBoundsException e) {
-				System.out.println("Error - " + e.getMessage());
-			} catch (IllegalArgumentException e) {
-				System.out.println("Error - " + e.getMessage());
-			}
+			processSearchCommand(commandMessage);
 		} else if (isCommandUndo) {
-			if (undoStack.isEmpty()) {
-				taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDONULL, null);
-			} else {
-				UndoableCommand undoableCommandObject = undoStack.peek();
-				List<AbstractTask> undoResult = undoStack.pop().undo();
-				if (undoableCommandObject instanceof Add) {
-					taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDOADD,
-							undoResult);
-				} else if (undoableCommandObject instanceof Delete) {
-					taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDODELETE,
-							undoResult);
-				} else if (undoableCommandObject instanceof Edit) {
-					taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDOEDIT,
-							undoResult);
-				} else if (undoableCommandObject instanceof Clear) {
-					taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDOCLEAR,
-							null);
-				}
-				try {
-					storageObject.writeTaskList(taskList);
-				} catch (IOException e) {
-					System.out.println("Unable to update text file.");
-				}
-			}
+			processUndoCommand();
 		} else if (isCommandClear) {
-			Clear clearObject = new Clear();
-			clearObject.execute(taskList);
-			undoStack.push(clearObject);
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.CLEAR, null);
-			try {
-				storageObject.writeTaskList(taskList);
-			} catch (IOException e) {
-				System.out.println("Unable to clear text file.");
-			}
+			processClearCommand();
 		} else if (isCommandHelp) {
-			Help helpObject = new Help();
-			helpObject.execute();
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.HELP, null);
+			processHelpCommand();
 		} else if (isCommandExit) {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.EXIT, null);
 		} else {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.INVALID, null);
 		}
+	}
+
+	private void processAddCommand(String commandMessage) {
+		try {
+			Add addObject = new Add(commandMessage);
+			List<AbstractTask> addResult = addObject.execute(taskList);
+			undoStack.push(addObject);
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.ADD, addResult);
+			storageObject.writeTaskList(taskList);
+		} catch (IOException e) {
+			System.out.println("Unable to write task to the text file.");
+		}
+	}
+
+	private void prcoessDeleteCommand(String commandMessage) {
+		try {
+			int index = Integer.parseInt(commandMessage);
+			Delete deleteObject = new Delete(searchOrDisplayTaskList, index);
+			List<AbstractTask> deleteResult = deleteObject.execute(taskList);
+			undoStack.push(deleteObject);
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE,
+					deleteResult);
+			storageObject.writeTaskList(taskList);
+		} catch (NumberFormatException e) {
+			taskResult = new TypeTaskPair(null, null);
+			System.out.println("Error - " + e.getMessage());
+		} catch (IndexOutOfBoundsException e) {
+			System.out.println("Error - " + e.getMessage());
+		} catch (IllegalArgumentException e) {
+			System.out.println("Error - " + e.getMessage());
+		} catch (IOException e) {
+			System.out.println("Unable to remove task from the text file.");
+		}
+	}
+
+	private void processEditCommand(String commandMessage) {
+		try {
+			String indexString = getFirstWord(commandMessage);
+			String editParameter = getMessage(commandMessage);
+			int index = Integer.parseInt(indexString);
+			Edit editObject = new Edit(searchOrDisplayTaskList, index,
+					editParameter);
+			List<AbstractTask> returnEditedTask = editObject.execute(taskList);
+			undoStack.push(editObject);
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT,
+					returnEditedTask);
+			storageObject.writeTaskList(taskList);
+		} catch (NumberFormatException e) {
+			taskResult = new TypeTaskPair(null, null);
+			System.out.println("Error - " + e.getMessage());
+		} catch (IllegalArgumentException e) {
+			System.out.println("Error - " + e.getMessage());
+		} catch (IndexOutOfBoundsException e) {
+			System.out.println("Error - " + e.getMessage());
+		} catch (IOException e) {
+			System.out.println("Unable to update text file.");
+		}
+	}
+
+	private void processSearchCommand(String commandMessage) {
+		try {
+			Search searchObject = new Search(commandMessage);
+			searchOrDisplayTaskList = searchObject.execute(taskList);
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH,
+					searchOrDisplayTaskList);
+		} catch (NullPointerException e) {
+			System.out.println("Error - " + e.getMessage());
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH, null);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			System.out.println("Error - " + e.getMessage());
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH, null);
+		} catch (IllegalArgumentException e) {
+			System.out.println("Error - " + e.getMessage());
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH, null);
+		}
+	}
+
+	private void processUndoCommand() {
+		if (undoStack.isEmpty()) {
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDONULL, null);
+		} else {
+			UndoableCommand undoableCommandObject = undoStack.peek();
+			List<AbstractTask> undoResult = undoStack.pop().undo();
+			if (undoableCommandObject instanceof Add) {
+				taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDOADD,
+						undoResult);
+			} else if (undoableCommandObject instanceof Delete) {
+				taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDODELETE,
+						undoResult);
+			} else if (undoableCommandObject instanceof Edit) {
+				taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDOEDIT,
+						undoResult);
+			} else if (undoableCommandObject instanceof Clear) {
+				taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDOCLEAR, null);
+			}
+			try {
+				storageObject.writeTaskList(taskList);
+			} catch (IOException e) {
+				System.out.println("Unable to update text file.");
+			}
+		}
+	}
+
+	private void processClearCommand() {
+		Clear clearObject = new Clear();
+		clearObject.execute(taskList);
+		undoStack.push(clearObject);
+		taskResult = new TypeTaskPair(TypeTaskPair.Type.CLEAR, null);
+		try {
+			storageObject.writeTaskList(taskList);
+		} catch (IOException e) {
+			System.out.println("Unable to clear text file.");
+		}
+	}
+
+	private void processHelpCommand() {
+		Help helpObject = new Help();
+		helpObject.execute();
+		taskResult = new TypeTaskPair(TypeTaskPair.Type.HELP, null);
 	}
 }
