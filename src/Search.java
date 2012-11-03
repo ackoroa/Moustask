@@ -65,45 +65,8 @@ public class Search implements Command {
 				break;
 			}
 			else{
-				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
-					if(currentWordIndex + 1 >= words.length){
-						searchLog.addLog(Logging.LoggingLevel.WARNING, 
-								"Search.andSearch(): search execution failed. Illegal search parameters, missing end date (currentWordIndex =" +
-								"" + currentWordIndex + ")");
-						
-						throw new ArrayIndexOutOfBoundsException("the end date parameter cannot be empty or null");
-					}
-					if(!words[currentWordIndex + 1].contains("-")){
-						searchLog.addLog(Logging.LoggingLevel.WARNING, 
-								"Search.andSearch(): search execution failed. Illegal search parameters, missing end date (words[currentWordIndex + 1] =" +
-								"" + words[currentWordIndex+1] + ")");
-						
-						throw new IllegalArgumentException(
-							    "the end date parameter cannot be missing");
-					}
-					if(currentWordIndex + 2 < words.length){
-						if(words[currentWordIndex + 2].contains(":")){
-							searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
-							currentWordIndex = currentWordIndex + 3;
-						}
-						else{
-							currentWordIndex = currentWordIndex + 1;
-						}
-					}
-					else{
-						searchWords = searchWords + " " + words[currentWordIndex + 1];
-						currentWordIndex = currentWordIndex + 2;
-					}
-				}
-				else{
-					if(currentWordIndex == 1){
-						searchWords = word;
-					}
-					else{
-						searchWords = searchWords + " " + word;
-					}
-					currentWordIndex = currentWordIndex + 1;
-				}
+				searchWords = searchWordsSeparator(searchWords, currentWordIndex, word, words);
+				currentWordIndex = currentWordIndex + 1;
 			}
 		}
 		
@@ -140,48 +103,9 @@ public class Search implements Command {
 				break;
 			}
 			else{
-				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
-					if(currentWordIndex + 1 >= words.length){
-						searchLog.addLog(Logging.LoggingLevel.WARNING, 
-								"Search.execute(): search execution failed. Illegal search parameters, missing end date (currentWordIndex =" +
-								"" + currentWordIndex + ")");
-						
-						throw new ArrayIndexOutOfBoundsException(
-							    "the end date parameter cannot be empty or null");
-					}
-						
-					if(!words[currentWordIndex + 1].contains("-")){
-						searchLog.addLog(Logging.LoggingLevel.WARNING, 
-								"Search.execute(): search execution failed. Illegal search parameters, missing end date (words[currentWordIndex + 1] =" +
-								"" + words[currentWordIndex+1] + ")");
-						
-						throw new IllegalArgumentException(
-							    "the end date parameter cannot be missing");
-					}
-					if(currentWordIndex + 2 < words.length){
-						if(words[currentWordIndex + 2].contains(":")){
-							searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
-							currentWordIndex = currentWordIndex + 3;
-						}
-						else{
-							currentWordIndex = currentWordIndex + 1;
-						}
-					}
-					else{
-						searchWords = searchWords + " " + words[currentWordIndex + 1];
-						currentWordIndex = currentWordIndex + 2;
-					}
+				searchWords = searchWordsSeparator(searchWords, currentWordIndex, word, words);
+				currentWordIndex = currentWordIndex + 1;
 				}
-				else{
-					if(currentWordIndex == 1){
-						searchWords = word;
-					}
-					else{
-						searchWords = searchWords + " " + word;
-					}
-					currentWordIndex = currentWordIndex + 1;
-				}
-			}
 		}
 		searchLog.addLog(Logging.LoggingLevel.INFO, "Search.notSearch(): Search command initialization successful. (searchCommand = "
 			    + searchCommand + ")");
@@ -214,46 +138,8 @@ public class Search implements Command {
 				break;
 			}
 			else{
-				if(word.equalsIgnoreCase(END_TIME_SEARCH)){
-					if(currentWordIndex + 1 >= words.length){
-						searchLog.addLog(Logging.LoggingLevel.WARNING, 
-								"Search.notSearch(): search execution failed. Illegal search parameters, missing end date (currentWordIndex =" +
-								"" + currentWordIndex + ")");
-						
-						throw new ArrayIndexOutOfBoundsException(
-							    "the end date parameter cannot be empty or null");
-					}
-					if(!words[currentWordIndex + 1].contains("-")){
-						searchLog.addLog(Logging.LoggingLevel.WARNING, 
-								"Search.notSearch(): search execution failed. Illegal search parameters, missing end date (words[currentWordIndex + 1] =" +
-								"" + words[currentWordIndex+1] + ")");
-						
-						throw new IllegalArgumentException(
-							    "the end date parameter cannot be missing");
-					}
-					if(currentWordIndex + 2 < words.length){
-						if(words[currentWordIndex + 2].contains(":")){
-							searchWords = searchWords + " " + words[currentWordIndex + 1] + " " + words[currentWordIndex + 2];
-							currentWordIndex = currentWordIndex + 3;
-						}
-						else{
-							currentWordIndex = currentWordIndex + 1;
-						}
-					}
-					else{
-						searchWords = searchWords + " " + words[currentWordIndex + 1];
-						currentWordIndex = currentWordIndex + 2;
-					}
-				}
-				else{
-					if(currentWordIndex == 1){
-						searchWords = word;
-					}
-					else{
-						searchWords = searchWords + " " + word;
-					}
-					currentWordIndex = currentWordIndex + 1;
-				}
+				searchWords = searchWordsSeparator(searchWords, currentWordIndex, word, words);
+				currentWordIndex = currentWordIndex + 1;
 			}
 		}
 
@@ -274,7 +160,37 @@ public class Search implements Command {
 			wholeTaskList = TaskList;
 		}
 	}
-
+	
+	public String searchWordsSeparator(String searchWords, int currentWordIndex, String word , String[] words){
+		if(word.equalsIgnoreCase(END_TIME_SEARCH)){
+			if(currentWordIndex + 1 >= words.length){
+				searchLog.addLog(Logging.LoggingLevel.WARNING, 
+						"Search.notSearch(): search execution failed. Illegal search parameters, missing end date (currentWordIndex =" +
+						"" + currentWordIndex + ")");
+				
+				throw new ArrayIndexOutOfBoundsException(
+					    "the end date parameter cannot be empty or null");
+			}
+			if(!words[currentWordIndex + 1].contains("-")){
+				searchLog.addLog(Logging.LoggingLevel.WARNING, 
+						"Search.notSearch(): search execution failed. Illegal search parameters, missing end date (words[currentWordIndex + 1] =" +
+						"" + words[currentWordIndex+1] + ")");
+				
+				throw new IllegalArgumentException(
+					    "the end date parameter cannot be missing");
+			}
+		}
+		else{
+			if(currentWordIndex == 1){
+				searchWords = word;
+			}
+			else{
+				searchWords = searchWords + " " + word;
+			}
+		}
+		return searchWords;
+	}
+	
 	public boolean chainCommand(String word){
 		if(word.equalsIgnoreCase(OR_SEARCH) || word.equalsIgnoreCase(AND_SEARCH) || word.equalsIgnoreCase(NOT_SEARCH)){
 			return true;
@@ -483,7 +399,7 @@ public class Search implements Command {
 		}
 		// System.out.println(endYear + "," + endMonth + "," + endDay); debug
 		
-		if(!dateChecker(startYear,startMonth,startDay,startHour,startMinute) || !dateChecker(endYear,endMonth,endDay,endHour,endMinute)){
+		if(!validDateChecker(startYear,startMonth,startDay,startHour,startMinute) || !validDateChecker(endYear,endMonth,endDay,endHour,endMinute)){
 			searchLog.addLog(Logging.LoggingLevel.WARNING, "Search.searchFromStartTimeToEndTime(): Searching within a timeframe failed. Invalid time frame (time = "
 				    + time + ")");
 			
@@ -514,62 +430,12 @@ public class Search implements Command {
 
 					//System.out.println(taskStartYear + "," + taskStartMonth + "," + taskStartDay); debug
 
-					if(dateComparator(startYear, startMonth, startDay, taskStartYear, taskStartMonth, taskStartDay)){
-						if(sameDayComparator(startYear, startMonth, startDay, taskStartYear, taskStartMonth, taskStartDay)){
-							if(timeComparator(startHour, startMinute, taskStartHour, taskStartMinute)){
-								if(dateComparator(taskStartYear, taskStartMonth, taskStartDay,endYear, endMonth, endDay)){
-									if(sameDayComparator(taskStartYear, taskStartMonth, taskStartDay,endYear, endMonth, endDay)){
-										if(timeComparator( taskStartHour, taskStartMinute,endHour, endMinute )){
-											results.add(tasksForSearch.get(i));
-										}
-									}
-									else{
-										results.add(tasksForSearch.get(i));
-									}
-								}
-							}
-						}
-						else{
-							if(dateComparator(taskStartYear, taskStartMonth, taskStartDay,endYear, endMonth, endDay)){
-								if(sameDayComparator(taskStartYear, taskStartMonth, taskStartDay,endYear, endMonth, endDay)){
-									if(timeComparator( taskStartHour, taskStartMinute,endHour, endMinute )){
-										results.add(tasksForSearch.get(i));
-									}
-								}
-								else{
-									results.add(tasksForSearch.get(i));
-								}
-							}
-						}
+					if(withinTimeFrameComparator(startYear, startMonth, startDay, taskStartYear, taskStartMonth, taskStartDay,startHour, startMinute, taskStartHour, taskStartMinute, endYear, endMonth,  endDay, endHour, endMinute)){
+						results.add(tasksForSearch.get(i));
 					}
 					
-					if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
-						if(sameDayComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
-							if(timeComparator(taskEndHour, taskEndMinute, endHour, endMinute)){
-								if(dateComparator(startYear, startMonth, startDay, taskEndYear, taskEndMonth, taskEndDay)){	
-									if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
-										if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
-											results.add(tasksForSearch.get(i));
-										}
-									}
-									else{
-										results.add(tasksForSearch.get(i));
-									}
-								}
-							}
-						}
-						else {
-							if(dateComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){	
-								if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
-									if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
-										results.add(tasksForSearch.get(i));
-									}
-								}
-								else{
-									results.add(tasksForSearch.get(i));
-								}
-							}
-						}
+					if(withinTimeFrameComparator(startYear, startMonth, startDay, taskEndYear, taskEndMonth, taskEndDay,startHour, startMinute, taskEndHour, taskEndMinute, endYear, endMonth,  endDay, endHour, endMinute)){
+						results.add(tasksForSearch.get(i));
 					}
 				}
 
@@ -585,33 +451,8 @@ public class Search implements Command {
 					int taskEndMinute = Integer.parseInt(taskEndTime[1]);
 
 
-					if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
-						if(sameDayComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
-							if(timeComparator(taskEndHour, taskEndMinute, endHour, endMinute)){
-								if(dateComparator(startYear, startMonth, startDay, taskEndYear, taskEndMonth, taskEndDay)){	
-									if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
-										if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
-											results.add(tasksForSearch.get(i));
-										}
-									}
-									else{
-										results.add(tasksForSearch.get(i));
-									}
-								}
-							}
-						}
-						else {
-							if(dateComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){	
-								if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
-									if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
-										results.add(tasksForSearch.get(i));
-									}
-								}
-								else{
-									results.add(tasksForSearch.get(i));
-								}
-							}
-						}
+					if(withinTimeFrameComparator(startYear, startMonth, startDay, taskEndYear, taskEndMonth, taskEndDay,startHour, startMinute, taskEndHour, taskEndMinute, endYear, endMonth,  endDay, endHour, endMinute)){
+						results.add(tasksForSearch.get(i));
 					}
 				}
 			}
@@ -686,8 +527,8 @@ public class Search implements Command {
 		}
 		return filteredResults;
 	}
-	public boolean sameDayComparator(int startYear, int startMonth, int startDay, int endYear, int endMonth, int endDay){
-		if(startYear == endYear && startMonth == endMonth && startDay == endDay){
+	public boolean sameDayComparator(int yearOfFirstDate, int monthOfFirstDate, int dayOfFirstDate, int yearOfSecondDate, int monthOfSecondDate, int dayOfSecondDate){
+		if(yearOfFirstDate == yearOfSecondDate && monthOfFirstDate == monthOfSecondDate && dayOfFirstDate == dayOfSecondDate){
 			return true;
 		}
 		else{
@@ -695,13 +536,13 @@ public class Search implements Command {
 		}
 	}
 
-	public boolean dateComparator(int startYear, int startMonth, int startDay, int endYear, int endMonth, int endDay){
+	public boolean dateComparator(int earlierYear, int earlierMonth, int earlierDay, int laterYear, int laterMonth, int laterDay){
 		boolean isLater = false;
-		if(startYear <= endYear){
-			if(startYear == endYear){
-				if(startMonth <= endMonth){
-					if(startMonth == endMonth){
-						if(startDay <= endDay){
+		if(earlierYear <= laterYear){
+			if(earlierYear == laterYear){
+				if(earlierMonth <= laterMonth){
+					if(earlierMonth == laterMonth){
+						if(earlierDay <= laterDay){
 							isLater = true;
 						}
 					}
@@ -717,11 +558,11 @@ public class Search implements Command {
 		return isLater;
 	}
 
-	public boolean timeComparator(int startHour, int startMinute, int endHour, int endMinute){
+	public boolean timeComparator(int earlierHour, int earlierMinute, int laterHour, int laterMinute){
 		boolean isLater = false;
-		if(startHour <= endHour){
-			if(startHour == endHour){
-				if(startMinute <= endMinute){
+		if(earlierHour <= laterHour){
+			if(earlierHour == laterHour){
+				if(earlierMinute <= laterMinute){
 					isLater = true;
 				}
 			}
@@ -734,7 +575,42 @@ public class Search implements Command {
 		return isLater;
 	}
 	
-	public boolean dateChecker(int year, int month, int day, int hour, int minute){
+	public boolean withinTimeFrameComparator(int timeFrameStartYear, int timeFrameStartMonth, int timeFrameStartDay, int taskYear, int taskMonth, int taskDay,
+			int timeFrameStartHour, int timeFrameStartMinute, int taskHour, int taskMinute, int timeFrameEndYear, int timeFrameEndMonth, int timeFrameEndDay
+			,int timeFrameEndHour,int timeFrameEndMinute ){
+		if(dateComparator(timeFrameStartYear, timeFrameStartMonth, timeFrameStartDay, taskYear, taskMonth, taskDay)){
+			if(sameDayComparator(timeFrameStartYear, timeFrameStartMonth, timeFrameStartDay, taskYear, taskMonth, taskDay)){
+				if(timeComparator(timeFrameStartHour, timeFrameStartMinute, taskHour, taskMinute)){
+					if(dateComparator(taskYear, taskMonth, taskDay,timeFrameEndYear, timeFrameEndMonth, timeFrameEndDay)){
+						if(sameDayComparator(taskYear, taskMonth, taskDay,timeFrameEndYear, timeFrameEndMonth, timeFrameEndDay)){
+							if(timeComparator( taskHour, taskMinute,timeFrameEndHour, timeFrameEndMinute )){
+								return true;
+							}
+						}
+						else{
+							return true;
+						}
+					}
+				}
+			}
+			else{
+				if(dateComparator(taskYear, taskMonth, taskDay,timeFrameEndYear, timeFrameEndMonth, timeFrameEndDay)){
+					if(sameDayComparator(taskYear, taskMonth, taskDay,timeFrameEndYear, timeFrameEndMonth, timeFrameEndDay)){
+						if(timeComparator( taskHour, taskMinute,timeFrameEndHour, timeFrameEndMinute )){
+							return true;
+						}
+					}
+					else{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	
+	public boolean validDateChecker(int year, int month, int day, int hour, int minute){
 		if(year == -1 || month == -1 || day == -1 || hour > 23 || minute > 59 ){
 			return false;
 		}
