@@ -46,11 +46,17 @@ public class Logic {
 	}
 
 	private static String getMessage(String userCommand) {
-		String checkCommandType = userCommand.replace(
-				getFirstWord(userCommand), "").trim();
-		logicLog.addLog(Logging.LoggingLevel.INFO, "Message that user input: "
-				+ checkCommandType);
-		return checkCommandType;
+		String arr[] = userCommand.split(" ", 2);
+
+		if (arr.length == 1) {
+			logicLog.addLog(Logging.LoggingLevel.INFO,
+					"Message that user input: " + arr[0]);
+			return arr[0];
+		} else {
+			logicLog.addLog(Logging.LoggingLevel.INFO,
+					"Message that user input: " + arr[1]);
+			return arr[1];
+		}
 	}
 
 	private void checkIsTaskListEmpty(String commandTypeString,
@@ -175,7 +181,8 @@ public class Logic {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.ADD, addResult);
 			storageObject.writeTaskList(taskList);
 		} catch (IOException e) {
-			System.out.println("Unable to write task to the text file.");
+			System.out
+					.println("MousTask Error: Unable to write task to the text file.");
 		}
 	}
 
@@ -190,13 +197,14 @@ public class Logic {
 			storageObject.writeTaskList(taskList);
 		} catch (NumberFormatException e) {
 			taskResult = new TypeTaskPair(null, null);
-			System.out.println("Error - " + e.getMessage());
+			System.out.println("MousTask Error: " + e.getMessage());
 		} catch (IndexOutOfBoundsException e) {
-			System.out.println("Error - " + e.getMessage());
+			System.out.println("MousTask Error: " + e.getMessage());
 		} catch (IllegalArgumentException e) {
-			System.out.println("Error - " + e.getMessage());
+			System.out.println("MousTask Error: " + e.getMessage());
 		} catch (IOException e) {
-			System.out.println("Unable to remove task from the text file.");
+			System.out
+					.println("MousTask Error: Unable to remove task from the text file.");
 		}
 	}
 
@@ -214,13 +222,13 @@ public class Logic {
 			storageObject.writeTaskList(taskList);
 		} catch (NumberFormatException e) {
 			taskResult = new TypeTaskPair(null, null);
-			System.out.println("Error - " + e.getMessage());
+			System.out.println("MousTask Error: " + e.getMessage());
 		} catch (IllegalArgumentException e) {
-			System.out.println("Error - " + e.getMessage());
+			System.out.println("MousTask Error: " + e.getMessage());
 		} catch (IndexOutOfBoundsException e) {
-			System.out.println("Error - " + e.getMessage());
+			System.out.println("MousTask Error: " + e.getMessage());
 		} catch (IOException e) {
-			System.out.println("Unable to update text file.");
+			System.out.println("MousTask Error: Unable to update text file.");
 		}
 	}
 
@@ -231,13 +239,13 @@ public class Logic {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH,
 					searchOrDisplayTaskList);
 		} catch (NullPointerException e) {
-			System.out.println("Error - " + e.getMessage());
+			System.out.println("MousTask Error: " + e.getMessage());
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH, null);
 		} catch (ArrayIndexOutOfBoundsException e) {
-			System.out.println("Error - " + e.getMessage());
+			System.out.println("MousTask Error: " + e.getMessage());
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH, null);
 		} catch (IllegalArgumentException e) {
-			System.out.println("Error - " + e.getMessage());
+			System.out.println("MousTask Error: " + e.getMessage());
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH, null);
 		}
 	}
@@ -263,7 +271,8 @@ public class Logic {
 			try {
 				storageObject.writeTaskList(taskList);
 			} catch (IOException e) {
-				System.out.println("Unable to update text file.");
+				System.out
+						.println("MousTask Error: Unable to update text file.");
 			}
 		}
 	}
@@ -276,7 +285,7 @@ public class Logic {
 		try {
 			storageObject.writeTaskList(taskList);
 		} catch (IOException e) {
-			System.out.println("Unable to clear text file.");
+			System.out.println("MousTask Error: Unable to clear text file.");
 		}
 	}
 
