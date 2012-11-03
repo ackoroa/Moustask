@@ -98,7 +98,7 @@ public class SearchTest {
 		
 		assertEquals("time frame search successful", expectedResults, searchResults);
 		
-		searchObject = new Search(".category timed .and .from 2012-12-10 00:00 .to 2012-12-15");
+		searchObject = new Search(".from 2012-12-10 00:00 .to 2012-12-15 .and .category timed");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
 		expectedResults = new Vector<AbstractTask>();
 		expectedResults.add(taskList.get(2));
