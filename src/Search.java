@@ -502,6 +502,15 @@ public class Search implements Command {
 					String[] taskStartTime = taskStartDateAndTime[1].split(":");
 					int taskStartHour = Integer.parseInt(taskStartTime[0]);
 					int taskStartMinute = Integer.parseInt(taskStartTime[1]);
+					
+					String[] taskEndDateAndTime = task.getEndDate().split(" ");
+					String[] taskEndDate = taskEndDateAndTime[0].split("-");
+					int taskEndYear = Integer.parseInt(taskEndDate[0]);
+					int taskEndMonth = Integer.parseInt(taskEndDate[1]);
+					int taskEndDay = Integer.parseInt(taskEndDate[2]);
+					String[] taskEndTime = taskEndDateAndTime[1].split(":");
+					int taskEndHour = Integer.parseInt(taskEndTime[0]);
+					int taskEndMinute = Integer.parseInt(taskEndTime[1]);
 
 					//System.out.println(taskStartYear + "," + taskStartMonth + "," + taskStartDay); debug
 
@@ -521,9 +530,38 @@ public class Search implements Command {
 							}
 						}
 						else{
-							if(dateComparator(taskStartYear, taskStartMonth, taskStartDay, endYear, endMonth, endDay )){
+							if(dateComparator(taskStartYear, taskStartMonth, taskStartDay,endYear, endMonth, endDay)){
 								if(sameDayComparator(taskStartYear, taskStartMonth, taskStartDay,endYear, endMonth, endDay)){
 									if(timeComparator( taskStartHour, taskStartMinute,endHour, endMinute )){
+										results.add(tasksForSearch.get(i));
+									}
+								}
+								else{
+									results.add(tasksForSearch.get(i));
+								}
+							}
+						}
+					}
+					
+					if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
+						if(sameDayComparator(taskEndYear, taskEndMonth, taskEndDay, endYear, endMonth, endDay)){
+							if(timeComparator(taskEndHour, taskEndMinute, endHour, endMinute)){
+								if(dateComparator(startYear, startMonth, startDay, taskEndYear, taskEndMonth, taskEndDay)){	
+									if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
+										if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
+											results.add(tasksForSearch.get(i));
+										}
+									}
+									else{
+										results.add(tasksForSearch.get(i));
+									}
+								}
+							}
+						}
+						else {
+							if(dateComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){	
+								if(sameDayComparator(startYear, startMonth, startDay, taskEndYear,taskEndMonth, taskEndDay)){
+									if(timeComparator(startHour, startMinute, taskEndHour, taskEndMinute)){
 										results.add(tasksForSearch.get(i));
 									}
 								}
@@ -578,6 +616,7 @@ public class Search implements Command {
 				}
 			}
 		}
+		results = removeDuplicateTasks(results);
 		return results;
 
 	}
