@@ -20,7 +20,7 @@ class CLI {
 
 	public void getUserInput() {
 		while (true) {
-			System.out.print("Command: ");
+			System.out.print("\nCommand: ");
 			taskResult = logicHandler.processCommand(userInput.nextLine());
 			printMessage();
 		}
@@ -52,15 +52,9 @@ class CLI {
 		} else if (isAddOperation) {
 			processAddOperation(taskResult);
 		} else if (isDeleteOperation) {
-			System.out.println("Task "
-					+ taskResult.getTasks().get(0).getDescription()
-					+ " has been deleted.");
-			logicHandler.clearSearchOrDisplayTaskList();
+			processDeleteOperation(taskResult);
 		} else if (isEditOperation) {
-			System.out.println("Task "
-					+ taskResult.getTasks().get(0).getDescription()
-					+ " has been updated.");
-			logicHandler.clearSearchOrDisplayTaskList();
+			processEditOperation(taskResult);
 		} else if (isSearchOperation) {
 			processSearchOperation(taskResult);
 		} else if (isDisplayOperation) {
@@ -108,6 +102,32 @@ class CLI {
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Delete Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	private void processDeleteOperation(TypeTaskPair taskResult2) {
+		boolean isDeleteInvalid = taskResult.getTasks() != null;
+		if (isDeleteInvalid) {
+			System.out.println("Task "
+					+ taskResult.getTasks().get(0).getDescription()
+					+ " has been deleted.");
+		}
+		logicHandler.clearSearchOrDisplayTaskList();
+	}
+
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Edit Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	private void processEditOperation(TypeTaskPair taskResult2) {
+		boolean isEditInvalid = taskResult.getTasks() != null;
+		if (isEditInvalid) {
+			System.out.println("Task "
+					+ taskResult.getTasks().get(0).getDescription()
+					+ " has been updated.");
+		}
+		logicHandler.clearSearchOrDisplayTaskList();
+	}
+
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////// Search Operation
 	// ////////////////////////////////////////////////////////////////////////////////////////
 	private static void processSearchOperation(TypeTaskPair taskResult) {
@@ -127,16 +147,20 @@ class CLI {
 	// ////////////////////////////////////////////////////////////////////////////////////////
 	private static void displayTaskList(List<AbstractTask> taskList) {
 		int totalNumberOfTask = taskList.size();
-		System.out
-				.println("*************************************************************");
-		System.out.println("[Displaying " + totalNumberOfTask + " task(s)]\n");
+		showDivider();
+		System.out.println("                  *** MOUSTASK LIST ***");
+		System.out.println("                     (TOTAL TASKS: "
+				+ totalNumberOfTask + ")");
 
 		for (int i = 0; i < totalNumberOfTask; i++) {
 			showDivider();
 			showDetailedTaskInfo(taskList, i);
 			showDivider();
-			System.out.println("\n");
 		}
+		System.out.println("                     (TOTAL TASKS: "
+				+ totalNumberOfTask + ")");
+		System.out.println("                 *** END OF TASKS LIST ***");
+		showDivider();
 	}
 
 	private static void showDetailedTaskInfo(List<AbstractTask> taskList,
@@ -147,29 +171,29 @@ class CLI {
 				.equals(AbstractTask.Type.DEADLINE);
 		int displayNumber = index + 1;
 
-		System.out.println("Task #" + displayNumber);
+		System.out.println("TASK #" + displayNumber);
 		displayWrapText(taskList.get(index).getDescription());
 		showLine();
 		if (!taskList.get(index).getVenue().isEmpty()) {
-			String venue = "Venue: " + taskList.get(index).getVenue();
+			String venue = "VENUE : " + taskList.get(index).getVenue();
 			displayWrapText(venue);
 			showLine();
 		}
 		if (isTimedTask) {
-			System.out.println("From: "
+			System.out.println("FROM  : "
 					+ ((TimedTask) taskList.get(index)).getStartDate());
 			showLine();
 		}
 		if (isTimedTask) {
-			System.out.println("To: "
+			System.out.println("TO    : "
 					+ ((TimedTask) taskList.get(index)).getEndDate());
 			showLine();
 		} else if (isDeadlineTask) {
-			System.out.println("To: "
+			System.out.println("BY    : "
 					+ ((DeadlineTask) taskList.get(index)).getEndDate());
 			showLine();
 		}
-		System.out.println("Status: " + taskList.get(index).getStatus());
+		System.out.println("STATUS: " + taskList.get(index).getStatus());
 	}
 
 	private static void showLine() {
