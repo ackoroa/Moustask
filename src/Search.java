@@ -23,20 +23,20 @@ public class Search implements Command {
 	private String searchLine;
 	private List < AbstractTask > searchResults = new Vector < AbstractTask > ();
 	private List < AbstractTask > wholeTaskList = new Vector < AbstractTask > ();
-	
+
 	private Logging searchLog = new Logging("Search Function");
 
 	public Search(String wholeSearchLine) throws NullPointerException {
 		searchLine = wholeSearchLine;
 		if(searchLine == null) {
 			searchLog.addLog(Logging.LoggingLevel.WARNING, "Search(): Search object initialization failed. Illegal wholeSearchLine (wholeSearchLine = "
-			    + wholeSearchLine + ")");
-			
+					+ wholeSearchLine + ")");
+
 			throw new NullPointerException("Search line cannot be empty!");
 		}
-		
+
 		searchLog.addLog(Logging.LoggingLevel.INFO, "Search(): Search object initialization successful. (searchLine = "
-			    + searchLine + ")");
+				+ searchLine + ")");
 		// System.out.println(searchLine); for debug
 	}
 
@@ -46,7 +46,7 @@ public class Search implements Command {
 
 	public List < AbstractTask > execute (List < AbstractTask > taskList) throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
 		maintainWholeTaskList(taskList);
-		
+
 		String [] words = searchLine.split(" ");
 		/* for(int i = 0; i < words.length; i++ ){		for debug
 		 * System.out.println(words[i]);
@@ -69,17 +69,17 @@ public class Search implements Command {
 				currentWordIndex = currentWordIndex + 1;
 			}
 		}
-		
+
 		searchLog.addLog(Logging.LoggingLevel.INFO, "Search.execute(): Search command initialization successful. (searchCommand = "
-			    + searchCommand + ")");
-		
+				+ searchCommand + ")");
+
 		searchResults = searchCommandExecution(searchCommand, searchWords, wholeTaskList, searchResults);
 		searchResults = removeDuplicateTasks(searchResults);
 
 		if(isChainCommand){
 			searchLog.addLog(Logging.LoggingLevel.INFO, "Search.execute(): chain command detected. (word = "
-				    + word + ")");
-			
+					+ word + ")");
+
 			searchResults = chainCommandExecution(word, words, currentWordIndex, taskList, searchResults);
 		}
 
@@ -105,17 +105,17 @@ public class Search implements Command {
 			else{
 				searchWords = searchWordsSeparator(searchWords, currentWordIndex, word, words);
 				currentWordIndex = currentWordIndex + 1;
-				}
+			}
 		}
 		searchLog.addLog(Logging.LoggingLevel.INFO, "Search.notSearch(): Search command initialization successful. (searchCommand = "
-			    + searchCommand + ")");
+				+ searchCommand + ")");
 
 		filteredResults = searchCommandExecution(searchCommand, searchWords, taskList, filteredResults);
 
 		if(isChainCommand){
 			searchLog.addLog(Logging.LoggingLevel.INFO, "Search.execute(): chain command detected. (word = "
-				    + word + ")");
-			
+					+ word + ")");
+
 			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, filteredResults);
 		}
 		return filteredResults;
@@ -148,8 +148,8 @@ public class Search implements Command {
 
 		if(isChainCommand){
 			searchLog.addLog(Logging.LoggingLevel.INFO, "Search.execute(): chain command detected. (word = "
-				    + word + ")");
-			
+					+ word + ")");
+
 			filteredResults = chainCommandExecution(word, words, currentWordIndex, taskList, filteredResults);
 		}
 		return filteredResults;
@@ -160,24 +160,24 @@ public class Search implements Command {
 			wholeTaskList = TaskList;
 		}
 	}
-	
+
 	public String searchWordsSeparator(String searchWords, int currentWordIndex, String word , String[] words){
 		if(word.equalsIgnoreCase(END_TIME_SEARCH)){
 			if(currentWordIndex + 1 >= words.length){
 				searchLog.addLog(Logging.LoggingLevel.WARNING, 
 						"Search.notSearch(): search execution failed. Illegal search parameters, missing end date (currentWordIndex =" +
-						"" + currentWordIndex + ")");
-				
+								"" + currentWordIndex + ")");
+
 				throw new ArrayIndexOutOfBoundsException(
-					    "the end date parameter cannot be empty or null");
+						"the end date parameter cannot be empty or null");
 			}
 			if(!words[currentWordIndex + 1].contains("-")){
 				searchLog.addLog(Logging.LoggingLevel.WARNING, 
 						"Search.notSearch(): search execution failed. Illegal search parameters, missing end date (words[currentWordIndex + 1] =" +
-						"" + words[currentWordIndex+1] + ")");
-				
+								"" + words[currentWordIndex+1] + ")");
+
 				throw new IllegalArgumentException(
-					    "the end date parameter cannot be missing");
+						"the end date parameter cannot be missing");
 			}
 		}
 		else{
@@ -190,7 +190,7 @@ public class Search implements Command {
 		}
 		return searchWords;
 	}
-	
+
 	public boolean chainCommand(String word){
 		if(word.equalsIgnoreCase(OR_SEARCH) || word.equalsIgnoreCase(AND_SEARCH) || word.equalsIgnoreCase(NOT_SEARCH)){
 			return true;
@@ -287,6 +287,7 @@ public class Search implements Command {
 			searchByYear = Integer.parseInt(searchByDate[0]);
 			searchByMonth = Integer.parseInt(searchByDate[1]);
 			searchByDay = Integer.parseInt(searchByDate[2]);
+
 		}
 		else if(timeFrameWords[1].equalsIgnoreCase(WITHIN_MONTHS_SEARCH)){
 			int monthIncrement = Integer.parseInt(timeFrameWords[0]);
@@ -295,6 +296,7 @@ public class Search implements Command {
 			searchByYear = Integer.parseInt(searchByDate[0]);
 			searchByMonth = Integer.parseInt(searchByDate[1]);
 			searchByDay = Integer.parseInt(searchByDate[2]);
+
 		}
 
 		for(int i = 0; i < tasksForSearch.size() ; i++){
@@ -306,11 +308,17 @@ public class Search implements Command {
 					int taskStartYear = Integer.parseInt(taskStartDate[0]);
 					int taskStartMonth = Integer.parseInt(taskStartDate[1]);
 					int taskStartDay = Integer.parseInt(taskStartDate[2]);
+					String[] taskEndDateAndTime = task.getEndDate().split(" ");
+					String[] taskEndDate = taskEndDateAndTime[0].split("-");
+					int taskEndYear = Integer.parseInt(taskEndDate[0]);
+					int taskEndMonth = Integer.parseInt(taskEndDate[1]);
+					int taskEndDay = Integer.parseInt(taskEndDate[2]);
 
-					if(dateComparator(taskStartYear, taskStartMonth, taskStartDay, searchByYear, searchByMonth, searchByDay)){
-						if(dateComparator(todayYear, todayMonth, todayDay ,taskStartYear, taskStartMonth, taskStartDay)){
-							results.add(tasksForSearch.get(i));
-						}
+					if(byDateComparator(taskStartYear, taskStartMonth, taskStartDay, searchByYear, searchByMonth, searchByDay, todayYear, todayMonth,todayDay)){
+						results.add(tasksForSearch.get(i));
+					}
+					if(byDateComparator(taskEndYear, taskEndMonth, taskEndDay, searchByYear, searchByMonth, searchByDay, todayYear, todayMonth,todayDay)){
+						results.add(tasksForSearch.get(i));
 					}
 				}
 
@@ -322,10 +330,8 @@ public class Search implements Command {
 					int taskEndMonth = Integer.parseInt(taskEndDate[1]);
 					int taskEndDay = Integer.parseInt(taskEndDate[2]);
 
-					if(dateComparator(taskEndYear, taskEndMonth, taskEndDay, searchByYear, searchByMonth, searchByDay)){
-						if(dateComparator(todayYear, todayMonth, todayDay ,taskEndYear, taskEndMonth, taskEndDay)){
-							results.add(tasksForSearch.get(i));
-						}
+					if(byDateComparator(taskEndYear, taskEndMonth, taskEndDay, searchByYear, searchByMonth, searchByDay, todayYear, todayMonth,todayDay)){
+						results.add(tasksForSearch.get(i));
 					}
 				}
 			}
@@ -338,8 +344,8 @@ public class Search implements Command {
 		String [] datesAndTimes = time.split(" ");
 		if(datesAndTimes.length < 2){
 			searchLog.addLog(Logging.LoggingLevel.WARNING, "Search.searchFromStartTimeToEndTime(): Searching within a timeframe failed. Invalid time frame (time = "
-				    + time + ")");
-			
+					+ time + ")");
+
 			throw new IllegalArgumentException("Date parameters cannot be empty!");
 		}
 		int endYear = -1;
@@ -352,7 +358,7 @@ public class Search implements Command {
 		int startDay = -1;
 		int startHour = 0;
 		int startMinute = 0;
-		
+
 		if(datesAndTimes[0].contains("-")){
 			String[] startDate = datesAndTimes[0].split("-");
 			startYear = Integer.parseInt(startDate[0]);
@@ -398,11 +404,11 @@ public class Search implements Command {
 			endMinute = 59;
 		}
 		// System.out.println(endYear + "," + endMonth + "," + endDay); debug
-		
+
 		if(!validDateChecker(startYear,startMonth,startDay,startHour,startMinute) || !validDateChecker(endYear,endMonth,endDay,endHour,endMinute)){
 			searchLog.addLog(Logging.LoggingLevel.WARNING, "Search.searchFromStartTimeToEndTime(): Searching within a timeframe failed. Invalid time frame (time = "
-				    + time + ")");
-			
+					+ time + ")");
+
 			throw new IllegalArgumentException("Invalid date format!");
 		}
 
@@ -418,7 +424,7 @@ public class Search implements Command {
 					String[] taskStartTime = taskStartDateAndTime[1].split(":");
 					int taskStartHour = Integer.parseInt(taskStartTime[0]);
 					int taskStartMinute = Integer.parseInt(taskStartTime[1]);
-					
+
 					String[] taskEndDateAndTime = task.getEndDate().split(" ");
 					String[] taskEndDate = taskEndDateAndTime[0].split("-");
 					int taskEndYear = Integer.parseInt(taskEndDate[0]);
@@ -433,7 +439,7 @@ public class Search implements Command {
 					if(withinTimeFrameComparator(startYear, startMonth, startDay, taskStartYear, taskStartMonth, taskStartDay,startHour, startMinute, taskStartHour, taskStartMinute, endYear, endMonth,  endDay, endHour, endMinute)){
 						results.add(tasksForSearch.get(i));
 					}
-					
+
 					if(withinTimeFrameComparator(startYear, startMonth, startDay, taskEndYear, taskEndMonth, taskEndDay,startHour, startMinute, taskEndHour, taskEndMinute, endYear, endMonth,  endDay, endHour, endMinute)){
 						results.add(tasksForSearch.get(i));
 					}
@@ -574,7 +580,16 @@ public class Search implements Command {
 		}
 		return isLater;
 	}
-	
+
+	public boolean byDateComparator(int taskYear,int taskMonth,int taskDay,int searchByYear,int searchByMonth,int searchByDay,int todayYear,int todayMonth,int todayDay){
+		if(dateComparator(taskYear, taskMonth, taskDay, searchByYear, searchByMonth, searchByDay)){
+			if(dateComparator(todayYear, todayMonth, todayDay ,taskYear, taskMonth, taskDay)){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public boolean withinTimeFrameComparator(int timeFrameStartYear, int timeFrameStartMonth, int timeFrameStartDay, int taskYear, int taskMonth, int taskDay,
 			int timeFrameStartHour, int timeFrameStartMinute, int taskHour, int taskMinute, int timeFrameEndYear, int timeFrameEndMonth, int timeFrameEndDay
 			,int timeFrameEndHour,int timeFrameEndMinute ){
@@ -608,13 +623,13 @@ public class Search implements Command {
 		}
 		return false;
 	}
-	
-	
+
+
 	public boolean validDateChecker(int year, int month, int day, int hour, int minute){
 		if(year == -1 || month == -1 || day == -1 || hour > 23 || minute > 59 ){
 			return false;
 		}
-		
+
 		return true;
 	}
 }
