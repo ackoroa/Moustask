@@ -196,15 +196,18 @@ public class Logic {
 					deleteResult);
 			storageObject.writeTaskList(taskList);
 		} catch (NumberFormatException e) {
-			taskResult = new TypeTaskPair(null, null);
 			System.out.println("MousTask Error: " + e.getMessage());
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE, null);
 		} catch (IndexOutOfBoundsException e) {
 			System.out.println("MousTask Error: " + e.getMessage());
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE, null);
 		} catch (IllegalArgumentException e) {
 			System.out.println("MousTask Error: " + e.getMessage());
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE, null);
 		} catch (IOException e) {
 			System.out
 					.println("MousTask Error: Unable to remove task from the text file.");
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE, null);
 		}
 	}
 
@@ -221,14 +224,17 @@ public class Logic {
 					returnEditedTask);
 			storageObject.writeTaskList(taskList);
 		} catch (NumberFormatException e) {
-			taskResult = new TypeTaskPair(null, null);
 			System.out.println("MousTask Error: " + e.getMessage());
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT, null);
 		} catch (IllegalArgumentException e) {
 			System.out.println("MousTask Error: " + e.getMessage());
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT, null);
 		} catch (IndexOutOfBoundsException e) {
 			System.out.println("MousTask Error: " + e.getMessage());
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT, null);
 		} catch (IOException e) {
 			System.out.println("MousTask Error: Unable to update text file.");
+			taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT, null);
 		}
 	}
 
