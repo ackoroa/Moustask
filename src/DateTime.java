@@ -83,7 +83,7 @@ public class DateTime {
 					calendar.add(Calendar.DAY_OF_MONTH, 1);
 				}
 				if (isEndDate) {
-					_dateTime = new SimpleDateFormat("yyyy-MM-dd 25:59")
+					_dateTime = new SimpleDateFormat("yyyy-MM-dd 23:59")
 							.format(calendar.getTime());
 				} else {
 					_dateTime = new SimpleDateFormat("yyyy-MM-dd 00:00")
