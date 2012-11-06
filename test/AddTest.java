@@ -1,5 +1,6 @@
-import static org.junit.Assert.*;
-
+//@author A0058657N
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Vector;
 import org.junit.Test;
@@ -9,7 +10,7 @@ public class AddTest {
 			timedTaskList, undoTaskList;
 	static AbstractTask addedTask;
 	static UndoableCommand addObject;
-	
+
 	@Test
 	public void testFloatingTask() {
 		floatingTaskList = new Vector<AbstractTask>();
