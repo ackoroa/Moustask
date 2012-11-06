@@ -104,7 +104,7 @@ public class AddTest {
 		addObject.execute(deadlineTaskList);
 
 		// Results
-		assertTrue("Size of task list is 4", deadlineTaskList.size() == 4);
+		assertEquals("Size of task list is 4", 4, deadlineTaskList.size());
 		for (int index = 0; index < deadlineTaskList.size(); index++) {
 			assertTrue("task type is deadline task", deadlineTaskList
 					.get(index).getType().equals(AbstractTask.Type.DEADLINE));
@@ -172,7 +172,7 @@ public class AddTest {
 		addObject.execute(timedTaskList);
 
 		// Results
-		assertTrue("Size of task list is 5", timedTaskList.size() == 5);
+		assertEquals("Size of task list is 5", 5, timedTaskList.size());
 		for (int index = 0; index < timedTaskList.size(); index++) {
 			assertTrue("task type is timed task", timedTaskList.get(index)
 					.getType().equals(AbstractTask.Type.TIMED));
