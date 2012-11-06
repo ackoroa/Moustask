@@ -1,13 +1,11 @@
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import java.util.Vector;
 import org.junit.Test;
 
 public class ClearTest {
-	
 	public static Vector<AbstractTask> taskList;
+
 	@Before
 	public void setUpBeforeClass() throws Exception {
 		taskList = new Vector<AbstractTask>();
@@ -24,11 +22,9 @@ public class ClearTest {
 		Clear clearTest = new Clear();
 		clearTest.execute(taskList);
 		assertEquals(taskList.size(), 0);
-		
+
 		clearTest.undo();
-		System.out.println(taskList);
-		assertEquals(taskList.size(),3);
+		assertEquals(taskList.size(), 3);
 	}
-	
 
 }
