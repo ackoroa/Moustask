@@ -1,5 +1,11 @@
+//@A0092101Y
 import java.util.List;
 import java.util.Vector;
+
+/**
+ * Implements the delete operation in Moustask.
+ * 
+ */
 
 public class Delete implements UndoableCommand {
     private List<AbstractTask> deleteSpace, wholeTaskList;
@@ -11,23 +17,7 @@ public class Delete implements UndoableCommand {
     public Delete(List<AbstractTask> deleteSpace, int index)
 	    throws IndexOutOfBoundsException, IllegalArgumentException {
 
-	if (deleteSpace == null || deleteSpace.size() <= 0) {
-	    deleteLog.addLog(Logging.LoggingLevel.WARNING,
-		    "Delete(): delete object initialization failed. Illegal deleteSpace (deleteSpace = "
-			    + deleteSpace + ")");
-
-	    throw new IllegalArgumentException(
-		    "deleteSpace cannot be empty or null");
-	}
-
-	if (index <= 0 || index > deleteSpace.size()) {
-	    deleteLog.addLog(Logging.LoggingLevel.WARNING,
-		    "Delete(): delete object initialization failed. Index is out of bounds (index = "
-			    + index + ")");
-
-	    throw new IndexOutOfBoundsException(
-		    "index pointer is outside the delete space");
-	}
+	validateConstructorArguments(deleteSpace, index);
 
 	this.deleteSpace = deleteSpace;
 	this.index = index;
@@ -37,19 +27,35 @@ public class Delete implements UndoableCommand {
 			+ deleteSpace.size() + " and index: " + index);
     }
 
+    private void validateConstructorArguments(List<AbstractTask> deleteSpace,
+	    int index) {
+	if (deleteSpace == null || deleteSpace.size() <= 0) {
+	    deleteLog
+		    .addLog(Logging.LoggingLevel.WARNING,
+			    "Delete(): delete object initialization failed. Illegal deleteSpace (deleteSpace = "
+				    + deleteSpace + ")");
+
+	    throw new IllegalArgumentException(
+		    "deleteSpace cannot be empty or null");
+	}
+
+	if (index <= 0 || index > deleteSpace.size()) {
+	    deleteLog
+		    .addLog(Logging.LoggingLevel.WARNING,
+			    "Delete(): delete object initialization failed. Index is out of bounds (index = "
+				    + index + ")");
+
+	    throw new IndexOutOfBoundsException(
+		    "index pointer is outside the delete space");
+	}
+    }
+
     // Deletes the specified task from taskList, stores the deletedTask and
     // returns it in a list
     public List<AbstractTask> execute(List<AbstractTask> wholeTaskList)
 	    throws IllegalArgumentException {
 
-	if (wholeTaskList == null || wholeTaskList.size() <= 0) {
-	    deleteLog.addLog(Logging.LoggingLevel.WARNING,
-		    "Delete.execute(): delete execution failed. Illegal task list (wholeTaskList = "
-			    + wholeTaskList + ")");
-
-	    throw new IllegalArgumentException(
-		    "taskList cannot be empty or null");
-	}
+	validateExecuteArguments(wholeTaskList);
 
 	deletedTask = deleteSpace.get(index - 1);
 	this.wholeTaskList = wholeTaskList;
@@ -63,6 +69,18 @@ public class Delete implements UndoableCommand {
 	return generateReturnList();
     }
 
+    private void validateExecuteArguments(List<AbstractTask> wholeTaskList) {
+	if (wholeTaskList == null || wholeTaskList.size() <= 0) {
+	    deleteLog
+		    .addLog(Logging.LoggingLevel.WARNING,
+			    "Delete.execute(): delete execution failed. Illegal task list (wholeTaskList = "
+				    + wholeTaskList + ")");
+
+	    throw new IllegalArgumentException(
+		    "taskList cannot be empty or null");
+	}
+    }
+
     // Undoes this delete operation
     // returns the task re-added
     public List<AbstractTask> undo() {
@@ -71,8 +89,9 @@ public class Delete implements UndoableCommand {
 
 	wholeTaskList.add(deletedTask);
 
-	deleteLog.addLog(Logging.LoggingLevel.INFO, "Delete.undo(): The task \""
-		+ deletedTask + "\" has been re-added to the task list");
+	deleteLog.addLog(Logging.LoggingLevel.INFO,
+		"Delete.undo(): The task \"" + deletedTask
+			+ "\" has been re-added to the task list");
 
 	return generateReturnList();
     }
