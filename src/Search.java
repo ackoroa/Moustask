@@ -86,7 +86,7 @@ public class Search implements Command {
 		return searchResults;
 	}
 
-	public List < AbstractTask > andSearch (List < AbstractTask > taskList) throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
+	private List < AbstractTask > andSearch (List < AbstractTask > taskList) throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
 		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
 
 		String [] words = searchLine.split(" ");
@@ -121,7 +121,7 @@ public class Search implements Command {
 		return filteredResults;
 	}
 
-	public List < AbstractTask > notSearch (List < AbstractTask > taskList) throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
+	private List < AbstractTask > notSearch (List < AbstractTask > taskList) throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
 		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
 
 		String [] words = searchLine.split(" ");
@@ -155,13 +155,13 @@ public class Search implements Command {
 		return filteredResults;
 	}
 
-	public void maintainWholeTaskList(List < AbstractTask > TaskList){
+	private void maintainWholeTaskList(List < AbstractTask > TaskList){
 		if(wholeTaskList.size() == 0){
 			wholeTaskList = TaskList;
 		}
 	}
 
-	public String searchWordsSeparator(String searchWords, int currentWordIndex, String word , String[] words){
+	private String searchWordsSeparator(String searchWords, int currentWordIndex, String word , String[] words){
 		if(word.equalsIgnoreCase(END_TIME_SEARCH)){
 			if(currentWordIndex + 1 >= words.length){
 				searchLog.addLog(Logging.LoggingLevel.WARNING, 
@@ -191,7 +191,7 @@ public class Search implements Command {
 		return searchWords;
 	}
 
-	public boolean chainCommand(String word){
+	private boolean chainCommand(String word){
 		if(word.equalsIgnoreCase(OR_SEARCH) || word.equalsIgnoreCase(AND_SEARCH) || word.equalsIgnoreCase(NOT_SEARCH)){
 			return true;
 		}
@@ -200,7 +200,7 @@ public class Search implements Command {
 		}
 	}
 
-	public List < AbstractTask > chainCommandExecution(String chainCommand, String[] searchWords, int currentWordIndex, List < AbstractTask > TaskList, List < AbstractTask > Results){
+	private List < AbstractTask > chainCommandExecution(String chainCommand, String[] searchWords, int currentWordIndex, List < AbstractTask > TaskList, List < AbstractTask > Results){
 		if(chainCommand.equalsIgnoreCase(OR_SEARCH)){
 			searchLine = searchWords[currentWordIndex + 1];
 			for(int i = currentWordIndex + 2; i < searchWords.length; i++){
@@ -230,7 +230,7 @@ public class Search implements Command {
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// /////////// Searching functions
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	public List < AbstractTask > searchCommandExecution(String searchCommand, String searchWords, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
+	private List < AbstractTask > searchCommandExecution(String searchCommand, String searchWords, List < AbstractTask > tasksForSearch, List < AbstractTask > vectorForTasksInsertion){
 		if(searchCommand.equalsIgnoreCase(VENUE_SEARCH)){
 			vectorForTasksInsertion= searchVenue(searchWords, tasksForSearch, vectorForTasksInsertion);
 		}
@@ -253,7 +253,7 @@ public class Search implements Command {
 		return vectorForTasksInsertion;
 	}
 
-	public List < AbstractTask > searchKeywords(String keywords, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+	private List < AbstractTask > searchKeywords(String keywords, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		String [] words = keywords.split(" ");
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			for(int j = 0; j < words.length; j++){
@@ -265,7 +265,7 @@ public class Search implements Command {
 		return results;
 	}
 
-	public List < AbstractTask > searchTimeFrame(String timeFrame, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+	private List < AbstractTask > searchTimeFrame(String timeFrame, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		DateFormat dateformat = new SimpleDateFormat("yyyy MM dd");
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(calendar.getTime());
@@ -340,7 +340,7 @@ public class Search implements Command {
 	}
 
 
-	public List < AbstractTask > searchFromStartTimeToEndTime(String time, List < AbstractTask > tasksForSearch, List < AbstractTask > results) throws IllegalArgumentException{
+	private List < AbstractTask > searchFromStartTimeToEndTime(String time, List < AbstractTask > tasksForSearch, List < AbstractTask > results) throws IllegalArgumentException{
 		String [] datesAndTimes = time.split(" ");
 		if(datesAndTimes.length < 2){
 			searchLog.addLog(Logging.LoggingLevel.WARNING, "Search.searchFromStartTimeToEndTime(): Searching within a timeframe failed. Invalid time frame (time = "
@@ -468,7 +468,7 @@ public class Search implements Command {
 
 	}
 
-	public List < AbstractTask > searchVenue(String venue, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+	private List < AbstractTask > searchVenue(String venue, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			if(tasksForSearch.get(i).getVenue().equalsIgnoreCase(venue)){
 				results.add(tasksForSearch.get(i));
@@ -477,7 +477,7 @@ public class Search implements Command {
 		return results;
 	}
 
-	public List < AbstractTask > searchCategory(String category, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+	private List < AbstractTask > searchCategory(String category, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			if(tasksForSearch.get(i).getType().toString().equalsIgnoreCase(category)){
 				results.add(tasksForSearch.get(i));
@@ -486,7 +486,7 @@ public class Search implements Command {
 		return results;
 	}
 
-	public List < AbstractTask > searchStatus(String status, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
+	private List < AbstractTask > searchStatus(String status, List < AbstractTask > tasksForSearch, List < AbstractTask > results){
 		// System.out.println(status); debug
 		for(int i = 0; i < tasksForSearch.size() ; i++){
 			//System.out.println(tasksForSearch.get(i).getStatus().toString()); debug
@@ -500,7 +500,7 @@ public class Search implements Command {
 
 
 
-	public List < AbstractTask > removeUnwantedTasks (List < AbstractTask > taskList, List < AbstractTask > unwantedTasks){
+	private List < AbstractTask > removeUnwantedTasks (List < AbstractTask > taskList, List < AbstractTask > unwantedTasks){
 		List < AbstractTask > filteredResults = new Vector < AbstractTask >();
 		for(int i = 0; i < taskList.size(); i++){
 			boolean isWanted = true;
@@ -517,7 +517,7 @@ public class Search implements Command {
 		return filteredResults;
 	}
 
-	public List < AbstractTask > removeDuplicateTasks (List < AbstractTask > taskList){
+	private List < AbstractTask > removeDuplicateTasks (List < AbstractTask > taskList){
 		List < AbstractTask > filteredResults = new Vector < AbstractTask >();
 		for(int i = 0; i < taskList.size(); i++){
 			boolean isWanted = true;
@@ -533,7 +533,7 @@ public class Search implements Command {
 		}
 		return filteredResults;
 	}
-	public boolean sameDayComparator(int yearOfFirstDate, int monthOfFirstDate, int dayOfFirstDate, int yearOfSecondDate, int monthOfSecondDate, int dayOfSecondDate){
+	private boolean sameDayComparator(int yearOfFirstDate, int monthOfFirstDate, int dayOfFirstDate, int yearOfSecondDate, int monthOfSecondDate, int dayOfSecondDate){
 		if(yearOfFirstDate == yearOfSecondDate && monthOfFirstDate == monthOfSecondDate && dayOfFirstDate == dayOfSecondDate){
 			return true;
 		}
@@ -542,7 +542,7 @@ public class Search implements Command {
 		}
 	}
 
-	public boolean dateComparator(int earlierYear, int earlierMonth, int earlierDay, int laterYear, int laterMonth, int laterDay){
+	private boolean dateComparator(int earlierYear, int earlierMonth, int earlierDay, int laterYear, int laterMonth, int laterDay){
 		boolean isLater = false;
 		if(earlierYear <= laterYear){
 			if(earlierYear == laterYear){
@@ -564,7 +564,7 @@ public class Search implements Command {
 		return isLater;
 	}
 
-	public boolean timeComparator(int earlierHour, int earlierMinute, int laterHour, int laterMinute){
+	private boolean timeComparator(int earlierHour, int earlierMinute, int laterHour, int laterMinute){
 		boolean isLater = false;
 		if(earlierHour <= laterHour){
 			if(earlierHour == laterHour){
@@ -581,7 +581,7 @@ public class Search implements Command {
 		return isLater;
 	}
 
-	public boolean byDateComparator(int taskYear,int taskMonth,int taskDay,int searchByYear,int searchByMonth,int searchByDay,int todayYear,int todayMonth,int todayDay){
+	private boolean byDateComparator(int taskYear,int taskMonth,int taskDay,int searchByYear,int searchByMonth,int searchByDay,int todayYear,int todayMonth,int todayDay){
 		if(dateComparator(taskYear, taskMonth, taskDay, searchByYear, searchByMonth, searchByDay)){
 			if(dateComparator(todayYear, todayMonth, todayDay ,taskYear, taskMonth, taskDay)){
 				return true;
@@ -590,7 +590,7 @@ public class Search implements Command {
 		return false;
 	}
 
-	public boolean withinTimeFrameComparator(int timeFrameStartYear, int timeFrameStartMonth, int timeFrameStartDay, int taskYear, int taskMonth, int taskDay,
+	private boolean withinTimeFrameComparator(int timeFrameStartYear, int timeFrameStartMonth, int timeFrameStartDay, int taskYear, int taskMonth, int taskDay,
 			int timeFrameStartHour, int timeFrameStartMinute, int taskHour, int taskMinute, int timeFrameEndYear, int timeFrameEndMonth, int timeFrameEndDay
 			,int timeFrameEndHour,int timeFrameEndMinute ){
 		if(dateComparator(timeFrameStartYear, timeFrameStartMonth, timeFrameStartDay, taskYear, taskMonth, taskDay)){
@@ -625,7 +625,7 @@ public class Search implements Command {
 	}
 
 
-	public boolean validDateChecker(int year, int month, int day, int hour, int minute){
+	private boolean validDateChecker(int year, int month, int day, int hour, int minute){
 		if(year == -1 || month == -1 || day == -1 || hour > 23 || minute > 59 ){
 			return false;
 		}
