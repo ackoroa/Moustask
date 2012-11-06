@@ -1,3 +1,4 @@
+//@author A0058657N
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,7 +9,7 @@ public class Add implements UndoableCommand {
 	private List<AbstractTask> wholeTaskList;
 	private String messageToAdd;
 	private AbstractTask taskAdded;
-	
+
 	public Add(String commandMessage) {
 		addLog.addLog(Logging.LoggingLevel.INFO, "Add(): User Input: "
 				+ commandMessage);
@@ -24,11 +25,11 @@ public class Add implements UndoableCommand {
 		boolean isValidAddMessage = addMessageValidation(messageToAdd,
 				addTokenList);
 		if (isValidAddMessage) {
-			addLog.addLog(Logging.LoggingLevel.INFO, "Add(): " + messageToAdd
-					+ " passes validation.");
+			addLog.addLog(Logging.LoggingLevel.INFO, "Add.execute(): "
+					+ messageToAdd + " passes validation.");
 			return differentiateAndAddTask(addTokenList, errorReturn);
 		} else {
-			addLog.addLog(Logging.LoggingLevel.WARNING, "Add(): "
+			addLog.addLog(Logging.LoggingLevel.WARNING, "Add.execute(): "
 					+ messageToAdd + " fails validation.");
 			return errorReturn;
 		}
