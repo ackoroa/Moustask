@@ -24,7 +24,7 @@ public class SearchTest {
 
 		taskList.add(new FloatingTask("read book"));
 	}
-
+	
 	@Test
 	public void testExecute() throws Exception {
 		Search searchObject = new Search("eat");

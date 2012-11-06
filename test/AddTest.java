@@ -9,7 +9,7 @@ public class AddTest {
 			timedTaskList, undoTaskList;
 	static AbstractTask addedTask;
 	static UndoableCommand addObject;
-
+	
 	@Test
 	public void testFloatingTask() {
 		floatingTaskList = new Vector<AbstractTask>();

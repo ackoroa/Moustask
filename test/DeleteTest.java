@@ -26,7 +26,7 @@ public class DeleteTest {
 	taskList.add(new TimedTask("relax", "2012-12-12 16:00",
 		"2012-12-12 18:00", "home"));
     }
-
+    
     @Test
     public void testConstructor() {
 	UndoableCommand deleteObject;
@@ -173,5 +173,4 @@ public class DeleteTest {
 		taskList.containsAll(origTaskList)
 			&& origTaskList.containsAll(taskList));
     }
-
 }

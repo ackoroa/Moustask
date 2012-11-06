@@ -19,7 +19,7 @@ public class TimedTaskTest {
 	assertEquals("the clone have the same field values", firstObject,
 		secondObject);
     }
-
+    
     @Test
     public void testHashCode() {
 	assertEquals("firstObject.hashCode == secondObject.hashCode()",

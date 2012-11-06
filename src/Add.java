@@ -8,7 +8,7 @@ public class Add implements UndoableCommand {
 	private List<AbstractTask> wholeTaskList;
 	private String messageToAdd;
 	private AbstractTask taskAdded;
-
+	
 	public Add(String commandMessage) {
 		addLog.addLog(Logging.LoggingLevel.INFO, "Add(): User Input: "
 				+ commandMessage);

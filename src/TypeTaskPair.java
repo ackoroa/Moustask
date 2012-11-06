@@ -17,7 +17,7 @@ public class TypeTaskPair {
 	public Type getType() {
 		return type;
 	}
-
+	
 	public List<AbstractTask> getTasks() {
 		return taskList;
 	}

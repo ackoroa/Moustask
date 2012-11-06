@@ -25,7 +25,7 @@ public class EditTest {
 	taskList.add(new TimedTask("relax", "2012-12-12 20:00",
 		"2012-12-12 22:00", "home"));
     }
-
+    
     @Test
     public void testConstructor() {
 	UndoableCommand editObject;

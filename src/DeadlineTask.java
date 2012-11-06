@@ -6,7 +6,7 @@ public class DeadlineTask extends AbstractTask {
 
 	this.endDate = endDate;
     }
-
+    
     public DeadlineTask(String description, String endDate, String venue) {
 	super(description, venue, AbstractTask.Type.DEADLINE);
 
