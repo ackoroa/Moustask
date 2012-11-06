@@ -13,33 +13,7 @@ public class Edit implements UndoableCommand {
     public Edit(List<AbstractTask> editSpace, int index, String editParameter)
 	    throws IndexOutOfBoundsException, IllegalArgumentException {
 
-	if (editSpace == null || editSpace.size() <= 0) {
-	    editLog.addLog(Logging.LoggingLevel.WARNING,
-		    "Edit(): edit object initialization failed. Illegal editSpace (editSpace = "
-			    + editSpace + ")");
-
-	    throw new IllegalArgumentException(
-		    "editSpace cannot be empty or null");
-	}
-
-	if (editParameter == null) {
-	    editLog.addLog(
-		    Logging.LoggingLevel.WARNING,
-		    "Edit(): edit object initialization failed. Illegal editParameter (editParameter = "
-			    + editParameter + ")");
-
-	    throw new IllegalArgumentException(
-		    "the edit parameter cannot be null");
-	}
-
-	if (index <= 0 || index > editSpace.size()) {
-	    editLog.addLog(Logging.LoggingLevel.WARNING,
-		    "Edit(): edit object initialization failed. Index is out of bounds (index = "
-			    + index + ")");
-
-	    throw new IndexOutOfBoundsException(
-		    "index pointer is outside the edit space");
-	}
+	validateConstructorArguments(editSpace, index, editParameter);
 
 	this.editSpace = editSpace;
 	this.index = index;
@@ -51,18 +25,40 @@ public class Edit implements UndoableCommand {
 			+ " and editParameter: " + editParameter);
     }
 
+    private void validateConstructorArguments(List<AbstractTask> editSpace,
+	    int index, String editParameter) {
+
+	if (editSpace == null || editSpace.size() <= 0) {
+	    editLog.addLog(Logging.LoggingLevel.WARNING,
+		    "Edit(): edit object initialization failed. Illegal editSpace (editSpace = "
+			    + editSpace + ")");
+	    throw new IllegalArgumentException(
+		    "editSpace cannot be empty or null");
+	}
+
+	if (editParameter == null) {
+	    editLog.addLog(
+		    Logging.LoggingLevel.WARNING,
+		    "Edit(): edit object initialization failed. Illegal editParameter (editParameter = "
+			    + editParameter + ")");
+	    throw new IllegalArgumentException(
+		    "the edit parameter cannot be null");
+	}
+
+	if (index <= 0 || index > editSpace.size()) {
+	    editLog.addLog(Logging.LoggingLevel.WARNING,
+		    "Edit(): edit object initialization failed. Index is out of bounds (index = "
+			    + index + ")");
+	    throw new IndexOutOfBoundsException(
+		    "index pointer is outside the edit space");
+	}
+    }
+
     // Executes the edit operation, saving both the original and edited tasks
     // and returning them in a list original->edited
     public List<AbstractTask> execute(List<AbstractTask> wholeTaskList)
 	    throws IllegalArgumentException {
-	if (wholeTaskList == null || wholeTaskList.size() <= 0) {
-	    editLog.addLog(Logging.LoggingLevel.WARNING,
-		    "Edit.execute(): delete execution failed. Illegal task list (wholeTaskList = "
-			    + wholeTaskList + ")");
-
-	    throw new IllegalArgumentException(
-		    "taskList cannot be empty or null");
-	}
+	validateExecuteArguments(wholeTaskList);
 
 	this.wholeTaskList = wholeTaskList;
 	originalTask = editSpace.get(index - 1);
@@ -76,6 +72,16 @@ public class Edit implements UndoableCommand {
 		+ "\"");
 
 	return generateReturnList(originalTask, editedTask);
+    }
+
+    private void validateExecuteArguments(List<AbstractTask> wholeTaskList) {
+	if (wholeTaskList == null || wholeTaskList.size() <= 0) {
+	    editLog.addLog(Logging.LoggingLevel.WARNING,
+		    "Edit.execute(): delete execution failed. Illegal task list (wholeTaskList = "
+			    + wholeTaskList + ")");
+	    throw new IllegalArgumentException(
+		    "taskList cannot be empty or null");
+	}
     }
 
     // edits a task according to the parameter given and returns it
@@ -179,7 +185,6 @@ public class Edit implements UndoableCommand {
 	    date = date + " 00:00";
 	else
 	    date = date + " 23:59";
-
 	return date;
     }
 
@@ -197,16 +202,25 @@ public class Edit implements UndoableCommand {
     }
 
     private void editEndTime(AbstractTask editedTask, String fieldValue) {
+	if (!(editedTask instanceof TimedTask))
+	    return;
+	
 	TimedTask task = (TimedTask) editedTask;
 	task.setEndDate(fieldValue);
     }
 
     private void editStartTime(AbstractTask editedTask, String fieldValue) {
+	if (!(editedTask instanceof TimedTask))
+	    return;
+	
 	TimedTask task = (TimedTask) editedTask;
 	task.setStartDate(fieldValue);
     }
 
     private void editDeadline(AbstractTask editedTask, String fieldValue) {
+	if (!(editedTask instanceof DeadlineTask))
+	    return;
+	
 	DeadlineTask task = (DeadlineTask) editedTask;
 	task.setEndDate(fieldValue);
     }
