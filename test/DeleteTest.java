@@ -1,6 +1,7 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.Stack;
@@ -36,7 +37,7 @@ public class DeleteTest {
 	// deleteSpace is null
 	try {
 	    deleteObject = new Delete(null, 1);
-	    assertFalse("delete constructor does not throw exception", true);
+	    fail("delete constructor does not throw exception");
 	} catch (IllegalArgumentException e) {
 	    assertEquals("correct exception for null delete space",
 		    "deleteSpace cannot be empty or null", e.getMessage());
@@ -45,7 +46,7 @@ public class DeleteTest {
 	// deleteSpace is empty
 	try {
 	    deleteObject = new Delete(new Vector<AbstractTask>(), 1);
-	    assertFalse("delete constructor does not throw exception", true);
+	    fail("delete constructor does not throw exception");
 	} catch (IllegalArgumentException e) {
 	    assertEquals("correct exception for empty delete space",
 		    "deleteSpace cannot be empty or null", e.getMessage());
@@ -54,14 +55,14 @@ public class DeleteTest {
 	// Index outside deleteSpace (<=0)
 	try {
 	    deleteObject = new Delete(taskList, 0);
-	    assertFalse("delete constructor does not throw exception", true);
+	    fail("delete constructor does not throw exception");
 	} catch (IndexOutOfBoundsException e) {
 	    assertEquals("correct exception for index == 0",
 		    "index pointer is outside the delete space", e.getMessage());
 	}
 	try {
 	    deleteObject = new Delete(taskList, -1);
-	    assertFalse("delete constructor does not throw exception", true);
+	    fail("delete constructor does not throw exception");
 	} catch (IndexOutOfBoundsException e) {
 	    assertEquals("correct exception for index < 0",
 		    "index pointer is outside the delete space", e.getMessage());
@@ -70,7 +71,7 @@ public class DeleteTest {
 	// Index outside deleteSpace (>deleteSpace.size)
 	try {
 	    deleteObject = new Delete(taskList, taskList.size() + 1);
-	    assertFalse("delete constructor does not throw exception", true);
+	    fail("delete constructor does not throw exception");
 	} catch (IndexOutOfBoundsException e) {
 	    assertEquals("correct exception for index > deleteSpace.size()",
 		    "index pointer is outside the delete space", e.getMessage());
@@ -92,7 +93,7 @@ public class DeleteTest {
 	deleteObject = new Delete(taskList, 1);
 	try {
 	    deleteReturn = deleteObject.execute(null);
-	    assertFalse("execute does not throw exception", true);
+	    fail("execute does not throw exception");
 	} catch (IllegalArgumentException e) {
 	    assertEquals("correct exception for null whole task list",
 		    "taskList cannot be empty or null", e.getMessage());
@@ -102,7 +103,7 @@ public class DeleteTest {
 	deleteObject = new Delete(taskList, 1);
 	try {
 	    deleteReturn = deleteObject.execute(new Vector<AbstractTask>());
-	    assertFalse("execute does not throw exception", true);
+	    fail("execute does not throw exception");
 	} catch (IllegalArgumentException e) {
 	    assertEquals("correct exception for empty whole task list",
 		    "taskList cannot be empty or null", e.getMessage());
