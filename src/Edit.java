@@ -166,6 +166,11 @@ public class Edit implements UndoableCommand {
 
 		editEndTime(editedTask, to);
 		break;
+	    default:
+		if (st.hasMoreTokens())
+		    paramToken = st.nextToken();
+		else
+		    paramToken = "";
 	    }
 
 	    if (paramToken.startsWith("."))
@@ -205,7 +210,7 @@ public class Edit implements UndoableCommand {
     private void editEndTime(AbstractTask editedTask, String fieldValue) {
 	if (!(editedTask instanceof TimedTask))
 	    return;
-	
+
 	TimedTask task = (TimedTask) editedTask;
 	task.setEndDate(fieldValue);
     }
@@ -213,7 +218,7 @@ public class Edit implements UndoableCommand {
     private void editStartTime(AbstractTask editedTask, String fieldValue) {
 	if (!(editedTask instanceof TimedTask))
 	    return;
-	
+
 	TimedTask task = (TimedTask) editedTask;
 	task.setStartDate(fieldValue);
     }
@@ -221,7 +226,7 @@ public class Edit implements UndoableCommand {
     private void editDeadline(AbstractTask editedTask, String fieldValue) {
 	if (!(editedTask instanceof DeadlineTask))
 	    return;
-	
+
 	DeadlineTask task = (DeadlineTask) editedTask;
 	task.setEndDate(fieldValue);
     }
