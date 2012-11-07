@@ -26,7 +26,7 @@ public class EditTest {
 	taskList.add(new TimedTask("relax", "2012-12-12 20:00",
 		"2012-12-12 22:00", "home"));
     }
-    
+
     @Test
     public void testConstructor() {
 	UndoableCommand editObject;
@@ -120,6 +120,21 @@ public class EditTest {
 	    assertEquals("correct exception for empty whole task list",
 		    "taskList cannot be empty or null", e.getMessage());
 	}
+
+	// wrong field types
+	editIndex = taskList.size();
+	editParameter = ".asdf ....";
+	editObject = new Edit(taskList, editIndex, editParameter);
+	origTask = taskList.get(editIndex - 1);
+	origTaskList = (Vector<AbstractTask>) taskList.clone();
+	editReturn = editObject.execute(taskList);
+	editedTask = taskList.lastElement();
+
+	assertEquals("Original task returned in list", editReturn.get(0),
+		origTask);
+	assertEquals("Edited task returned in list", editReturn.get(1),
+		editedTask);
+	assertEquals("nothing changed", origTask, editedTask);
 
 	// Edit description only
 	// one word description

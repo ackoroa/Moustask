@@ -4,10 +4,11 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ LogicTest.class, AddTest.class, ClearTest.class,
-		DeadlineTaskTest.class, DeleteTest.class, EditTest.class,
-		FloatingTaskTest.class, HelpTest.class, SearchTest.class,
-		StorageTest.class, TimedTaskTest.class, TypeTaskPairTest.class })
+@SuiteClasses({ AddTest.class, ClearTest.class, CLITest.class,
+	DeadlineTaskTest.class, DeleteTest.class, EditTest.class,
+	FloatingTaskTest.class, HelpTest.class, LogicTest.class,
+	SearchTest.class, StorageTest.class, TimedTaskTest.class,
+	TypeTaskPairTest.class })
 public class AllUnitTests {
 
 }

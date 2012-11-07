@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class HelpTest {
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
     @Before
     public void setUpStreams() {
@@ -30,7 +30,7 @@ public class HelpTest {
 
 	help.execute();
 
-	assertTrue(outContent.toString().length() > 0);
+	assertTrue("Help prints somehing", outContent.toString().length() > 0);
     }
 
 }
