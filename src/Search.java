@@ -19,6 +19,7 @@ public class Search implements Command {
 	private final String WITHIN_MONTHS_SEARCH = ".months";
 	private final String CATEGORY_SEARCH = ".category";
 	private final String STATUS_SEARCH = ".status";
+	
 
 	private String searchLine;
 	private List < AbstractTask > searchResults = new Vector < AbstractTask > ();
@@ -280,23 +281,34 @@ public class Search implements Command {
 		int searchByDay = 0;
 
 		String[] timeFrameWords = timeFrame.split(" ");
-		if(timeFrameWords[1].equalsIgnoreCase(WITHIN_DAYS_SEARCH)){
-			int daysIncrement = Integer.parseInt(timeFrameWords[0]);
-			calendar.add(Calendar.DATE, daysIncrement);
-			String[] searchByDate = dateformat.format(calendar.getTime()).split(" ");
-			searchByYear = Integer.parseInt(searchByDate[0]);
-			searchByMonth = Integer.parseInt(searchByDate[1]);
-			searchByDay = Integer.parseInt(searchByDate[2]);
+		if(timeFrameWords.length > 1){
+			if(timeFrameWords[1].equalsIgnoreCase(WITHIN_DAYS_SEARCH)){
+				int daysIncrement = Integer.parseInt(timeFrameWords[0]);
+				calendar.add(Calendar.DATE, daysIncrement);
+				String[] searchByDate = dateformat.format(calendar.getTime()).split(" ");
+				searchByYear = Integer.parseInt(searchByDate[0]);
+				searchByMonth = Integer.parseInt(searchByDate[1]);
+				searchByDay = Integer.parseInt(searchByDate[2]);
+			}
 
+			else if(timeFrameWords[1].equalsIgnoreCase(WITHIN_MONTHS_SEARCH)){
+				int monthIncrement = Integer.parseInt(timeFrameWords[0]);
+				calendar.add(Calendar.MONTH, monthIncrement);
+				String[] searchByDate = dateformat.format(calendar.getTime()).split(" ");
+				searchByYear = Integer.parseInt(searchByDate[0]);
+				searchByMonth = Integer.parseInt(searchByDate[1]);
+				searchByDay = Integer.parseInt(searchByDate[2]);
+			}
 		}
-		else if(timeFrameWords[1].equalsIgnoreCase(WITHIN_MONTHS_SEARCH)){
-			int monthIncrement = Integer.parseInt(timeFrameWords[0]);
-			calendar.add(Calendar.MONTH, monthIncrement);
-			String[] searchByDate = dateformat.format(calendar.getTime()).split(" ");
+		
+		else if(validDayChecker(timeFrameWords[0])){
+			DateTime dayOfTheWeek = new DateTime(timeFrameWords[0]);
+			dayOfTheWeek.generateDateTime(dayOfTheWeek.validateDateTime());
+			String[] endDate = dayOfTheWeek.getDateTime().split(" ");		
+			String[] searchByDate = endDate[0].split("-");
 			searchByYear = Integer.parseInt(searchByDate[0]);
 			searchByMonth = Integer.parseInt(searchByDate[1]);
 			searchByDay = Integer.parseInt(searchByDate[2]);
-
 		}
 
 		for(int i = 0; i < tasksForSearch.size() ; i++){
@@ -631,5 +643,14 @@ public class Search implements Command {
 		}
 
 		return true;
+	}
+	
+	private boolean validDayChecker(String word){
+		if(word.equalsIgnoreCase("monday") || word.equalsIgnoreCase("tuesday") || word.equalsIgnoreCase("wednesday") || word.equalsIgnoreCase("thursday") 
+				|| word.equalsIgnoreCase("friday") || word.equalsIgnoreCase("saturday") || word.equalsIgnoreCase("sunday")){
+			return true;
+		}
+		
+		return false;
 	}
 }
