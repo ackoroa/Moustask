@@ -26,7 +26,13 @@ public class AddTest {
 		addObject = new Add("");
 		addObject.execute(floatingTaskList);
 
+		addObject = new Add(" .at ");
+		addObject.execute(floatingTaskList);
+
 		addObject = new Add("Invalid keyword used .in Orchard");
+		addObject.execute(floatingTaskList);
+
+		addObject = new Add("Duplicated keyword .at Monday .at Tuesday");
 		addObject.execute(floatingTaskList);
 
 		addObject = new Add("Without venue .at ");
@@ -72,10 +78,19 @@ public class AddTest {
 		addObject = new Add("");
 		addObject.execute(deadlineTaskList);
 
+		addObject = new Add(" .by ");
+		addObject.execute(deadlineTaskList);
+
+		addObject = new Add("Empty venue .at  .by 2012-10-11");
+		addObject.execute(timedTaskList);
+
 		addObject = new Add(".by 2012-12-21 00:00");
 		addObject.execute(deadlineTaskList);
 
 		addObject = new Add("Deadline Task without end time .by");
+		addObject.execute(deadlineTaskList);
+
+		addObject = new Add("Wrong keyword used .by Tuesday .to Monday");
 		addObject.execute(deadlineTaskList);
 
 		addObject = new Add("Deadline Task with wrong keyword .in 2012-12-21");
@@ -141,8 +156,30 @@ public class AddTest {
 		addObject = new Add("");
 		addObject.execute(timedTaskList);
 
+		addObject = new Add(".from Monday .to 2012-12-21 00:00");
+		addObject.execute(timedTaskList);
+
+		addObject = new Add(" .from  .to ");
+		addObject.execute(timedTaskList);
+
+		addObject = new Add("Empty Start Date .from  .to 2012-12-21 00:00");
+		addObject.execute(timedTaskList);
+
+		addObject = new Add("Empty End Date .from 2012-12-21 00:00 .to ");
+		addObject.execute(timedTaskList);
+
+		addObject = new Add("Empty Start and End Date .from  .to ");
+		addObject.execute(timedTaskList);
+
 		addObject = new Add(
 				"Wrong keyword used .in 2012-10-10 .till 2012-10-11");
+		addObject.execute(timedTaskList);
+
+		addObject = new Add("Empty venue .at  .to 2012-10-11 .from 2012-10-10");
+		addObject.execute(timedTaskList);
+
+		addObject = new Add(
+				"Wrong keyword used .at Jurong East .to 2012-10-11 .from 2012-10-10 .by Monday");
 		addObject.execute(timedTaskList);
 
 		addObject = new Add(
