@@ -50,10 +50,11 @@ public class Logic {
 
 	private static String getMessage(String userCommand) {
 		String arr[] = userCommand.split(" ", 2);
+		boolean isArrayLengthOne = arr.length == 1;
 
-		if (arr.length == 1) {
-			logicLog.addLog(Logging.LoggingLevel.INFO,
-					"Logic(): Message that user input: " + arr[0]);
+		if (isArrayLengthOne) {
+			logicLog.addLog(Logging.LoggingLevel.WARNING,
+					"Logic(): Message that user input: \"\"");
 			return arr[0];
 		} else {
 			logicLog.addLog(Logging.LoggingLevel.INFO,
@@ -176,6 +177,9 @@ public class Logic {
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Add Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processAddCommand(String commandMessage) {
 		try {
 			Add addObject = new Add(commandMessage);
@@ -188,6 +192,9 @@ public class Logic {
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Delete Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void prcoessDeleteCommand(String commandMessage) {
 		try {
 			int index = Integer.parseInt(commandMessage);
@@ -216,6 +223,9 @@ public class Logic {
 		taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE, null);
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Edit Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processEditCommand(String commandMessage) {
 		try {
 			String indexString = getFirstWord(commandMessage);
@@ -247,6 +257,9 @@ public class Logic {
 		taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT, null);
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Search Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processSearchCommand(String commandMessage) {
 		try {
 			Search searchObject = new Search(commandMessage);
@@ -267,6 +280,9 @@ public class Logic {
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Undo Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processUndoCommand() {
 		if (undoStack.isEmpty()) {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDONULL, null);
@@ -293,6 +309,9 @@ public class Logic {
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Clear Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processClearCommand() {
 		Clear clearObject = new Clear();
 		clearObject.execute(taskList);
@@ -305,13 +324,16 @@ public class Logic {
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Help Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processHelpCommand() {
 		Help helpObject = new Help();
 		helpObject.execute();
 		taskResult = new TypeTaskPair(TypeTaskPair.Type.HELP, null);
 	}
 
-	private void processIOExceptionError() {
+	private static void processIOExceptionError() {
 		System.out.println(MOUSTASK_IOEXCEPTION_MESSAGE);
 		logicLog.addLog(Logging.LoggingLevel.SEVERE,
 				"Logic(): Unable to load from/update to text file.");
