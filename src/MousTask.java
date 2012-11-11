@@ -19,8 +19,7 @@ class MousTask {
 	private void showWelcomeMessage() {
 		System.out.println("Welcome to MousTask!");
 		System.out.println("Type .help to view the user guide.");
-		System.out
-				.println("Use the search or display command first before edit or delete any tasks.");
-		System.out.println("Type .exit to exit the program.");
+		System.out.println("Use .search or .display first before .edit or .delete any tasks.");
+		System.out.println("Type .exit to end the program.");
 	}
 }
