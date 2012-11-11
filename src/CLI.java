@@ -107,7 +107,7 @@ class CLI {
 		logicHandler.clearSearchOrDisplayTaskList();
 	}
 
-	private void displayDeleteOperationResult(TypeTaskPair taskResult2) {
+	private static void displayDeleteOperationResult(TypeTaskPair taskResult) {
 		displayAddDeleteEditCommon(taskResult, 0);
 		System.out.print(" has been deleted.\n");
 	}
@@ -123,7 +123,7 @@ class CLI {
 		logicHandler.clearSearchOrDisplayTaskList();
 	}
 
-	private void displayEditOperationResult(TypeTaskPair taskResult2) {
+	private static void displayEditOperationResult(TypeTaskPair taskResult) {
 		displayAddDeleteEditCommon(taskResult, 0);
 		System.out.print(" has been updated to ");
 		displayAddDeleteEditCommon(taskResult, 1);
