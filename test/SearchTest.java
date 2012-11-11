@@ -2,6 +2,10 @@
 import static org.junit.Assert.*;
 
 import java.util.Vector;
+import java.util.Calendar;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,16 +18,21 @@ public class SearchTest {
 		taskList = new Vector<AbstractTask>();
 		taskList.add(new FloatingTask("eat","Crystal Jade"));
 
-		taskList.add(new DeadlineTask("finish eating", "2012-12-12 18:00"));
+		taskList.add(new DeadlineTask("finish eating", "2012-01-12 18:00"));
 
-		taskList.add(new TimedTask("must eat", "2012-12-12 18:00",
-				"2012-12-12 20:00", "KFC"));
+		taskList.add(new TimedTask("must eat", "2012-01-12 18:00",
+				"2012-01-12 20:00", "KFC"));
 
-		taskList.add(new TimedTask("eat lunch", "2012-12-15 13:00", "2012-12-15 15:00","mcdonalds"));
+		taskList.add(new TimedTask("eat lunch", "2012-01-15 13:00", "2012-01-15 15:00","mcdonalds"));
 
-		taskList.add(new DeadlineTask("project","2013-01-05 10:00"));
+		taskList.add(new DeadlineTask("project","2013-03-05 10:00"));
 
 		taskList.add(new FloatingTask("read book"));
+		
+		DateTime tuesdayDate = new DateTime("tuesday");
+		String taskDate = tuesdayDate.generateDateTime(tuesdayDate.validateDateTime());
+		
+		taskList.add(new DeadlineTask("read tuesday with morrie", taskDate));
 	}
 	
 	@Test
@@ -62,10 +71,11 @@ public class SearchTest {
 		expectedResults.add(taskList.get(3));
 		expectedResults.add(taskList.get(4));
 		expectedResults.add(taskList.get(5));
+		expectedResults.add(taskList.get(6));
 		
 		assertEquals("status search successful", expectedResults, searchResults);
 		
-		searchObject = new Search(".from 2012-12-10 00:00 .to 2012-12-15 15:00");
+		searchObject = new Search(".from 2012-01-10 00:00 .to 2012-01-15 15:00");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
 		expectedResults = new Vector<AbstractTask>();
 		expectedResults.add(taskList.get(1));
@@ -74,14 +84,29 @@ public class SearchTest {
 		
 		assertEquals("time frame search successful", expectedResults, searchResults);
 		
-		searchObject = new Search(".from 2012-12-15 13:00 .to 2012-12-15 15:00");
+		searchObject = new Search(".from 2012-01-15 13:00 .to 2012-01-15 15:00");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
 		expectedResults = new Vector<AbstractTask>();
 		expectedResults.add(taskList.get(3));
 		
 		assertEquals("time frame search successful", expectedResults, searchResults);
 		
-		searchObject = new Search(".from 2012-12-10 .to 2012-12-15 15:00");
+		searchObject = new Search(".free 2 .hours");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(calendar.getTime());
+		String StartDate = dateFormat.format(calendar.getTime());
+		calendar.add(Calendar.HOUR, 2);
+		String EndDate = dateFormat.format(calendar.getTime());
+		expectedResults.add(new TimedTask("FREE SLOT", StartDate, EndDate));
+		
+		assertEquals("time frame search successful", expectedResults, searchResults);
+		
+		
+		searchObject = new Search(".from 2012-01-10 .to 2012-01-15 15:00");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
 		expectedResults = new Vector<AbstractTask>();
 		expectedResults.add(taskList.get(1));
@@ -90,7 +115,7 @@ public class SearchTest {
 		
 		assertEquals("time frame search successful", expectedResults, searchResults);
 		
-		searchObject = new Search(".from 2012-12-10 00:00 .to 2012-12-15");
+		searchObject = new Search(".from 2012-01-10 00:00 .to 2012-01-15");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
 		expectedResults = new Vector<AbstractTask>();
 		expectedResults.add(taskList.get(1));
@@ -99,7 +124,7 @@ public class SearchTest {
 		
 		assertEquals("time frame search successful", expectedResults, searchResults);
 		
-		searchObject = new Search(".from 2012-12-10 00:00 .to 2012-12-15 .and .category timed");
+		searchObject = new Search(".from 2012-01-10 00:00 .to 2012-01-15 .and .category timed");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
 		expectedResults = new Vector<AbstractTask>();
 		expectedResults.add(taskList.get(2));
@@ -107,20 +132,19 @@ public class SearchTest {
 		
 		assertEquals("multiple time frame search successful", expectedResults, searchResults);
 		
-		searchObject = new Search(".category deadline .not .from 2012-12-10 00:00 .to 2012-12-15  ");
+		searchObject = new Search(".category deadline .not .from 2012-01-10 00:00 .to 2012-01-15  ");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
 		expectedResults = new Vector<AbstractTask>();
 		expectedResults.add(taskList.get(4));
+		expectedResults.add(taskList.get(6));
 		
 		assertEquals("multiple time frame search successful", expectedResults, searchResults);
 		
-		searchObject = new Search(".by 5 .months");
+		searchObject = new Search(".by 9 .months");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
 		expectedResults = new Vector<AbstractTask>();
-		expectedResults.add(taskList.get(1));
-		expectedResults.add(taskList.get(2));
-		expectedResults.add(taskList.get(3));
 		expectedResults.add(taskList.get(4));
+		expectedResults.add(taskList.get(6));
 		
 		assertEquals("by date search successful", expectedResults, searchResults);
 		
@@ -129,8 +153,12 @@ public class SearchTest {
 		expectedResults = new Vector<AbstractTask>();
 		expectedResults.add(taskList.get(0));
 		
-		
 		assertEquals("multiple search successful", expectedResults, searchResults);
+		
+		searchObject = new Search(".by tuesday");
+		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);
+		expectedResults = new Vector<AbstractTask>();
+		expectedResults.add(taskList.get(6));
 		
 		searchObject = new Search("eat .not eating");
 		searchResults = (Vector<AbstractTask>) searchObject.execute(taskList);

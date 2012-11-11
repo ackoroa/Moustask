@@ -164,8 +164,13 @@ public class LogicTest {
 		taskResult = logicObject.processCommand(".search .from  .days");
 		assertEquals(taskResult.getType(), TypeTaskPair.Type.SEARCH);
 
+		
 		// Invalid Search with ArrayIndexOutOfBoundsException
 		taskResult = logicObject.processCommand(".search .from 2012-12-21 12:21 .to 2012-12-21 12:51");
+		assertEquals(taskResult.getType(), TypeTaskPair.Type.SEARCH);
+		
+		// Invalid Search with ArrayIndexOutOfBoundsException
+		taskResult = logicObject.processCommand(".search .from 2012-12-21 12:21 2359 .to 2012-12-21 12:51 2359");
 		assertEquals(taskResult.getType(), TypeTaskPair.Type.SEARCH);
 
 		// Search
