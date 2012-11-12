@@ -1,3 +1,4 @@
+//@author A0087723X
 import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -10,10 +11,12 @@ public class Logging {
 		INFO, WARNING, SEVERE;
 	}
 
+	//initialize logging object
 	public Logging(String componentName) {
 		logType = componentName;
 	}
 
+	//adds log for action
 	public void addLog(LoggingLevel logLevel, String loggingMessage) {
 		Logger moustaskLogger = Logger.getLogger(logType);
 		moustaskLogger.setUseParentHandlers(false);
