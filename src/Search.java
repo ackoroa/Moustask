@@ -32,6 +32,7 @@ public class Search implements Command {
 	private Logging searchLog = new Logging("Search Function");
 
 	public Search(String wholeSearchQuery) throws NullPointerException {
+		// Initialise the search query
 		searchQuery = wholeSearchQuery;
 
 		if (searchQuery == null) {
@@ -46,24 +47,26 @@ public class Search implements Command {
 	}
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////
-	// //////// Modes of searching (Chain Commands and Simple Search)
+	// //////// Modes of searching (Chain searches and Simple Search)
 	// /////////////////////////////////////////////////////////////////////////////////////////////////
 
+	// execute is the simple search. execute is also the .or search for chain searches
 	public List < AbstractTask > execute (List < AbstractTask > taskList) throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
-		maintainWholeTaskList(taskList);
+		intialiseWholeTaskList(taskList);
 
+		// process the search parameters
 		String [] allWords 			= searchQuery.split(" ");
 		String currentWord		 	= "";
 		String searchCommandWord 	= allWords[0];
 		String searchWords 			= "";
 
-		boolean isChainCommand 		= false;
+		boolean isChainSearch 		= false;
 		int currentWordIndex 		= 1;
 
 		while (currentWordIndex != allWords.length) {
 			currentWord = allWords[currentWordIndex];
 			if (chainCommandChecker(currentWord)) {
-				isChainCommand 		= true;
+				isChainSearch 		= true;
 				break;
 			} else {
 				searchWords 		= searchWordsSeparator(searchWords, currentWordIndex, currentWord, allWords);
@@ -74,34 +77,38 @@ public class Search implements Command {
 		searchLog.addLog(Logging.LoggingLevel.INFO, "Search.execute(): Search command initialization " +
 				"successful. (searchCommand = "	+ searchCommandWord + ")");
 
+		// carry out the search
 		searchResults 	= searchCommandExecution(searchCommandWord, searchWords, wholeTaskList, searchResults);
 		searchResults 	= removeDuplicateTasks(searchResults);
 
-		if (isChainCommand) {
+		// detection of chain searches
+		if (isChainSearch) {
 			searchLog.addLog(Logging.LoggingLevel.INFO, "Search.execute(): chain command detected. (word = "
 					+ currentWord + ")");
 
-			searchResults = chainCommandExecution(currentWord, allWords, currentWordIndex, taskList, searchResults);
+			searchResults = chainSearchExecution(currentWord, allWords, currentWordIndex, taskList, searchResults);
 		}
 
 		return searchResults;
 	}
 
+	// andSearch is for the .and search, and it is strictly a chain command.
 	private List < AbstractTask > andSearch (List < AbstractTask > taskList) throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
 		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
 
+		// process the filter parameters
 		String [] allWords 			= searchQuery.split(" ");
 		String currentWord 			= "";
 		String searchCommandWord 	= allWords[0];
 		String searchWords 			= "";
 
-		boolean isChainCommand 		= false;
+		boolean isChainSearch 		= false;
 		int currentWordIndex 		= 1;
 
 		while (currentWordIndex != allWords.length) {
 			currentWord = allWords[currentWordIndex];
 			if (chainCommandChecker(currentWord)) {
-				isChainCommand = true;
+				isChainSearch = true;
 				break;
 			} else {
 				searchWords 		= searchWordsSeparator(searchWords, currentWordIndex, currentWord, allWords);
@@ -112,34 +119,38 @@ public class Search implements Command {
 		searchLog.addLog(Logging.LoggingLevel.INFO, "Search.notSearch(): Search command initialization " +
 				"successful. (searchCommand = " + searchCommandWord + ")");
 
+		// carry out the filtering of results
 		filteredResults = searchCommandExecution(searchCommandWord, searchWords, taskList, filteredResults);
 
-		if (isChainCommand) {
+		// detection of chain searches
+		if (isChainSearch) {
 			searchLog.addLog(Logging.LoggingLevel.INFO, "Search.execute(): chain command detected. " +
 					"(word = " + currentWord + ")");
 
-			filteredResults = chainCommandExecution(currentWord, allWords, currentWordIndex, taskList, filteredResults);
+			filteredResults = chainSearchExecution(currentWord, allWords, currentWordIndex, taskList, filteredResults);
 		}
 
 		return filteredResults;
 	}
 
+	// notSearch is for the .not search, and it is strictly a chain command.
 	private List < AbstractTask > notSearch (List < AbstractTask > taskList) throws 
 	ArrayIndexOutOfBoundsException, IllegalArgumentException {
 		List < AbstractTask > filteredResults = new Vector < AbstractTask > ();
 
+		// process the filter parameters
 		String [] words 			= searchQuery.split(" ");
 		String currentWord 			= "";
 		String searchCommandWord 	= words[0];
 		String searchWords 			= "";
 
-		boolean isChainCommand 		= false;
+		boolean isChainSearch 		= false;
 		int currentWordIndex 		= 1;
 
 		while (currentWordIndex != words.length) {
 			currentWord = words[currentWordIndex];
 			if (chainCommandChecker(currentWord)) {
-				isChainCommand = true;
+				isChainSearch = true;
 				break;
 			} else {
 				searchWords 		= searchWordsSeparator(searchWords, currentWordIndex, currentWord, words);
@@ -147,25 +158,31 @@ public class Search implements Command {
 			}
 		}
 
+		// carry out the filtering of results
 		filteredResults = searchCommandExecution(searchCommandWord, searchWords, taskList, filteredResults);
 		filteredResults = removeUnwantedTasks(taskList, filteredResults);
 
-		if (isChainCommand) {
+		// detection of chain searches
+		if (isChainSearch) {
 			searchLog.addLog(Logging.LoggingLevel.INFO, "Search.execute(): chain command detected. " +
 					"(word = " + currentWord + ")");
 
-			filteredResults = chainCommandExecution(currentWord, words, currentWordIndex, taskList, filteredResults);
+			filteredResults = chainSearchExecution(currentWord, words, currentWordIndex, taskList, filteredResults);
 		}
 
 		return filteredResults;
 	}
 
-	private void maintainWholeTaskList(List < AbstractTask > TaskList){
+	// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// /////////// Helper functions for the simple search and the chain searches
+	// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private void intialiseWholeTaskList(List < AbstractTask > TaskList){
 		if (wholeTaskList.size() == 0) {
 			wholeTaskList = TaskList;
 		}
 	}
 
+	// searchWordsSeparator helps to separate each word in the search query.
 	private String searchWordsSeparator(String searchWords, int currentWordIndex, String currentWord , String[] allWords){
 		if (currentWord.equalsIgnoreCase(END_TIME_SEARCH)) {
 			if (currentWordIndex + 1 >= allWords.length) {
@@ -204,7 +221,7 @@ public class Search implements Command {
 		return isChainCommand;
 	}
 
-	private List < AbstractTask > chainCommandExecution(String chainCommand, String[] searchWords, int currentWordIndex, List < AbstractTask > currentTaskList, List < AbstractTask > searchResults){
+	private List < AbstractTask > chainSearchExecution(String chainCommand, String[] searchWords, int currentWordIndex, List < AbstractTask > currentTaskList, List < AbstractTask > searchResults){
 		if (chainCommand.equalsIgnoreCase(OR_SEARCH)) {
 			searchQuery = searchWords[currentWordIndex + 1];
 
@@ -259,6 +276,7 @@ public class Search implements Command {
 		String [] allKeyWords = keyWords.split(" ");
 		for (int i = 0; i < taskListForSearching.size(); i++) {
 			for (int j = 0; j < allKeyWords.length; j++) {
+				// search for each keyword in the description for each task
 				if (taskListForSearching.get(i).getDescription().toLowerCase().contains(allKeyWords[j].toLowerCase())) {
 					searchResults.add(taskListForSearching.get(i));
 				}
@@ -276,6 +294,7 @@ public class Search implements Command {
 		String startSlot = dateFormat.format(calendar.getTime());
 		String endSlot;
 
+		// the first slot we have to check is the one starting from the current time
 		String[] dateAndTimeOfToday 	= startSlot.split(" ");
 		String[] dateOfToday 			= dateAndTimeOfToday[0].split("-");
 		String[] TimeOfToday 			= dateAndTimeOfToday[1].split(":");
@@ -294,6 +313,7 @@ public class Search implements Command {
 		int hourOfEndSlot 			= 24;
 		int minuteOfEndSlot  		= 60;
 
+		// process the date and time of the tail(end) of the current free slot we are checking for
 		String[] wantedFreeSlot = durationOfWantedFreeSlot.split(" ");
 		if (wantedFreeSlot[1].equalsIgnoreCase(WITHIN_DAYS_SEARCH)) {
 			int daysIncrement 		= Integer.parseInt(wantedFreeSlot[0]);
@@ -324,6 +344,7 @@ public class Search implements Command {
 			minuteOfEndSlot  		= Integer.parseInt(timeOfEndSlot[1]);
 		}
 
+		// invalid commands given
 		else{
 			throw new IllegalArgumentException("Invalid free date format!");
 		}
@@ -332,15 +353,19 @@ public class Search implements Command {
 			throw new IllegalArgumentException("Invalid free date format!");
 		}
 
-		AbstractTask taskOnHand = null;
+		AbstractTask taskInterruptingPreviousFreeSlot = null;
+		// if isFreeSlot still remains true after checking the list, the current free slot is a valid free slot
 		boolean isFreeSlot = true;
 
+		// search through the lists of task to check for interruption of the current free slot
 		for (int i = 0; i < taskListForSearching.size() ; i++) {	
-			if (taskOnHand != null && taskOnHand.equals(taskListForSearching.get(i))) {
+			// checks that can be avoided
+			if (taskInterruptingPreviousFreeSlot != null && taskInterruptingPreviousFreeSlot.equals(taskListForSearching.get(i))) {
 				continue;
 			}
 
 			if (taskListForSearching.get(i).getType().toString().equalsIgnoreCase("timed")) {
+				// intialise the parameters for the check
 				TimedTask currentTask 			= (TimedTask) taskListForSearching.get(i);
 
 				String[] taskStartDateAndTime 	= currentTask.getStartDate().split(" ");
@@ -367,6 +392,7 @@ public class Search implements Command {
 				int taskEndHour 				= Integer.parseInt(taskEndTime[0]);
 				int taskEndMinute 				= Integer.parseInt(taskEndTime[1]);
 
+				// checks that can be avoided
 				if (dateComparator(taskEndYear, taskEndMonth, taskEndDay, yearOfStartSlot, monthOfStartSlot, dayOfStartSlot)) {
 					if (sameDayChecker(taskEndYear, taskEndMonth, taskEndDay, yearOfStartSlot, monthOfStartSlot, dayOfStartSlot)) {
 						if (timeComparator(taskEndHour, taskEndMinute, hourOfStartSlot, minuteOfStartSlot)) {
@@ -377,7 +403,8 @@ public class Search implements Command {
 					}
 				}
 
-
+				// the various checks for interruption. Interruption occurs when either the task cuts into the free slot or the slot
+				// cuts into the free slot. So we have to check for all cases.
 				if (withinTimeFrameComparator(taskStartYear, taskStartMonth, taskStartDay, yearOfStartSlot, monthOfStartSlot, 
 						dayOfStartSlot, taskStartHour, taskStartMinute, hourOfStartSlot, minuteOfStartSlot, 
 						taskEndYear, taskEndMonth,  taskEndDay, taskEndHour, taskEndMinute)) {
@@ -433,11 +460,14 @@ public class Search implements Command {
 					}
 				}
 
+				// current free slot is invalid, we have to adjust the free slot to avoid interruptions by tasks' timing
 				if (isFreeSlot == false) {
+					// reset the check parameters
 					isFreeSlot 	= true;
 					i 			= 0;
-					taskOnHand 	= currentTask;
+					taskInterruptingPreviousFreeSlot 	= currentTask;
 
+					// adjust the free slot
 					startSlot	= currentTask.getEndDate();
 
 					String[] dateAndTimeOfStart 	= startSlot.split(" ");
@@ -455,6 +485,9 @@ public class Search implements Command {
 						calendar.setTime(dateFormat.parse(startSlot));
 					} catch (ParseException e) {
 						System.out.println("Error occured while searching for a free slot, please try again.");
+						searchLog.addLog(Logging.LoggingLevel.WARNING, "Search.searchByFreeSlot(): Searching for a free slot failed." +
+								"	Invalid time parsing (parse time = " + startSlot + ")");
+						
 						return searchResults;
 					}
 
@@ -489,7 +522,7 @@ public class Search implements Command {
 				}
 			}
 		}
-
+		// create a free slot and returns the caller
 		TimedTask freeSlot = new TimedTask("FREE SLOT", startSlot, endSlot);
 
 		searchResults.add(freeSlot);
@@ -497,6 +530,7 @@ public class Search implements Command {
 	}
 
 	private List < AbstractTask > searchByDeadlineDate(String deadlineDate, List < AbstractTask > taskListForSearching, List < AbstractTask > searchResults){
+		// intialise the deadline parameters for checking
 		DateFormat dateFormat 	= new SimpleDateFormat("yyyy MM dd");
 		Calendar calendar 		= Calendar.getInstance();
 		calendar.setTime(calendar.getTime());
@@ -513,6 +547,7 @@ public class Search implements Command {
 		String[] deadlineWords 	= deadlineDate.split(" ");
 		if (deadlineWords.length > 1) {
 			if (deadlineWords[1].equalsIgnoreCase(WITHIN_DAYS_SEARCH)) {
+				// user searches by number of days
 				int daysIncrement 		= Integer.parseInt(deadlineWords[0]);
 				calendar.add(Calendar.DATE, daysIncrement);
 				String[] dateOfDeadline = dateFormat.format(calendar.getTime()).split(" ");
@@ -521,6 +556,7 @@ public class Search implements Command {
 				monthOfDeadline 		= Integer.parseInt(dateOfDeadline[1]);
 				dayOfDeadline 			= Integer.parseInt(dateOfDeadline[2]);	
 			} else if (deadlineWords[1].equalsIgnoreCase(WITHIN_MONTHS_SEARCH)) {
+				// user searches by number of weeks
 				int monthIncrement 		= Integer.parseInt(deadlineWords[0]);
 				calendar.add(Calendar.MONTH, monthIncrement);
 				String[] dateOfDeadline = dateFormat.format(calendar.getTime()).split(" ");
@@ -530,6 +566,7 @@ public class Search implements Command {
 				dayOfDeadline 			= Integer.parseInt(dateOfDeadline[2]);
 			}
 		} else if (validDayChecker(deadlineWords[0])) {
+			// user searches by day of the week
 			DateTime dayOfTheWeek 			= new DateTime(deadlineWords[0]);
 			dayOfTheWeek.generateDateTime(dayOfTheWeek.validateDateTime());
 			String[] dateAndTimeOfDeadline 	= dayOfTheWeek.getDateTime().split(" ");		
@@ -541,6 +578,7 @@ public class Search implements Command {
 		}
 
 		for (int i = 0; i < taskListForSearching.size() ; i++) {
+			// for each task in the list, if it falls within the deadline set by the user then it is a valid task
 			if (taskWithDateChecker(taskListForSearching.get(i))) {
 				if (taskListForSearching.get(i).getType().toString().equalsIgnoreCase("timed")) {
 					TimedTask currentTask 			= (TimedTask) taskListForSearching.get(i);
@@ -590,6 +628,7 @@ public class Search implements Command {
 
 	private List < AbstractTask > searchFromStartTimeToEndTime(String timeFrame, List < AbstractTask > taskListForSearching, List < AbstractTask > searchResults) 
 			throws IllegalArgumentException{
+		// intialise the search parameters
 		String [] datesAndTimes = timeFrame.split(" ");
 
 		if (datesAndTimes.length < 2) {
@@ -610,6 +649,8 @@ public class Search implements Command {
 		int startHour 	= 0;
 		int startMinute = 0;
 
+		// if the user doesn't specify time, we shall assume that it's 00:00 for start time and
+		// 23:59 for end time
 		if (datesAndTimes[0].contains("-")) {
 			String[] startDate 	= datesAndTimes[0].split("-");
 
@@ -665,6 +706,7 @@ public class Search implements Command {
 		}
 
 		for (int i = 0; i < taskListForSearching.size() ; i++) {
+			// for each task in the list, if it falls within the time frame then we shall add it to the results
 			if (taskWithDateChecker(taskListForSearching.get(i))) {
 				if (taskListForSearching.get(i).getType().toString().equalsIgnoreCase("timed")) {
 					TimedTask currentTask 			= (TimedTask) taskListForSearching.get(i);
@@ -735,6 +777,7 @@ public class Search implements Command {
 
 	private List < AbstractTask > searchByVenue(String venue, List < AbstractTask > taskListForSearching, List < AbstractTask > searchResults){
 		for (int i = 0; i < taskListForSearching.size() ; i++) {
+			// check each task in the list for valid venue
 			if (taskListForSearching.get(i).getVenue().equalsIgnoreCase(venue)) {
 				searchResults.add(taskListForSearching.get(i));
 			}
@@ -762,9 +805,9 @@ public class Search implements Command {
 
 		return searchResults;
 	}
-	
+
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// /////////// Helper functions
+	// /////////// Helper functions for the different types of search execution
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private List < AbstractTask > removeUnwantedTasks (List < AbstractTask > taskList, List < AbstractTask > unwantedTasks){
 		List < AbstractTask > filteredResults = new Vector < AbstractTask >();
@@ -861,6 +904,8 @@ public class Search implements Command {
 		return isLater;
 	}
 
+	// withinTimeFrameComparator combines many different time checks. It will only return true when a date falls within 
+	// a start date and time and an end date and time
 	private boolean withinTimeFrameComparator(int timeFrameStartYear, int timeFrameStartMonth, int timeFrameStartDay, 
 			int taskYear, int taskMonth, int taskDay, int timeFrameStartHour, int timeFrameStartMinute, 
 			int taskHour, int taskMinute, int timeFrameEndYear, int timeFrameEndMonth, 
