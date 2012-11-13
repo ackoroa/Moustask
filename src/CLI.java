@@ -63,18 +63,11 @@ class CLI {
 		} else if (isUnableToUndo) {
 			System.out.println("There is nothing to undo.");
 		} else if (isUndoAddOperation) {
-			System.out.println("Task "
-					+ taskResult.getTasks().get(0).getDescription()
-					+ " has been deleted.");
+			displayDeleteOperationResult(taskResult);
 		} else if (isUndoDeleteOperation) {
-			System.out.println("Task "
-					+ taskResult.getTasks().get(0).getDescription()
-					+ " has been added.");
+			displayAddOperationResult(taskResult);
 		} else if (isUndoEditOperation) {
-			System.out.println("Task "
-					+ taskResult.getTasks().get(0).getDescription()
-					+ " has been updated to "
-					+ taskResult.getTasks().get(1).getDescription() + ".");
+			displayEditOperationResult(taskResult);
 		} else if (isUndoClearOperation) {
 			System.out.println("All tasks are restored.");
 		} else if (isClearOperation) {
@@ -93,39 +86,79 @@ class CLI {
 	// ////////////////////////////////////////////////////////////////////////////////////////
 	private static void processAddOperation(TypeTaskPair taskResult) {
 		boolean isAddResultEmpty = taskResult.getTasks().isEmpty();
-		if (isAddResultEmpty) {
-			System.out.println("Invalid Syntax. Please try again.");
-		} else {
-			System.out.println("Task "
-					+ taskResult.getTasks().get(0).getDescription()
-					+ " has been added.");
+		if (!isAddResultEmpty) {
+			displayAddOperationResult(taskResult);
 		}
+	}
+
+	private static void displayAddOperationResult(TypeTaskPair taskResult) {
+		displayAddDeleteEditCommon(taskResult, 0);
+		System.out.print(" has been added.\n");
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////// Delete Operation
 	// ////////////////////////////////////////////////////////////////////////////////////////
-	private void processDeleteOperation(TypeTaskPair taskResult2) {
+	private void processDeleteOperation(TypeTaskPair taskResult) {
 		boolean isDeleteInvalid = taskResult.getTasks() != null;
 		if (isDeleteInvalid) {
-			System.out.println("Task "
-					+ taskResult.getTasks().get(0).getDescription()
-					+ " has been deleted.");
+			displayDeleteOperationResult(taskResult);
 		}
 		logicHandler.clearSearchOrDisplayTaskList();
+	}
+
+	private static void displayDeleteOperationResult(TypeTaskPair taskResult) {
+		displayAddDeleteEditCommon(taskResult, 0);
+		System.out.print(" has been deleted.\n");
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////
 	// //////////////////////////// Edit Operation
 	// ////////////////////////////////////////////////////////////////////////////////////////
-	private void processEditOperation(TypeTaskPair taskResult2) {
+	private void processEditOperation(TypeTaskPair taskResult) {
 		boolean isEditInvalid = taskResult.getTasks() != null;
 		if (isEditInvalid) {
-			System.out.println("Task "
-					+ taskResult.getTasks().get(0).getDescription()
-					+ " has been updated.");
+			displayEditOperationResult(taskResult);
 		}
 		logicHandler.clearSearchOrDisplayTaskList();
+	}
+
+	private static void displayEditOperationResult(TypeTaskPair taskResult) {
+		displayAddDeleteEditCommon(taskResult, 0);
+		System.out.print(" has been updated to ");
+		displayAddDeleteEditCommon(taskResult, 1);
+		System.out.print(".\n");
+	}
+
+	private static void displayAddDeleteEditCommon(TypeTaskPair taskResult,
+			int index) {
+		boolean isVenueEmpty = taskResult.getTasks().get(index).getVenue()
+				.isEmpty();
+		boolean isTimedTask = taskResult.getTasks().get(index).getType()
+				.equals(AbstractTask.Type.TIMED);
+		boolean isDeadlineTask = taskResult.getTasks().get(index).getType()
+				.equals(AbstractTask.Type.DEADLINE);
+
+		System.out.print("Task <"
+				+ taskResult.getTasks().get(index).getDescription());
+		if (!isVenueEmpty) {
+			System.out.print(" at "
+					+ taskResult.getTasks().get(index).getVenue());
+		}
+		if (isTimedTask) {
+			System.out.print(" from "
+					+ ((TimedTask) taskResult.getTasks().get(index))
+							.getStartDate()
+					+ " to "
+					+ ((TimedTask) taskResult.getTasks().get(index))
+							.getEndDate() + ">");
+		} else if (isDeadlineTask) {
+			System.out.print(" by "
+					+ ((DeadlineTask) taskResult.getTasks().get(index))
+							.getEndDate() + ">");
+		} else {
+			System.out.print(">");
+		}
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +169,7 @@ class CLI {
 		if (isSearchResultInvalid) {
 			boolean isSearchResultEmpty = taskResult.getTasks().isEmpty();
 			if (isSearchResultEmpty) {
-				System.out.println("Your search has returned no result.");
+				System.out.println("Your search returns no result.");
 			} else {
 				displayTaskList(taskResult.getTasks());
 			}
@@ -208,17 +241,21 @@ class CLI {
 	}
 
 	private static void displayWrapText(String message) {
-		int initial = 0;
-		int charLimit = 60;
-		while (initial < message.length() - 1) {
-			if (message.length() - 1 - initial > charLimit) {
-				System.out.println(message.substring(initial, initial
-						+ charLimit));
-			} else {
-				System.out
-						.println(message.substring(initial, message.length()));
+		if (message.length() == 1) {
+			System.out.println(message);
+		} else {
+			int initial = 0;
+			int charLimit = 60;
+			while (initial < message.length() - 1) {
+				if (message.length() - 1 - initial > charLimit) {
+					System.out.println(message.substring(initial, initial
+							+ charLimit));
+				} else {
+					System.out.println(message.substring(initial,
+							message.length()));
+				}
+				initial += charLimit;
 			}
-			initial += charLimit;
 		}
 	}
 }

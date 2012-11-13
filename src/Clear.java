@@ -1,3 +1,4 @@
+//@author A0087723X
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ public class Clear implements UndoableCommand {
 	public Clear() {
 	}
 
+	//duplicates the current whole task list for undo and removes it 
 	public List<AbstractTask> execute(List<AbstractTask> wholeTaskList) {
 		this.wholeTaskList = wholeTaskList;
 		for (int i = 0; i < wholeTaskList.size(); i++) {
@@ -20,6 +22,7 @@ public class Clear implements UndoableCommand {
 		return null;
 	}
 
+	//retrieve(undo) back the previously cleared whole task list
 	public List<AbstractTask> undo() {
 		for (int i = 0; i < undoTaskList.size(); i++) {
 			wholeTaskList.add(undoTaskList.get(i));

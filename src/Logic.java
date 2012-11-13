@@ -13,6 +13,8 @@ public class Logic {
 	private Stack<UndoableCommand> undoStack;
 	private Storage storageObject;
 
+	private static final String MOUSTASK_IOEXCEPTION_MESSAGE = "MousTask has encountered a critical error: Unable to load from/update to text file.";
+
 	private Logic() {
 		taskList = new LinkedList<AbstractTask>();
 		searchOrDisplayTaskList = new LinkedList<AbstractTask>();
@@ -21,7 +23,7 @@ public class Logic {
 		try {
 			taskList = storageObject.loadTaskList();
 		} catch (IOException e) {
-			System.out.println("Unable to load tasks from text file.");
+			processIOExceptionError();
 		}
 	}
 
@@ -41,21 +43,22 @@ public class Logic {
 
 	private static String getFirstWord(String userCommand) {
 		String commandTypeString = userCommand.trim().split("\\s+")[0];
-		logicLog.addLog(Logging.LoggingLevel.INFO, "Command that user input: "
-				+ commandTypeString);
+		logicLog.addLog(Logging.LoggingLevel.INFO,
+				"Logic(): Command that user input: " + commandTypeString);
 		return commandTypeString;
 	}
 
 	private static String getMessage(String userCommand) {
 		String arr[] = userCommand.split(" ", 2);
+		boolean isArrayLengthOne = arr.length == 1;
 
-		if (arr.length == 1) {
-			logicLog.addLog(Logging.LoggingLevel.INFO,
-					"Message that user input: " + arr[0]);
+		if (isArrayLengthOne) {
+			logicLog.addLog(Logging.LoggingLevel.WARNING,
+					"Logic(): Message that user input: \"\"");
 			return arr[0];
 		} else {
 			logicLog.addLog(Logging.LoggingLevel.INFO,
-					"Message that user input: " + arr[1]);
+					"Logic(): Message that user input: " + arr[1]);
 			return arr[1];
 		}
 	}
@@ -147,7 +150,7 @@ public class Logic {
 		boolean isCommandHelp = commandTypeString.equalsIgnoreCase(".help");
 		boolean isCommandExit = commandTypeString.equalsIgnoreCase(".exit");
 
-		logicLog.addLog(Logging.LoggingLevel.INFO, "Execute "
+		logicLog.addLog(Logging.LoggingLevel.INFO, "Logic(): Execute "
 				+ commandTypeString + " function");
 
 		if (isCommandAdd) {
@@ -174,6 +177,9 @@ public class Logic {
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Add Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processAddCommand(String commandMessage) {
 		try {
 			Add addObject = new Add(commandMessage);
@@ -182,11 +188,13 @@ public class Logic {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.ADD, addResult);
 			storageObject.writeTaskList(taskList);
 		} catch (IOException e) {
-			System.out
-					.println("MousTask Error: Unable to write task to the text file.");
+			processIOExceptionError();
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Delete Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void prcoessDeleteCommand(String commandMessage) {
 		try {
 			int index = Integer.parseInt(commandMessage);
@@ -197,21 +205,27 @@ public class Logic {
 					deleteResult);
 			storageObject.writeTaskList(taskList);
 		} catch (NumberFormatException e) {
-			System.out.println("MousTask Error: " + e.getMessage());
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE, null);
+			prcoessDeleteCommandError();
 		} catch (IndexOutOfBoundsException e) {
-			System.out.println("MousTask Error: " + e.getMessage());
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE, null);
+			prcoessDeleteCommandError();
 		} catch (IllegalArgumentException e) {
-			System.out.println("MousTask Error: " + e.getMessage());
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE, null);
+			prcoessDeleteCommandError();
 		} catch (IOException e) {
-			System.out
-					.println("MousTask Error: Unable to remove task from the text file.");
+			processIOExceptionError();
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE, null);
 		}
 	}
 
+	private void prcoessDeleteCommandError() {
+		System.out
+				.println("You have entered an invalid Task Number.\nPlease enter a Task Number within the Total Tasks Range:\n.delete <Task Number>\n[Total Tasks Range: 1 - "
+						+ taskList.size() + "]");
+		taskResult = new TypeTaskPair(TypeTaskPair.Type.DELETE, null);
+	}
+
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Edit Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processEditCommand(String commandMessage) {
 		try {
 			String indexString = getFirstWord(commandMessage);
@@ -225,20 +239,27 @@ public class Logic {
 					returnEditedTask);
 			storageObject.writeTaskList(taskList);
 		} catch (NumberFormatException e) {
-			System.out.println("MousTask Error: " + e.getMessage());
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT, null);
-		} catch (IllegalArgumentException e) {
-			System.out.println("MousTask Error: " + e.getMessage());
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT, null);
+			processEditCommandError();
 		} catch (IndexOutOfBoundsException e) {
-			System.out.println("MousTask Error: " + e.getMessage());
-			taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT, null);
+			processEditCommandError();
+		} catch (IllegalArgumentException e) {
+			processEditCommandError();
 		} catch (IOException e) {
-			System.out.println("MousTask Error: Unable to update text file.");
+			processIOExceptionError();
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT, null);
 		}
 	}
 
+	private void processEditCommandError() {
+		System.out
+				.println("You have entered an invalid Task Number.\nPlease enter a Task Number within the Total Tasks Range:\n.edit <Task Number> ...\n[Total Tasks Range: 1 - "
+						+ taskList.size() + "]");
+		taskResult = new TypeTaskPair(TypeTaskPair.Type.EDIT, null);
+	}
+
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Search Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processSearchCommand(String commandMessage) {
 		try {
 			Search searchObject = new Search(commandMessage);
@@ -246,17 +267,22 @@ public class Logic {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH,
 					searchOrDisplayTaskList);
 		} catch (NullPointerException e) {
-			System.out.println("MousTask Error: " + e.getMessage());
+			System.out.println("Your search line cannot be empty.");
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH, null);
 		} catch (ArrayIndexOutOfBoundsException e) {
-			System.out.println("MousTask Error: " + e.getMessage());
+			System.out
+					.println("You have entered an invalid Day/Date.\nPlease enter a valid Day/Date.\nDay Format Eg: 7\nDate Format Eg: 2012-12-21 12:21");
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH, null);
 		} catch (IllegalArgumentException e) {
-			System.out.println("MousTask Error: " + e.getMessage());
+			System.out
+					.println("You have entered an invalid Date.\nPlease enter a valid Date.\nDate Format Eg: 2012-12-21 12:21");
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.SEARCH, null);
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Undo Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processUndoCommand() {
 		if (undoStack.isEmpty()) {
 			taskResult = new TypeTaskPair(TypeTaskPair.Type.UNDONULL, null);
@@ -278,12 +304,14 @@ public class Logic {
 			try {
 				storageObject.writeTaskList(taskList);
 			} catch (IOException e) {
-				System.out
-						.println("MousTask Error: Unable to update text file.");
+				processIOExceptionError();
 			}
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Clear Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processClearCommand() {
 		Clear clearObject = new Clear();
 		clearObject.execute(taskList);
@@ -292,13 +320,22 @@ public class Logic {
 		try {
 			storageObject.writeTaskList(taskList);
 		} catch (IOException e) {
-			System.out.println("MousTask Error: Unable to clear text file.");
+			processIOExceptionError();
 		}
 	}
 
+	// ////////////////////////////////////////////////////////////////////////////////////////
+	// //////////////////////////// Help Operation
+	// ////////////////////////////////////////////////////////////////////////////////////////
 	private void processHelpCommand() {
 		Help helpObject = new Help();
 		helpObject.execute();
 		taskResult = new TypeTaskPair(TypeTaskPair.Type.HELP, null);
+	}
+
+	private static void processIOExceptionError() {
+		System.out.println(MOUSTASK_IOEXCEPTION_MESSAGE);
+		logicLog.addLog(Logging.LoggingLevel.SEVERE,
+				"Logic(): Unable to load from/update to text file.");
 	}
 }

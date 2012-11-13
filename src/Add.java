@@ -21,9 +21,9 @@ public class Add implements UndoableCommand {
 
 		List<String> addTokenList = new Vector<String>();
 		List<AbstractTask> errorReturn = new LinkedList<AbstractTask>();
-
 		boolean isValidAddMessage = addMessageValidation(messageToAdd,
 				addTokenList);
+
 		if (isValidAddMessage) {
 			addLog.addLog(Logging.LoggingLevel.INFO, "Add.execute(): "
 					+ messageToAdd + " passes validation.");
@@ -40,8 +40,10 @@ public class Add implements UndoableCommand {
 	// ////////////////////////////////////////////////////////////////////////////////////////
 	private boolean addMessageValidation(String messageToAdd,
 			List<String> addTokenList) {
+		boolean isMessageEmpty = checkMessageEmpty(messageToAdd) == true;
+		
 		// Validation #1 - Determine whether the input is empty
-		if (checkMessageEmpty(messageToAdd) == true) {
+		if (isMessageEmpty) {
 			addLog.addLog(Logging.LoggingLevel.WARNING, "Add(): "
 					+ messageToAdd + " is empty.");
 			return false;
@@ -49,26 +51,31 @@ public class Add implements UndoableCommand {
 
 		// Validation #2 - Determine whether the first token is keyword
 		splitStringIntoTokens(messageToAdd, addTokenList);
-		if (checkFirstTokenForKeyword(addTokenList.get(0)) == true) {
+		boolean isFirstTokenKeyword = checkFirstTokenForKeyword(addTokenList.get(0)) == true;
+		
+		if (isFirstTokenKeyword) {
 			addLog.addLog(Logging.LoggingLevel.WARNING, "Add(): "
 					+ messageToAdd + " has a keyword in the first word.");
 			return false;
 		}
 
 		// Validation #3 - Determine whether there is a syntax error
-		if (checkSyntax(addTokenList) == false) {
+		boolean isNoSyntaxError = checkSyntax(addTokenList) == false;
+		
+		if (isNoSyntaxError) {
 			addLog.addLog(Logging.LoggingLevel.WARNING, "Add(): "
 					+ messageToAdd + " has a syntax error.");
 			return false;
 		}
-
 		return true;
 	}
 
 	// Validation #1
 	private static boolean checkMessageEmpty(String messageToAdd) {
 		boolean isMessageEmpty = messageToAdd.isEmpty();
+
 		if (isMessageEmpty) {
+			System.out.println("Please enter your task name after .add");
 			return true;
 		}
 		return false;
@@ -89,7 +96,10 @@ public class Add implements UndoableCommand {
 	}
 
 	private boolean checkFirstTokenForKeyword(String firstToken) {
-		if (firstToken.matches("\\.\\w+")) {
+		boolean isFirstWordKeyword = firstToken.matches("\\.\\w+");
+		
+		if (isFirstWordKeyword) {
+			System.out.println("Please enter your task name after .add");
 			return true;
 		}
 		return false;
@@ -100,6 +110,8 @@ public class Add implements UndoableCommand {
 		boolean isDuplicatedKeyword = checkDuplicatedKeywords(addTokenList);
 
 		if (isDuplicatedKeyword) {
+			System.out
+					.println("You have entered some duplicated keywords.\nPlease enter according to the add format:\neg: .add <Task Name>...");
 			return false;
 		} else {
 			boolean isAllowedKeyword = checkAllowedKeywords(addTokenList);
@@ -132,14 +144,23 @@ public class Add implements UndoableCommand {
 	private static boolean checkAllowedKeywords(List<String> addTokenList) {
 		for (int i = 0; i < addTokenList.size(); i++) {
 			boolean isTokenEmpty = addTokenList.get(i).isEmpty();
+
 			if (!isTokenEmpty) {
 				char firstCharacter = addTokenList.get(i).charAt(0);
 				boolean isCommand = (firstCharacter == '.');
 				if (isCommand) {
-					if (!((addTokenList.get(i).equalsIgnoreCase(".from"))
-							|| (addTokenList.get(i).equalsIgnoreCase(".to"))
-							|| (addTokenList.get(i).equalsIgnoreCase(".by")) || (addTokenList
-								.get(i).equalsIgnoreCase(".at")))) {
+					boolean isFromKeyword = addTokenList.get(i)
+							.equalsIgnoreCase(".from");
+					boolean isToKeyword = addTokenList.get(i).equalsIgnoreCase(
+							".to");
+					boolean isByKeyword = addTokenList.get(i).equalsIgnoreCase(
+							".by");
+					boolean isAtKeyword = addTokenList.get(i).equalsIgnoreCase(
+							".at");
+
+					if (!((isFromKeyword) || (isToKeyword) || (isByKeyword) || (isAtKeyword))) {
+						System.out
+								.println("You have entered some invalid keywords.\nPlease enter according to the add format:\neg: .add <Task Name>...");
 						return false;
 					}
 				}
@@ -164,9 +185,10 @@ public class Add implements UndoableCommand {
 			if (hasValidKeywords) {
 				return processTimedTask(addTokenList, errorReturn);
 			} else {
+				System.out
+						.println("You have entered an invalid command to add a timed task.\nPlease enter according to the adding timed task format:\neg: .add <Task Name> .at <Venue> .from <date time |day> .to <date time |day>");
 				return errorReturn;
 			}
-
 		} // Deadline Task
 		else if (isByKeyword) {
 			boolean hasValidKeywords = checkValidKeywords("deadline",
@@ -175,6 +197,8 @@ public class Add implements UndoableCommand {
 			if (hasValidKeywords) {
 				return processDeadlineTask(addTokenList, errorReturn);
 			} else {
+				System.out
+						.println("You have entered an invalid command to add a deadline task.\nPlease enter according to the adding deadline task format:\neg: .add <Task Name> .at <Venue> .by <date time |day>");
 				return errorReturn;
 			}
 		} // Floating Task
@@ -185,6 +209,8 @@ public class Add implements UndoableCommand {
 			if (hasValidKeywords) {
 				return processFloatingTask(addTokenList, errorReturn);
 			} else {
+				System.out
+						.println("You have entered an invalid command to add a floating task.\nPlease enter according to the adding floating task format:\neg: .add <Task Name> .at <Venue>");
 				return errorReturn;
 			}
 		}
@@ -198,20 +224,37 @@ public class Add implements UndoableCommand {
 		DateTime timedTaskEndDate = null;
 		String description = addTokenList.get(0);
 		addTokenList.remove(0);
+		boolean isTokenSizeOdd = addTokenList.size() % 2 != 0;
 
-		if (addTokenList.size() % 2 != 0) {
+		if (isTokenSizeOdd) {
+			System.out
+					.println("You have entered an invalid command to add a timed task.\nPlease enter according to the adding timed task format:\neg: .add <Task Name> .at <Venue> .from <date time |day> .to <date time|day>");
 			return errorReturn;
 		} else {
 			for (int i = 0; i < addTokenList.size(); i++) {
-				if (addTokenList.get(i).equals(".at")) {
-					if (addTokenList.get(i + 1).isEmpty()) {
+				boolean isAtKeyword = addTokenList.get(i).equals(".at");
+				boolean isFromKeyword = addTokenList.get(i).equals(".from");
+				boolean isToKeyword = addTokenList.get(i).equals(".to");
+
+				if (isAtKeyword) {
+					boolean isNextTokenEmpty = addTokenList.get(i + 1)
+							.isEmpty();
+
+					if (isNextTokenEmpty) {
+						System.out
+								.println("You have entered an invalid command to add a timed task.\nPlease enter according to the adding timed task format:\neg: .add <Task Name> .at <Venue> .from <date time |day> .to <date time|day>");
 						return errorReturn;
 					} else {
 						venue = addTokenList.get(i + 1);
 						i = i + 1;
 					}
-				} else if (addTokenList.get(i).equals(".from")) {
-					if (addTokenList.get(i + 1).isEmpty()) {
+				} else if (isFromKeyword) {
+					boolean isNextTokenEmpty = addTokenList.get(i + 1)
+							.isEmpty();
+
+					if (isNextTokenEmpty) {
+						System.out
+								.println("You have entered an invalid date time OR day format.\nPlease enter according to the date time OR day format:\ndate time format eg: 2012-12-21 12:21\nday format eg: monday");
 						return errorReturn;
 					} else {
 						startDate = addTokenList.get(i + 1);
@@ -221,20 +264,30 @@ public class Add implements UndoableCommand {
 						if (isStartDateValid) {
 							i = i + 1;
 						} else {
+							System.out
+									.println("You have entered an invalid date time OR day format.\nPlease enter according to the date time OR day format:\ndate time format eg: 2012-12-21 12:21\nday format eg: monday");
 							return errorReturn;
 						}
 					}
-				} else if (addTokenList.get(i).equals(".to")) {
-					if (addTokenList.get(i + 1).isEmpty()) {
+				} else if (isToKeyword) {
+					boolean isNextTokenEmpty = addTokenList.get(i + 1)
+							.isEmpty();
+
+					if (isNextTokenEmpty) {
+						System.out
+								.println("You have entered an invalid date time OR day format.\nPlease enter according to the date time OR day format:\ndate time format eg: 2012-12-21 12:21\nday format eg: monday");
 						return errorReturn;
 					} else {
 						endDate = addTokenList.get(i + 1);
 						timedTaskEndDate = new DateTime(endDate);
 						boolean isEndDateValid = timedTaskEndDate
 								.validateDateTime();
+
 						if (isEndDateValid) {
 							i = i + 1;
 						} else {
+							System.out
+									.println("You have entered an invalid date time OR day format.\nPlease enter according to the date time OR day format:\ndate time format eg: 2012-12-21 12:21\nday format eg: monday");
 							return errorReturn;
 						}
 					}
@@ -252,6 +305,8 @@ public class Add implements UndoableCommand {
 					+ " TASK - " + taskAdded.getDescription() + " is added.");
 			return generateReturnList(timedTaskObject);
 		} else {
+			System.out
+					.println("Your Start Date/Day is later than End Date/Day.\nPlease try again.");
 			return errorReturn;
 		}
 	}
@@ -262,20 +317,36 @@ public class Add implements UndoableCommand {
 		DateTime deadlineTaskEndDate = null;
 		String description = addTokenList.get(0);
 		addTokenList.remove(0);
+		boolean isTokenSizeOdd = addTokenList.size() % 2 != 0;
 
-		if (addTokenList.size() % 2 != 0) {
+		if (isTokenSizeOdd) {
+			System.out
+					.println("You have entered an invalid command to add a deadline task.\nPlease enter according to the adding deadline task format:\neg: .add <Task Name> .at <Venue> .by <date time|day>");
 			return errorReturn;
 		} else {
 			for (int i = 0; i < addTokenList.size(); i++) {
-				if (addTokenList.get(i).equals(".at")) {
-					if (addTokenList.get(i + 1).isEmpty()) {
+				boolean isAtKeyword = addTokenList.get(i).equals(".at");
+				boolean isByKeyword = addTokenList.get(i).equals(".by");
+
+				if (isAtKeyword) {
+					boolean isNextTokenEmpty = addTokenList.get(i + 1)
+							.isEmpty();
+
+					if (isNextTokenEmpty) {
+						System.out
+								.println("You have entered an invalid command to add a deadline task.\nPlease enter according to the adding deadline task format:\neg: .add <Task Name> .at <Venue> .by <date time|day>");
 						return errorReturn;
 					} else {
 						venue = addTokenList.get(i + 1);
 						i = i + 1;
 					}
-				} else if (addTokenList.get(i).equals(".by")) {
-					if (addTokenList.get(i + 1).isEmpty()) {
+				} else if (isByKeyword) {
+					boolean isNextTokenEmpty = addTokenList.get(i + 1)
+							.isEmpty();
+
+					if (isNextTokenEmpty) {
+						System.out
+								.println("You have entered an invalid date time OR day format.\nPlease enter according to the date time OR day format:\ndate time format eg: 2012-12-21 12:21\nday format eg: monday");
 						return errorReturn;
 					} else {
 						endDate = addTokenList.get(i + 1);
@@ -285,6 +356,8 @@ public class Add implements UndoableCommand {
 						if (isEndDateValid) {
 							i = i + 1;
 						} else {
+							System.out
+									.println("You have entered an invalid date time OR day format.\nPlease enter according to the date time OR day format:\ndate time format eg: 2012-12-21 12:21\nday format eg: monday");
 							return errorReturn;
 						}
 					}
@@ -304,13 +377,23 @@ public class Add implements UndoableCommand {
 		String venue = "";
 		String description = addTokenList.get(0);
 		addTokenList.remove(0);
+		boolean isTokenSizeOdd = addTokenList.size() % 2 != 0;
 
-		if (addTokenList.size() % 2 != 0) {
+		if (isTokenSizeOdd) {
+			System.out
+					.println("You have entered an invalid command to add a floating task.\nPlease enter according to the adding floating task format:\neg: .add <Task Name> .at <Venue>");
 			return errorReturn;
 		} else {
 			for (int i = 0; i < addTokenList.size(); i++) {
-				if (addTokenList.get(i).equals(".at")) {
-					if (addTokenList.get(i + 1).isEmpty()) {
+				boolean isAtKeyword = addTokenList.get(i).equals(".at");
+
+				if (isAtKeyword) {
+					boolean isNextTokenEmpty = addTokenList.get(i + 1)
+							.isEmpty();
+
+					if (isNextTokenEmpty) {
+						System.out
+								.println("You have entered an invalid command to add a floating task.\nPlease enter according to the adding floating task format:\neg: .add <Task Name> .at <Venue>");
 						return errorReturn;
 					} else {
 						venue = addTokenList.get(i + 1);
